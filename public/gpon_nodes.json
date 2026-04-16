@@ -1,0 +1,4142 @@
+[
+  {
+    "id": 1,
+    "name": "11 Purana Paltan",
+    "latitude": 23.7309404,
+    "longitude": 90.4095267
+  },
+  {
+    "id": 2,
+    "name": "12/1 Purana Paltan",
+    "latitude": 23.7306674,
+    "longitude": 90.4101243
+  },
+  {
+    "id": 3,
+    "name": "12 Purana Paltan",
+    "latitude": 23.73040887,
+    "longitude": 90.4102567
+  },
+  {
+    "id": 4,
+    "name": "16 Purana Paltan",
+    "latitude": 23.73119799,
+    "longitude": 90.41117971
+  },
+  {
+    "id": 5,
+    "name": "15/A Purana Paltan",
+    "latitude": 23.73140043,
+    "longitude": 90.41090964
+  },
+  {
+    "id": 6,
+    "name": "15 Purana Paltan",
+    "latitude": 23.73138985,
+    "longitude": 90.41101487
+  },
+  {
+    "id": 7,
+    "name": "14 Purana Paltan",
+    "latitude": 23.73027513,
+    "longitude": 90.41069199
+  },
+  {
+    "id": 8,
+    "name": "21/1 Purana Paltan",
+    "latitude": 23.7301571,
+    "longitude": 90.4031541
+  },
+  {
+    "id": 9,
+    "name": "21/2 Purana Paltan",
+    "latitude": 23.731562,
+    "longitude": 90.41186098
+  },
+  {
+    "id": 10,
+    "name": "22 Purana Paltan",
+    "latitude": 23.73028245,
+    "longitude": 90.41123514
+  },
+  {
+    "id": 11,
+    "name": "56 Purana Paltan",
+    "latitude": 23.730265,
+    "longitude": 90.41203511
+  },
+  {
+    "id": 12,
+    "name": "56/1 Purana Paltan",
+    "latitude": 23.73004455,
+    "longitude": 90.41112648
+  },
+  {
+    "id": 13,
+    "name": "Baitul View Tower",
+    "latitude": 23.73041805,
+    "longitude": 90.41218459
+  },
+  {
+    "id": 14,
+    "name": "57 Janata Bank",
+    "latitude": 23.73026346,
+    "longitude": 90.41219704
+  },
+  {
+    "id": 15,
+    "name": "57/1 Purana Paltan",
+    "latitude": 23.72987631,
+    "longitude": 90.41090605
+  },
+  {
+    "id": 16,
+    "name": "Daily Bangla Mor",
+    "latitude": 23.73038143,
+    "longitude": 90.41499122
+  },
+  {
+    "id": 17,
+    "name": "3/4 Purana Paltan",
+    "latitude": 23.7320288,
+    "longitude": 90.4105086
+  },
+  {
+    "id": 18,
+    "name": "168 Shahid Syed Nazrul Islam Sarani",
+    "latitude": 23.7324002,
+    "longitude": 90.4093228
+  },
+  {
+    "id": 19,
+    "name": "166-167 Shahid Syed Nazrul Islam Sarani",
+    "latitude": 23.7326592,
+    "longitude": 90.4098952
+  },
+  {
+    "id": 20,
+    "name": "37/2 Purana Paltan",
+    "latitude": 23.7324428,
+    "longitude": 90.4125777
+  },
+  {
+    "id": 21,
+    "name": "8 Purana Paltan",
+    "latitude": 23.731521,
+    "longitude": 90.4096962
+  },
+  {
+    "id": 22,
+    "name": "3/3/B Purana Paltan",
+    "latitude": 23.7317918,
+    "longitude": 90.4100023
+  },
+  {
+    "id": 23,
+    "name": "24,25,26 Purana Paltan",
+    "latitude": 23.7317867,
+    "longitude": 90.4108125
+  },
+  {
+    "id": 24,
+    "name": "48/A-B Purana Paltan",
+    "latitude": 23.7312522,
+    "longitude": 90.4116277
+  },
+  {
+    "id": 25,
+    "name": "31 & 31/1 Purana Paltan",
+    "latitude": 23.7317666,
+    "longitude": 90.4111067
+  },
+  {
+    "id": 26,
+    "name": "5 Purana Paltan",
+    "latitude": 23.7324128,
+    "longitude": 90.409988
+  },
+  {
+    "id": 27,
+    "name": "59/2 Purana Paltan",
+    "latitude": 23.7316198,
+    "longitude": 90.4109522
+  },
+  {
+    "id": 28,
+    "name": "59 Purana Paltan, Dhaka 1000",
+    "latitude": 23.7315505,
+    "longitude": 90.4104435
+  },
+  {
+    "id": 29,
+    "name": "60 Purana Paltan",
+    "latitude": 23.7316072,
+    "longitude": 90.4110286
+  },
+  {
+    "id": 30,
+    "name": "60/2 Purana Paltan",
+    "latitude": 23.7306087,
+    "longitude": 90.4135456
+  },
+  {
+    "id": 31,
+    "name": "48 Purana Paltan, Dhaka 1205",
+    "latitude": 23.7307354,
+    "longitude": 90.4119577
+  },
+  {
+    "id": 32,
+    "name": "41 Purana Paltan",
+    "latitude": 23.731498,
+    "longitude": 90.4108428
+  },
+  {
+    "id": 33,
+    "name": "55 Purana Paltan",
+    "latitude": 23.7305906,
+    "longitude": 90.4119377
+  },
+  {
+    "id": 34,
+    "name": "58/1/A, Dhaka 1000",
+    "latitude": 23.7306347,
+    "longitude": 90.4129903
+  },
+  {
+    "id": 35,
+    "name": "65/2/2 DR Tower",
+    "latitude": 23.7313394,
+    "longitude": 90.4115489
+  },
+  {
+    "id": 36,
+    "name": "3 Segun Bagicha Rd",
+    "latitude": 23.7321481,
+    "longitude": 90.4036286
+  },
+  {
+    "id": 37,
+    "name": "4 Segun Bagicha Rd",
+    "latitude": 23.7318736,
+    "longitude": 90.4057069
+  },
+  {
+    "id": 38,
+    "name": "5 Segun Bagicha Rd",
+    "latitude": 23.7322383,
+    "longitude": 90.4068983
+  },
+  {
+    "id": 39,
+    "name": "6 Segun Bagicha Rd",
+    "latitude": 23.7319768,
+    "longitude": 90.4068794
+  },
+  {
+    "id": 40,
+    "name": "7 Segun Bagicha Rd",
+    "latitude": 23.73157,
+    "longitude": 90.4065012
+  },
+  {
+    "id": 41,
+    "name": "8 Segun Bagicha Rd",
+    "latitude": 23.7319767,
+    "longitude": 90.4068793
+  },
+  {
+    "id": 42,
+    "name": "9 Segun Bagicha Rd",
+    "latitude": 23.7372763,
+    "longitude": 90.4065005
+  },
+  {
+    "id": 43,
+    "name": "10 Segun Bagicha Rd",
+    "latitude": 23.7335571,
+    "longitude": 90.4064407
+  },
+  {
+    "id": 44,
+    "name": "Shilpokola Academy",
+    "latitude": 23.7342411,
+    "longitude": 90.4042422
+  },
+  {
+    "id": 45,
+    "name": "Matshya Bhaban",
+    "latitude": 23.7337603,
+    "longitude": 90.4039665
+  },
+  {
+    "id": 46,
+    "name": "Public Works Department, Purta Bhaban",
+    "latitude": 23.7319362,
+    "longitude": 90.4047174
+  },
+  {
+    "id": 47,
+    "name": "National Housing Authority",
+    "latitude": 23.7319386,
+    "longitude": 90.4047174
+  },
+  {
+    "id": 48,
+    "name": "Ministry of Foreign Affairs",
+    "latitude": 23.7301833,
+    "longitude": 90.4031847
+  },
+  {
+    "id": 49,
+    "name": "IEB HQ",
+    "latitude": 23.7334086,
+    "longitude": 90.4002899
+  },
+  {
+    "id": 50,
+    "name": "IEB Seminar Room (Old Building)",
+    "latitude": 23.7334058,
+    "longitude": 90.3991928
+  },
+  {
+    "id": 51,
+    "name": "Supreme Court Judges Sports Complex",
+    "latitude": 23.7336577,
+    "longitude": 90.4018441
+  },
+  {
+    "id": 52,
+    "name": "Bangladesh Supreme Court, Administrative Building 4",
+    "latitude": 23.7332748,
+    "longitude": 90.4023066
+  },
+  {
+    "id": 53,
+    "name": "High Court Division Administrative Building 3",
+    "latitude": 23.7331806,
+    "longitude": 90.4022706
+  },
+  {
+    "id": 54,
+    "name": "Bangladesh Bar Council",
+    "latitude": 23.7329498,
+    "longitude": 90.4026345
+  },
+  {
+    "id": 55,
+    "name": "Supreme Court Legal Aid Office",
+    "latitude": 23.7328289,
+    "longitude": 90.4020739
+  },
+  {
+    "id": 56,
+    "name": "Supreme Court Museum",
+    "latitude": 23.7329359,
+    "longitude": 90.4023267
+  },
+  {
+    "id": 57,
+    "name": "Administration Building 2, Bangladesh Supreme court",
+    "latitude": 23.7328492,
+    "longitude": 90.4013807
+  },
+  {
+    "id": 58,
+    "name": "Supreme Court Annex Building",
+    "latitude": 23.7319215,
+    "longitude": 90.4014609
+  },
+  {
+    "id": 59,
+    "name": "Bijoy 71 Building",
+    "latitude": 23.7318869,
+    "longitude": 90.4005236
+  },
+  {
+    "id": 60,
+    "name": "Bangladesh Supreme Court Bar Association",
+    "latitude": 23.7306526,
+    "longitude": 90.3997321
+  },
+  {
+    "id": 61,
+    "name": "International Crimes Tribunal",
+    "latitude": 23.7296504,
+    "longitude": 90.4015888
+  },
+  {
+    "id": 62,
+    "name": "Bangladesh Shishu Academy",
+    "latitude": 23.7287767,
+    "longitude": 90.3991257
+  },
+  {
+    "id": 63,
+    "name": "National Eidgah Gate",
+    "latitude": 23.7296704,
+    "longitude": 90.4040405
+  },
+  {
+    "id": 64,
+    "name": "BMA BHABAN ~ Segunbagicha",
+    "latitude": 23.7301121,
+    "longitude": 90.4072062
+  },
+  {
+    "id": 65,
+    "name": "3 Segun Bagicha Rd (WASA Bhaban)",
+    "latitude": 23.734768,
+    "longitude": 90.4044222
+  },
+  {
+    "id": 66,
+    "name": "24/D Segun Bagicha (",
+    "latitude": 23.7345638,
+    "longitude": 90.4071104
+  },
+  {
+    "id": 67,
+    "name": "3 Segun Bagicha Rd",
+    "latitude": 23.7320487,
+    "longitude": 90.4060559
+  },
+  {
+    "id": 68,
+    "name": "4 Segun Bagicha",
+    "latitude": 23.731933,
+    "longitude": 90.4040349
+  },
+  {
+    "id": 69,
+    "name": "45 Topkhana Road",
+    "latitude": 23.7304238,
+    "longitude": 90.4094383
+  },
+  {
+    "id": 70,
+    "name": "30 Topkhana Road",
+    "latitude": 23.7302587,
+    "longitude": 90.4081237
+  },
+  {
+    "id": 71,
+    "name": "22/2 Topkhana Road",
+    "latitude": 23.7305282,
+    "longitude": 90.4110135
+  },
+  {
+    "id": 72,
+    "name": "21/A Topkhana Road",
+    "latitude": 23.7302015,
+    "longitude": 90.4057056
+  },
+  {
+    "id": 73,
+    "name": "35 Topkhana Road",
+    "latitude": 23.7305733,
+    "longitude": 90.4093928
+  },
+  {
+    "id": 74,
+    "name": "33 Topkhana Road",
+    "latitude": 23.7305681,
+    "longitude": 90.4081617
+  },
+  {
+    "id": 75,
+    "name": "28 Topkhana Road",
+    "latitude": 23.7302184,
+    "longitude": 90.4078605
+  },
+  {
+    "id": 76,
+    "name": "22/1 Topkhana Road",
+    "latitude": 23.7300706,
+    "longitude": 90.4051413
+  },
+  {
+    "id": 77,
+    "name": "27/11/2/A Topkhana Road",
+    "latitude": 23.7309229,
+    "longitude": 90.4077577
+  },
+  {
+    "id": 78,
+    "name": "144/2 Nawabpur Road, Hamidur Nessa Market",
+    "latitude": 23.72224177,
+    "longitude": 90.41115384
+  },
+  {
+    "id": 79,
+    "name": "144/1 Nawabpur Road, Ambia Market",
+    "latitude": 23.72221284,
+    "longitude": 90.41143378
+  },
+  {
+    "id": 80,
+    "name": "144/3 Nawabpur Road, Lal Mia Market",
+    "latitude": 23.7222108,
+    "longitude": 90.41160075
+  },
+  {
+    "id": 81,
+    "name": "144 Nawabpur Road",
+    "latitude": 23.72213161,
+    "longitude": 90.41179825
+  },
+  {
+    "id": 82,
+    "name": "148,149,150/1 Nawabpur Road, Taj Market",
+    "latitude": 23.72162288,
+    "longitude": 90.41189763
+  },
+  {
+    "id": 83,
+    "name": "151,152,153 Nawabpur Road, Khaja Market",
+    "latitude": 23.72179895,
+    "longitude": 90.41176522
+  },
+  {
+    "id": 84,
+    "name": "150/1 Nawabpur Road, Taj Market",
+    "latitude": 23.72178176,
+    "longitude": 90.41192079
+  },
+  {
+    "id": 85,
+    "name": "154 Nawabpur Road, AR Rahman Market",
+    "latitude": 23.72166021,
+    "longitude": 90.41168058
+  },
+  {
+    "id": 86,
+    "name": "155,156 Nawabpur Road, Mozammel/Samrat Market",
+    "latitude": 23.72154911,
+    "longitude": 90.41166329
+  },
+  {
+    "id": 87,
+    "name": "157 Nawabpur Road, Ali Ahmed Electric Market",
+    "latitude": 23.72146595,
+    "longitude": 90.4116907
+  },
+  {
+    "id": 88,
+    "name": "158,159 Nawabpur Road, Deepa Market",
+    "latitude": 23.72169262,
+    "longitude": 90.41191573
+  },
+  {
+    "id": 89,
+    "name": "160 Nawabpur Road, Janata Electric Market",
+    "latitude": 23.72131769,
+    "longitude": 90.41168089
+  },
+  {
+    "id": 90,
+    "name": "161 Nawabpur Road, Khan Market",
+    "latitude": 23.72125295,
+    "longitude": 90.41166332
+  },
+  {
+    "id": 91,
+    "name": "162 Nawabpur Road",
+    "latitude": 23.72114052,
+    "longitude": 90.41168991
+  },
+  {
+    "id": 92,
+    "name": "163 Nawabpur Road, Tower Market",
+    "latitude": 23.72112013,
+    "longitude": 90.41167572
+  },
+  {
+    "id": 93,
+    "name": "165 Nawabpur Road, Central Market",
+    "latitude": 23.72097393,
+    "longitude": 90.41166681
+  },
+  {
+    "id": 94,
+    "name": "166 Nawabpur Road, Enam Electric Market",
+    "latitude": 23.72092389,
+    "longitude": 90.41150467
+  },
+  {
+    "id": 95,
+    "name": "167 Nawabpur Road, MS Electric Market",
+    "latitude": 23.72087199,
+    "longitude": 90.411681
+  },
+  {
+    "id": 96,
+    "name": "168-170 Nawabpur Road",
+    "latitude": 23.72072645,
+    "longitude": 90.41177903
+  },
+  {
+    "id": 97,
+    "name": "171-176 Nawabpur Road, Rashid Electric Market",
+    "latitude": 23.72083376,
+    "longitude": 90.41164672
+  },
+  {
+    "id": 98,
+    "name": "177-178 Nawabpur Road, Bhai Bhai Goli",
+    "latitude": 23.7200261,
+    "longitude": 90.41157978
+  },
+  {
+    "id": 99,
+    "name": "190-194 Nawabpur Road",
+    "latitude": 23.71968935,
+    "longitude": 90.41163876
+  },
+  {
+    "id": 100,
+    "name": "198-202 Nawabpur Road, Nawabpur Tower",
+    "latitude": 23.71941807,
+    "longitude": 90.41142427
+  },
+  {
+    "id": 101,
+    "name": "203-206 Nawabpur Road, PM & Madina Tower",
+    "latitude": 23.71921232,
+    "longitude": 90.41153652
+  },
+  {
+    "id": 102,
+    "name": "153-155 Alubazar, Haji Osman Gani Road, Majed Sardar Tower",
+    "latitude": 23.72054802,
+    "longitude": 90.4113031
+  },
+  {
+    "id": 103,
+    "name": "145-147 Alubazar, Haji Osman Gani Road",
+    "latitude": 23.71983314,
+    "longitude": 90.41112615
+  },
+  {
+    "id": 104,
+    "name": "148 Alubazar, Haji Osman Gani Road",
+    "latitude": 23.72041185,
+    "longitude": 90.41078836
+  },
+  {
+    "id": 105,
+    "name": "144 Alubazar, Haji Osman Gani Road",
+    "latitude": 23.7202342,
+    "longitude": 90.41054409
+  },
+  {
+    "id": 106,
+    "name": "137 Alubazar, Haji Osman Gani Road",
+    "latitude": 23.72009409,
+    "longitude": 90.41013304
+  },
+  {
+    "id": 107,
+    "name": "75-79 Lutfar Rahman Lane, Suritola",
+    "latitude": 23.71986629,
+    "longitude": 90.41010323
+  },
+  {
+    "id": 108,
+    "name": "151-152 Syed Nazrul Islam Avenue",
+    "latitude": 23.7329833,
+    "longitude": 90.41066997
+  },
+  {
+    "id": 109,
+    "name": "10/1-10/2 North South Road, Al Amin Super Market",
+    "latitude": 23.72104977,
+    "longitude": 90.41012805
+  },
+  {
+    "id": 110,
+    "name": "10 Kazi Abdul Hamid Lane",
+    "latitude": 23.72143696,
+    "longitude": 90.41101581
+  },
+  {
+    "id": 111,
+    "name": "11-12 Baitur Samir Market",
+    "latitude": 23.72222336,
+    "longitude": 90.41083762
+  },
+  {
+    "id": 112,
+    "name": "187-188 Siddique Bazar",
+    "latitude": 23.72108335,
+    "longitude": 90.41061581
+  },
+  {
+    "id": 113,
+    "name": "189-191 Siddique Bazar",
+    "latitude": 23.72256807,
+    "longitude": 90.40844366
+  },
+  {
+    "id": 114,
+    "name": "5-7 Kazi Abdul Hamid Lane, Muktijoddha Tower",
+    "latitude": 23.72196504,
+    "longitude": 90.41105856
+  },
+  {
+    "id": 115,
+    "name": "6/2 Selim Plaza",
+    "latitude": 23.72101155,
+    "longitude": 90.41062126
+  },
+  {
+    "id": 116,
+    "name": "5 Ayesha Plaza",
+    "latitude": 23.72093972,
+    "longitude": 90.41076543
+  },
+  {
+    "id": 117,
+    "name": "11-12 Siddique Bazar, BMP Office Market",
+    "latitude": 23.7223919,
+    "longitude": 90.40922389
+  },
+  {
+    "id": 118,
+    "name": "BRTC Shoe Market",
+    "latitude": 23.72289809,
+    "longitude": 90.40994668
+  },
+  {
+    "id": 119,
+    "name": "BRTC Underground Market",
+    "latitude": 23.72285526,
+    "longitude": 90.40959417
+  },
+  {
+    "id": 120,
+    "name": "Zaker Super Market",
+    "latitude": 23.72285278,
+    "longitude": 90.40934913
+  },
+  {
+    "id": 121,
+    "name": "City Plaza",
+    "latitude": 23.72277251,
+    "longitude": 90.40756503
+  },
+  {
+    "id": 122,
+    "name": "130 Siddique Bazar, Rose Marina Market",
+    "latitude": 23.72246148,
+    "longitude": 90.40872275
+  },
+  {
+    "id": 123,
+    "name": "Fire Service HQ",
+    "latitude": 23.72277966,
+    "longitude": 90.40605267
+  },
+  {
+    "id": 124,
+    "name": "263 Nawabpur Road Market",
+    "latitude": 23.71941721,
+    "longitude": 90.41143136
+  },
+  {
+    "id": 125,
+    "name": "234-235 Nawabpur Road, Jabin Tower",
+    "latitude": 23.71671739,
+    "longitude": 90.41134379
+  },
+  {
+    "id": 126,
+    "name": "233 Nawabpur Road, Gorb Market",
+    "latitude": 23.7173365,
+    "longitude": 90.41157526
+  },
+  {
+    "id": 127,
+    "name": "219 Nawabpur Road",
+    "latitude": 23.71750956,
+    "longitude": 90.41119019
+  },
+  {
+    "id": 128,
+    "name": "222 Nawabpur Road",
+    "latitude": 23.71754455,
+    "longitude": 90.41132637
+  },
+  {
+    "id": 129,
+    "name": "General Post Office Dhaka",
+    "latitude": 23.72845984,
+    "longitude": 90.41088356
+  },
+  {
+    "id": 130,
+    "name": "General Post Office Dhaka",
+    "latitude": 23.72932416,
+    "longitude": 90.41096939
+  },
+  {
+    "id": 131,
+    "name": "General Post Office Dhaka",
+    "latitude": 23.72922418,
+    "longitude": 90.41086939
+  },
+  {
+    "id": 132,
+    "name": "General Post Office Dhaka",
+    "latitude": 23.72912416,
+    "longitude": 90.41087392
+  },
+  {
+    "id": 133,
+    "name": "General Post Office Dhaka",
+    "latitude": 23.72902416,
+    "longitude": 90.41093392
+  },
+  {
+    "id": 134,
+    "name": "General Post Office Dhaka",
+    "latitude": 23.72752416,
+    "longitude": 90.41089165
+  },
+  {
+    "id": 135,
+    "name": "General Post Office Dhaka",
+    "latitude": 23.72801577,
+    "longitude": 90.41096939
+  },
+  {
+    "id": 136,
+    "name": "General Post Office Dhaka",
+    "latitude": 23.72859324,
+    "longitude": 90.41088391
+  },
+  {
+    "id": 137,
+    "name": "Baitul Mukarram National Mosque",
+    "latitude": 23.72912714,
+    "longitude": 90.41227529
+  },
+  {
+    "id": 138,
+    "name": "Baitul Mukarram National Mosque",
+    "latitude": 23.72919605,
+    "longitude": 90.41237475
+  },
+  {
+    "id": 139,
+    "name": "Baitul Mukarram National Mosque",
+    "latitude": 23.72942245,
+    "longitude": 90.41221077
+  },
+  {
+    "id": 140,
+    "name": "Baitul Mukarram National Mosque",
+    "latitude": 23.72936339,
+    "longitude": 90.41233174
+  },
+  {
+    "id": 141,
+    "name": "Baitul Mukarram National Mosque",
+    "latitude": 23.72927234,
+    "longitude": 90.41289895
+  },
+  {
+    "id": 142,
+    "name": "Baitul Mukarram National Mosque",
+    "latitude": 23.72910992,
+    "longitude": 90.41225378
+  },
+  {
+    "id": 143,
+    "name": "Baitul Mukarram National Mosque",
+    "latitude": 23.72937327,
+    "longitude": 90.41143073
+  },
+  {
+    "id": 144,
+    "name": "Baitul Mukarram National Mosque",
+    "latitude": 23.7297956,
+    "longitude": 90.41223539
+  },
+  {
+    "id": 145,
+    "name": "33 Baitul Mukkarram, Dhaka 1000",
+    "latitude": 23.72872847,
+    "longitude": 90.41171614
+  },
+  {
+    "id": 146,
+    "name": "Baitul Mukkarram Market",
+    "latitude": 23.7293437,
+    "longitude": 90.41178066
+  },
+  {
+    "id": 147,
+    "name": "Baitul Mukkarram Market",
+    "latitude": 23.72962917,
+    "longitude": 90.41179679
+  },
+  {
+    "id": 148,
+    "name": "Baitul Mukkarram Market",
+    "latitude": 23.72852175,
+    "longitude": 90.4117726
+  },
+  {
+    "id": 149,
+    "name": "Baitul Mukkarram Market",
+    "latitude": 23.72944706,
+    "longitude": 90.41194464
+  },
+  {
+    "id": 150,
+    "name": "Baitul Mukkarram Market",
+    "latitude": 23.72942737,
+    "longitude": 90.41174571
+  },
+  {
+    "id": 151,
+    "name": "Dilkusha Rd",
+    "latitude": 23.72591411,
+    "longitude": 90.41529378
+  },
+  {
+    "id": 152,
+    "name": "Dilkusha Rd",
+    "latitude": 23.7259092,
+    "longitude": 90.41588118
+  },
+  {
+    "id": 153,
+    "name": "Dilkusha Rd",
+    "latitude": 23.72589447,
+    "longitude": 90.41662683
+  },
+  {
+    "id": 154,
+    "name": "61 Dilkusha Rd, Dhaka",
+    "latitude": 23.72605162,
+    "longitude": 90.41663756
+  },
+  {
+    "id": 155,
+    "name": "61 Dilkusha Rd, Dhaka",
+    "latitude": 23.72605162,
+    "longitude": 90.41663756
+  },
+  {
+    "id": 156,
+    "name": "61 Dilkusha Rd, Dhaka",
+    "latitude": 23.72605162,
+    "longitude": 90.41663756
+  },
+  {
+    "id": 157,
+    "name": "63 Dilkusha Rd, Dhaka",
+    "latitude": 23.72603688,
+    "longitude": 90.41738322
+  },
+  {
+    "id": 158,
+    "name": "63 Dilkusha Rd, Dhaka",
+    "latitude": 23.72603688,
+    "longitude": 90.41738322
+  },
+  {
+    "id": 159,
+    "name": "63 Dilkusha Rd, Dhaka",
+    "latitude": 23.72603688,
+    "longitude": 90.41738322
+  },
+  {
+    "id": 160,
+    "name": "63 Dilkusha Rd, Dhaka",
+    "latitude": 23.72603688,
+    "longitude": 90.41738322
+  },
+  {
+    "id": 161,
+    "name": "62 Dilkusha Rd, Dhaka",
+    "latitude": 23.7260639,
+    "longitude": 90.4169782
+  },
+  {
+    "id": 162,
+    "name": "62 Dilkusha Rd, Dhaka",
+    "latitude": 23.7260639,
+    "longitude": 90.4169782
+  },
+  {
+    "id": 163,
+    "name": "62 Dilkusha Rd, Dhaka",
+    "latitude": 23.7260639,
+    "longitude": 90.4169782
+  },
+  {
+    "id": 164,
+    "name": "64 Dilkusha Rd, Dhaka",
+    "latitude": 23.72610809,
+    "longitude": 90.41749855
+  },
+  {
+    "id": 165,
+    "name": "65 Dilkusha Rd, Dhaka",
+    "latitude": 23.72610318,
+    "longitude": 90.41773995
+  },
+  {
+    "id": 166,
+    "name": "66 Dilkusha Rd, Dhaka",
+    "latitude": 23.72611301,
+    "longitude": 90.41775873
+  },
+  {
+    "id": 167,
+    "name": "67 Dilkusha Rd, Dhaka",
+    "latitude": 23.72610073,
+    "longitude": 90.41791698
+  },
+  {
+    "id": 168,
+    "name": "68 Dilkusha Rd, Dhaka",
+    "latitude": 23.72605162,
+    "longitude": 90.41799744
+  },
+  {
+    "id": 169,
+    "name": "Dilkusha Rd",
+    "latitude": 23.72602215,
+    "longitude": 90.41814228
+  },
+  {
+    "id": 170,
+    "name": "Dilkusha Rd",
+    "latitude": 23.72594358,
+    "longitude": 90.41885038
+  },
+  {
+    "id": 171,
+    "name": "75 Dilkusha Rd, Dhaka 1000",
+    "latitude": 23.72611546,
+    "longitude": 90.41887721
+  },
+  {
+    "id": 172,
+    "name": "37 Dilkusha Rd",
+    "latitude": 23.72626525,
+    "longitude": 90.4189228
+  },
+  {
+    "id": 173,
+    "name": "Dilkusha Rd",
+    "latitude": 23.72655745,
+    "longitude": 90.41901668
+  },
+  {
+    "id": 174,
+    "name": "Dilkusha Rd",
+    "latitude": 23.72641012,
+    "longitude": 90.41901668
+  },
+  {
+    "id": 175,
+    "name": "Sonali Bank Bhaban",
+    "latitude": 23.72586991,
+    "longitude": 90.4212
+  },
+  {
+    "id": 176,
+    "name": "Sonali Bank Bhaban",
+    "latitude": 23.72676617,
+    "longitude": 90.42074134
+  },
+  {
+    "id": 177,
+    "name": "Sonali Bank Bhaban",
+    "latitude": 23.72677599,
+    "longitude": 90.42090764
+  },
+  {
+    "id": 178,
+    "name": "Sonali Bank Bhaban",
+    "latitude": 23.72651325,
+    "longitude": 90.42090227
+  },
+  {
+    "id": 179,
+    "name": "Sonali Bank Bhaban",
+    "latitude": 23.72647888,
+    "longitude": 90.4211249
+  },
+  {
+    "id": 180,
+    "name": "Sonali Bank Bhaban",
+    "latitude": 23.72621123,
+    "longitude": 90.42100956
+  },
+  {
+    "id": 181,
+    "name": "Sonali Bank Bhaban",
+    "latitude": 23.72631436,
+    "longitude": 90.42123219
+  },
+  {
+    "id": 182,
+    "name": "Sonali Bank Bhaban",
+    "latitude": 23.72609336,
+    "longitude": 90.42104175
+  },
+  {
+    "id": 183,
+    "name": "Sonali Bank Bhaban",
+    "latitude": 23.72619895,
+    "longitude": 90.42123487
+  },
+  {
+    "id": 184,
+    "name": "Sonali Bank Bhaban",
+    "latitude": 23.72595585,
+    "longitude": 90.42115708
+  },
+  {
+    "id": 185,
+    "name": "Sonali Bank Bhaban",
+    "latitude": 23.72607863,
+    "longitude": 90.42137434
+  },
+  {
+    "id": 186,
+    "name": "Sonali Bank Bhaban",
+    "latitude": 23.72609827,
+    "longitude": 90.42133143
+  },
+  {
+    "id": 187,
+    "name": "Sonali Bank Bhaban",
+    "latitude": 23.72585272,
+    "longitude": 90.42133143
+  },
+  {
+    "id": 188,
+    "name": "Sonali Bank Bhaban",
+    "latitude": 23.7262456,
+    "longitude": 90.42133411
+  },
+  {
+    "id": 189,
+    "name": "Sonali Bank Bhaban",
+    "latitude": 23.7266483,
+    "longitude": 90.42114904
+  },
+  {
+    "id": 190,
+    "name": "Sonali Bank Bhaban",
+    "latitude": 23.72650834,
+    "longitude": 90.42075743
+  },
+  {
+    "id": 191,
+    "name": "Agrani Bank PLC | Head Office",
+    "latitude": 23.72733752,
+    "longitude": 90.41874295
+  },
+  {
+    "id": 192,
+    "name": "Agrani Bank PLC | Head Office",
+    "latitude": 23.72734183,
+    "longitude": 90.41885286
+  },
+  {
+    "id": 193,
+    "name": "Agrani Bank PLC | Head Office",
+    "latitude": 23.72745251,
+    "longitude": 90.41891724
+  },
+  {
+    "id": 194,
+    "name": "Agrani Bank PLC | Head Office",
+    "latitude": 23.72718516,
+    "longitude": 90.41878849
+  },
+  {
+    "id": 195,
+    "name": "Agrani Bank PLC | Head Office",
+    "latitude": 23.72714347,
+    "longitude": 90.41901144
+  },
+  {
+    "id": 196,
+    "name": "Agrani Bank PLC | Head Office",
+    "latitude": 23.72721965,
+    "longitude": 90.41906797
+  },
+  {
+    "id": 197,
+    "name": "Agrani Bank PLC | Head Office",
+    "latitude": 23.72722253,
+    "longitude": 90.41887798
+  },
+  {
+    "id": 198,
+    "name": "Agrani Bank PLC | Head Office",
+    "latitude": 23.72726421,
+    "longitude": 90.41909466
+  },
+  {
+    "id": 199,
+    "name": "Agrani Bank PLC | Head Office",
+    "latitude": 23.72718084,
+    "longitude": 90.41865345
+  },
+  {
+    "id": 200,
+    "name": "Agrani Bank PLC | Head Office",
+    "latitude": 23.72734758,
+    "longitude": 90.41957355
+  },
+  {
+    "id": 201,
+    "name": "Bangladesh Krishi Bank || Head Office",
+    "latitude": 23.72803323,
+    "longitude": 90.41867701
+  },
+  {
+    "id": 202,
+    "name": "Bangladesh Krishi Bank || Head Office",
+    "latitude": 23.72791967,
+    "longitude": 90.41833786
+  },
+  {
+    "id": 203,
+    "name": "Bangladesh Krishi Bank || Head Office",
+    "latitude": 23.72807234,
+    "longitude": 90.41817148
+  },
+  {
+    "id": 204,
+    "name": "Bangladesh Krishi Bank || Head Office",
+    "latitude": 23.72804934,
+    "longitude": 90.41862996
+  },
+  {
+    "id": 205,
+    "name": "Bangladesh Krishi Bank || Head Office",
+    "latitude": 23.72819452,
+    "longitude": 90.41837874
+  },
+  {
+    "id": 206,
+    "name": "Bangladesh Krishi Bank || Head Office",
+    "latitude": 23.72818014,
+    "longitude": 90.41843526
+  },
+  {
+    "id": 207,
+    "name": "Bangladesh Krishi Bank || Head Office",
+    "latitude": 23.72797028,
+    "longitude": 90.41823429
+  },
+  {
+    "id": 208,
+    "name": "Bangladesh Krishi Bank || Head Office",
+    "latitude": 23.72817152,
+    "longitude": 90.41852319
+  },
+  {
+    "id": 209,
+    "name": "Bangladesh Krishi Bank || Head Office",
+    "latitude": 23.72813271,
+    "longitude": 90.41814793
+  },
+  {
+    "id": 210,
+    "name": "Bangladesh Krishi Bank || Head Office",
+    "latitude": 23.72805509,
+    "longitude": 90.41838659
+  },
+  {
+    "id": 211,
+    "name": "59 Motijheel C/A, Dhaka 1000",
+    "latitude": 23.72722282,
+    "longitude": 90.4208315
+  },
+  {
+    "id": 212,
+    "name": "60 Motijheel C/A, Dhaka 1000",
+    "latitude": 23.72734922,
+    "longitude": 90.42065364
+  },
+  {
+    "id": 213,
+    "name": "61 Motijheel C/A, Dhaka 1000",
+    "latitude": 23.72742849,
+    "longitude": 90.42054131
+  },
+  {
+    "id": 214,
+    "name": "62 Motijheel C/A, Dhaka 1000",
+    "latitude": 23.72753775,
+    "longitude": 90.42026049
+  },
+  {
+    "id": 215,
+    "name": "62 Motijheel C/A, Dhaka 1000",
+    "latitude": 23.72781626,
+    "longitude": 90.42034474
+  },
+  {
+    "id": 216,
+    "name": "62 Motijheel C/A, Dhaka 1000",
+    "latitude": 23.72776698,
+    "longitude": 90.42053429
+  },
+  {
+    "id": 217,
+    "name": "60 Motijheel C/A, Dhaka 1000",
+    "latitude": 23.72734065,
+    "longitude": 90.42078235
+  },
+  {
+    "id": 218,
+    "name": "61 Motijheel C/A, Dhaka 1000",
+    "latitude": 23.7274392,
+    "longitude": 90.42054599
+  },
+  {
+    "id": 219,
+    "name": "BIWTA Bhaban",
+    "latitude": 23.73015784,
+    "longitude": 90.41667065
+  },
+  {
+    "id": 220,
+    "name": "BIWTA Bhaban",
+    "latitude": 23.73031208,
+    "longitude": 90.41676192
+  },
+  {
+    "id": 221,
+    "name": "BIWTA Bhaban",
+    "latitude": 23.73024567,
+    "longitude": 90.41704976
+  },
+  {
+    "id": 222,
+    "name": "BIWTA Bhaban",
+    "latitude": 23.73020068,
+    "longitude": 90.4170755
+  },
+  {
+    "id": 223,
+    "name": "BIWTA Bhaban",
+    "latitude": 23.73026924,
+    "longitude": 90.41691403
+  },
+  {
+    "id": 224,
+    "name": "BIWTA Bhaban",
+    "latitude": 23.73024139,
+    "longitude": 90.41706848
+  },
+  {
+    "id": 225,
+    "name": "BIWTA Bhaban",
+    "latitude": 23.73028852,
+    "longitude": 90.41681808
+  },
+  {
+    "id": 226,
+    "name": "BIWTA Bhaban",
+    "latitude": 23.73025638,
+    "longitude": 90.41677596
+  },
+  {
+    "id": 227,
+    "name": "BIWTA Bhaban",
+    "latitude": 23.73010642,
+    "longitude": 90.41711997
+  },
+  {
+    "id": 228,
+    "name": "BIWTA Bhaban",
+    "latitude": 23.73000573,
+    "longitude": 90.41711295
+  },
+  {
+    "id": 229,
+    "name": "BIWTA Bhaban",
+    "latitude": 23.73017283,
+    "longitude": 90.41721357
+  },
+  {
+    "id": 230,
+    "name": "BIWTA Bhaban",
+    "latitude": 23.73005501,
+    "longitude": 90.41677128
+  },
+  {
+    "id": 231,
+    "name": "3 DIT Ave",
+    "latitude": 23.73506467,
+    "longitude": 90.41680557
+  },
+  {
+    "id": 232,
+    "name": "3 DIT Ave",
+    "latitude": 23.734387,
+    "longitude": 90.41631205
+  },
+  {
+    "id": 233,
+    "name": "3 DIT Ave",
+    "latitude": 23.73421021,
+    "longitude": 90.41612966
+  },
+  {
+    "id": 234,
+    "name": "1/D, DIT",
+    "latitude": 23.7337486,
+    "longitude": 90.41576488
+  },
+  {
+    "id": 235,
+    "name": "1/D, DIT",
+    "latitude": 23.73415128,
+    "longitude": 90.41602237
+  },
+  {
+    "id": 236,
+    "name": "1/D, DIT",
+    "latitude": 23.73280574,
+    "longitude": 90.41542155
+  },
+  {
+    "id": 237,
+    "name": "6 DIT",
+    "latitude": 23.73235395,
+    "longitude": 90.41507823
+  },
+  {
+    "id": 238,
+    "name": "6 DIT",
+    "latitude": 23.73187269,
+    "longitude": 90.41507823
+  },
+  {
+    "id": 239,
+    "name": "9 DIT",
+    "latitude": 23.73336557,
+    "longitude": 90.41557176
+  },
+  {
+    "id": 240,
+    "name": "Bangladesh Road Transport Corporation (BRTC)",
+    "latitude": 23.72845119,
+    "longitude": 90.41475767
+  },
+  {
+    "id": 241,
+    "name": "Bangladesh Road Transport Corporation (BRTC)",
+    "latitude": 23.7283602,
+    "longitude": 90.41478607
+  },
+  {
+    "id": 242,
+    "name": "Bangladesh Road Transport Corporation (BRTC)",
+    "latitude": 23.7283992,
+    "longitude": 90.41485351
+  },
+  {
+    "id": 243,
+    "name": "Bangladesh Road Transport Corporation (BRTC)",
+    "latitude": 23.72831146,
+    "longitude": 90.41496711
+  },
+  {
+    "id": 244,
+    "name": "Bangladesh Road Transport Corporation (BRTC)",
+    "latitude": 23.72835045,
+    "longitude": 90.41491741
+  },
+  {
+    "id": 245,
+    "name": "Bangladesh Road Transport Corporation (BRTC)",
+    "latitude": 23.72841545,
+    "longitude": 90.41477897
+  },
+  {
+    "id": 246,
+    "name": "Bangladesh Road Transport Corporation (BRTC)",
+    "latitude": 23.72849344,
+    "longitude": 90.41480737
+  },
+  {
+    "id": 247,
+    "name": "Bangladesh Road Transport Corporation (BRTC)",
+    "latitude": 23.7283667,
+    "longitude": 90.415031
+  },
+  {
+    "id": 248,
+    "name": "Karmasangsthan Bank, Head Office",
+    "latitude": 23.73011483,
+    "longitude": 90.41490291
+  },
+  {
+    "id": 249,
+    "name": "Karmasangsthan Bank, Head Office",
+    "latitude": 23.72999015,
+    "longitude": 90.41478184
+  },
+  {
+    "id": 250,
+    "name": "Karmasangsthan Bank, Head Office",
+    "latitude": 23.73007847,
+    "longitude": 90.41493885
+  },
+  {
+    "id": 251,
+    "name": "Karmasangsthan Bank, Head Office",
+    "latitude": 23.73001959,
+    "longitude": 90.41478751
+  },
+  {
+    "id": 252,
+    "name": "Karmasangsthan Bank, Head Office",
+    "latitude": 23.7300802,
+    "longitude": 90.41493129
+  },
+  {
+    "id": 253,
+    "name": "Karmasangsthan Bank, Head Office",
+    "latitude": 23.73002305,
+    "longitude": 90.41478562
+  },
+  {
+    "id": 254,
+    "name": "Karmasangsthan Bank, Head Office",
+    "latitude": 23.73006461,
+    "longitude": 90.41485751
+  },
+  {
+    "id": 255,
+    "name": "Karmasangsthan Bank, Head Office",
+    "latitude": 23.73006461,
+    "longitude": 90.41485751
+  },
+  {
+    "id": 256,
+    "name": "Department of National Savings, Head Office",
+    "latitude": 23.73010256,
+    "longitude": 90.41371504
+  },
+  {
+    "id": 257,
+    "name": "Department of National Savings, Head Office",
+    "latitude": 23.73015012,
+    "longitude": 90.41424749
+  },
+  {
+    "id": 258,
+    "name": "Bangladesh Chess Federation",
+    "latitude": 23.73008473,
+    "longitude": 90.41434002
+  },
+  {
+    "id": 259,
+    "name": "Bangladesh Chess Federation",
+    "latitude": 23.72983507,
+    "longitude": 90.41415172
+  },
+  {
+    "id": 260,
+    "name": "EEF Authority , ICB Extention Office",
+    "latitude": 23.72983507,
+    "longitude": 90.41444229
+  },
+  {
+    "id": 261,
+    "name": "EEF Authority , ICB Extention Office",
+    "latitude": 23.73000299,
+    "longitude": 90.41479455
+  },
+  {
+    "id": 262,
+    "name": "Bangladesh Chess Federation",
+    "latitude": 23.72994801,
+    "longitude": 90.4137816
+  },
+  {
+    "id": 263,
+    "name": "Department of National Savings, Head Office",
+    "latitude": 23.73006392,
+    "longitude": 90.41435463
+  },
+  {
+    "id": 264,
+    "name": "14, Puran Paltan",
+    "latitude": 23.73026609,
+    "longitude": 90.41019816
+  },
+  {
+    "id": 265,
+    "name": "14, Puran Paltan",
+    "latitude": 23.73030849,
+    "longitude": 90.41070766
+  },
+  {
+    "id": 266,
+    "name": "14, Puran Paltan",
+    "latitude": 23.73030849,
+    "longitude": 90.41070766
+  },
+  {
+    "id": 267,
+    "name": "14, Puran Paltan",
+    "latitude": 23.73030849,
+    "longitude": 90.41070766
+  },
+  {
+    "id": 268,
+    "name": "14, Puran Paltan",
+    "latitude": 23.73030849,
+    "longitude": 90.41070766
+  },
+  {
+    "id": 269,
+    "name": "14, Puran Paltan",
+    "latitude": 23.73030849,
+    "longitude": 90.41070766
+  },
+  {
+    "id": 270,
+    "name": "14, Puran Paltan",
+    "latitude": 23.73030849,
+    "longitude": 90.41070766
+  },
+  {
+    "id": 271,
+    "name": "14, Puran Paltan",
+    "latitude": 23.73030849,
+    "longitude": 90.41070766
+  },
+  {
+    "id": 272,
+    "name": "14, Puran Paltan",
+    "latitude": 23.73030849,
+    "longitude": 90.41070766
+  },
+  {
+    "id": 273,
+    "name": "15, Puran Paltan",
+    "latitude": 23.73054359,
+    "longitude": 90.41038326
+  },
+  {
+    "id": 274,
+    "name": "15/1, Puran Paltan",
+    "latitude": 23.73067971,
+    "longitude": 90.41032919
+  },
+  {
+    "id": 275,
+    "name": "15/1, Puran Paltan",
+    "latitude": 23.73067971,
+    "longitude": 90.41032919
+  },
+  {
+    "id": 276,
+    "name": "15/1, Puran Paltan",
+    "latitude": 23.73067971,
+    "longitude": 90.41032919
+  },
+  {
+    "id": 277,
+    "name": "15/1, Puran Paltan",
+    "latitude": 23.73067971,
+    "longitude": 90.41032919
+  },
+  {
+    "id": 278,
+    "name": "15, Puran Paltan",
+    "latitude": 23.73054359,
+    "longitude": 90.41038326
+  },
+  {
+    "id": 279,
+    "name": "15, Puran Paltan",
+    "latitude": 23.73054359,
+    "longitude": 90.41038326
+  },
+  {
+    "id": 280,
+    "name": "15, Puran Paltan",
+    "latitude": 23.73054359,
+    "longitude": 90.41038326
+  },
+  {
+    "id": 281,
+    "name": "11, Puran Paltan",
+    "latitude": 23.73065496,
+    "longitude": 90.41025485
+  },
+  {
+    "id": 282,
+    "name": "11, Puran Paltan",
+    "latitude": 23.73065496,
+    "longitude": 90.41025485
+  },
+  {
+    "id": 283,
+    "name": "11, Puran Paltan",
+    "latitude": 23.73065496,
+    "longitude": 90.41025485
+  },
+  {
+    "id": 284,
+    "name": "11, Puran Paltan",
+    "latitude": 23.73065496,
+    "longitude": 90.41025485
+  },
+  {
+    "id": 285,
+    "name": "11, Puran Paltan",
+    "latitude": 23.73065496,
+    "longitude": 90.41025485
+  },
+  {
+    "id": 286,
+    "name": "12, Puran Paltan",
+    "latitude": 23.73036417,
+    "longitude": 90.41030216
+  },
+  {
+    "id": 287,
+    "name": "12/1, Puran Paltan",
+    "latitude": 23.73036417,
+    "longitude": 90.41030216
+  },
+  {
+    "id": 288,
+    "name": "12/1, Puran Paltan",
+    "latitude": 23.73036417,
+    "longitude": 90.41030216
+  },
+  {
+    "id": 289,
+    "name": "12/1, Puran Paltan",
+    "latitude": 23.73042604,
+    "longitude": 90.41038326
+  },
+  {
+    "id": 290,
+    "name": "12/1, Puran Paltan",
+    "latitude": 23.73042604,
+    "longitude": 90.41038326
+  },
+  {
+    "id": 291,
+    "name": "12/1, Puran Paltan",
+    "latitude": 23.73042604,
+    "longitude": 90.41038326
+  },
+  {
+    "id": 292,
+    "name": "Sikhha Bhaban",
+    "latitude": 23.72869807,
+    "longitude": 90.40457477
+  },
+  {
+    "id": 293,
+    "name": "Sikhha Bhaban",
+    "latitude": 23.72869807,
+    "longitude": 90.40457477
+  },
+  {
+    "id": 294,
+    "name": "Sikhha Bhaban",
+    "latitude": 23.72856904,
+    "longitude": 90.40452695
+  },
+  {
+    "id": 295,
+    "name": "Sikhha Bhaban",
+    "latitude": 23.72867964,
+    "longitude": 90.40463769
+  },
+  {
+    "id": 296,
+    "name": "Sikhha Bhaban",
+    "latitude": 23.72867964,
+    "longitude": 90.40463769
+  },
+  {
+    "id": 297,
+    "name": "Sikhha Bhaban",
+    "latitude": 23.72867964,
+    "longitude": 90.40463769
+  },
+  {
+    "id": 298,
+    "name": "Sikhha Bhaban",
+    "latitude": 23.72867964,
+    "longitude": 90.40463769
+  },
+  {
+    "id": 299,
+    "name": "Sikhha Bhaban",
+    "latitude": 23.72867964,
+    "longitude": 90.40463769
+  },
+  {
+    "id": 300,
+    "name": "Sikhha Bhaban",
+    "latitude": 23.72867964,
+    "longitude": 90.40463769
+  },
+  {
+    "id": 301,
+    "name": "Dhaka PWD Division-4, 15 Abdul Gani Rd, Dhaka 1000",
+    "latitude": 23.72830176,
+    "longitude": 90.40525685
+  },
+  {
+    "id": 302,
+    "name": "Dhaka PWD Division-4, 15 Abdul Gani Rd, Dhaka 1000",
+    "latitude": 23.72830176,
+    "longitude": 90.40525685
+  },
+  {
+    "id": 303,
+    "name": "Dhaka PWD Division-4, 15 Abdul Gani Rd, Dhaka 1000",
+    "latitude": 23.72830176,
+    "longitude": 90.40525685
+  },
+  {
+    "id": 304,
+    "name": "Dhaka PWD Division-4, 15 Abdul Gani Rd, Dhaka 1000",
+    "latitude": 23.72830176,
+    "longitude": 90.40525685
+  },
+  {
+    "id": 305,
+    "name": "Dhaka PWD Division-4, 15 Abdul Gani Rd, Dhaka 1000",
+    "latitude": 23.72819808,
+    "longitude": 90.40610504
+  },
+  {
+    "id": 306,
+    "name": "Directorate General of Food, 16 Abdul Goni ",
+    "latitude": 23.72819808,
+    "longitude": 90.40610504
+  },
+  {
+    "id": 307,
+    "name": "Directorate General of Food, 16 Abdul Goni ",
+    "latitude": 23.72819808,
+    "longitude": 90.40610504
+  },
+  {
+    "id": 308,
+    "name": "Directorate General of Food, 16 Abdul Goni ",
+    "latitude": 23.72819808,
+    "longitude": 90.40610504
+  },
+  {
+    "id": 309,
+    "name": "Directorate General of Food, 16 Abdul Goni ",
+    "latitude": 23.72819808,
+    "longitude": 90.40610504
+  },
+  {
+    "id": 310,
+    "name": "Biddyut Bhaban",
+    "latitude": 23.72855982,
+    "longitude": 90.4067091
+  },
+  {
+    "id": 311,
+    "name": "Biddyut Bhaban",
+    "latitude": 23.72855982,
+    "longitude": 90.4067091
+  },
+  {
+    "id": 312,
+    "name": "Biddyut Bhaban",
+    "latitude": 23.72855982,
+    "longitude": 90.4067091
+  },
+  {
+    "id": 313,
+    "name": "Biddyut Bhaban",
+    "latitude": 23.72855982,
+    "longitude": 90.4067091
+  },
+  {
+    "id": 314,
+    "name": "Biddyut Bhaban",
+    "latitude": 23.72855982,
+    "longitude": 90.4067091
+  },
+  {
+    "id": 315,
+    "name": "Biddyut Bhaban",
+    "latitude": 23.72855982,
+    "longitude": 90.4067091
+  },
+  {
+    "id": 316,
+    "name": "Biddyut Bhaban",
+    "latitude": 23.72855982,
+    "longitude": 90.4067091
+  },
+  {
+    "id": 317,
+    "name": "Biddyut Bhaban",
+    "latitude": 23.72855982,
+    "longitude": 90.4067091
+  },
+  {
+    "id": 318,
+    "name": "Biddyut Bhaban",
+    "latitude": 23.72855982,
+    "longitude": 90.4067091
+  },
+  {
+    "id": 319,
+    "name": "Biddyut Bhaban",
+    "latitude": 23.72855982,
+    "longitude": 90.4067091
+  },
+  {
+    "id": 320,
+    "name": "Biddyut Bhaban",
+    "latitude": 23.72855982,
+    "longitude": 90.4067091
+  },
+  {
+    "id": 321,
+    "name": "Biddyut Bhaban",
+    "latitude": 23.72855982,
+    "longitude": 90.4067091
+  },
+  {
+    "id": 322,
+    "name": "Biddyut Bhaban",
+    "latitude": 23.72855982,
+    "longitude": 90.4067091
+  },
+  {
+    "id": 323,
+    "name": "Biddyut Bhaban",
+    "latitude": 23.72855982,
+    "longitude": 90.4067091
+  },
+  {
+    "id": 324,
+    "name": "Paribahan Pool Bhavan",
+    "latitude": 23.72888931,
+    "longitude": 90.40659332
+  },
+  {
+    "id": 325,
+    "name": "Paribahan Pool Bhavan",
+    "latitude": 23.72888931,
+    "longitude": 90.40659332
+  },
+  {
+    "id": 326,
+    "name": "Paribahan Pool Bhavan",
+    "latitude": 23.72888931,
+    "longitude": 90.40659332
+  },
+  {
+    "id": 327,
+    "name": "Paribahan Pool Bhavan",
+    "latitude": 23.72888931,
+    "longitude": 90.40659332
+  },
+  {
+    "id": 328,
+    "name": "Paribahan Pool Bhavan",
+    "latitude": 23.72888931,
+    "longitude": 90.40659332
+  },
+  {
+    "id": 329,
+    "name": "Paribahan Pool Bhavan",
+    "latitude": 23.72888931,
+    "longitude": 90.40659332
+  },
+  {
+    "id": 330,
+    "name": "Paribahan Pool Bhavan",
+    "latitude": 23.72888931,
+    "longitude": 90.40659332
+  },
+  {
+    "id": 331,
+    "name": "Paribahan Pool Bhavan",
+    "latitude": 23.72888931,
+    "longitude": 90.40659332
+  },
+  {
+    "id": 332,
+    "name": "Paribahan Pool Bhavan",
+    "latitude": 23.72888931,
+    "longitude": 90.40659332
+  },
+  {
+    "id": 333,
+    "name": "Paribahan Pool Bhavan",
+    "latitude": 23.72888931,
+    "longitude": 90.40659332
+  },
+  {
+    "id": 334,
+    "name": "Press Club Bhaban",
+    "latitude": 23.72938274,
+    "longitude": 90.40672871
+  },
+  {
+    "id": 335,
+    "name": "Press Club Bhaban",
+    "latitude": 23.72938274,
+    "longitude": 90.40672871
+  },
+  {
+    "id": 336,
+    "name": "Press Club Bhaban",
+    "latitude": 23.72938274,
+    "longitude": 90.40672871
+  },
+  {
+    "id": 337,
+    "name": "Press Club Bhaban",
+    "latitude": 23.72938274,
+    "longitude": 90.40672871
+  },
+  {
+    "id": 338,
+    "name": "Dhaka Trade Center Total 6 Floor",
+    "latitude": 23.72407734,
+    "longitude": 90.41110591
+  },
+  {
+    "id": 339,
+    "name": "Dhaka Trade Center Total 6 Floor",
+    "latitude": 23.72407734,
+    "longitude": 90.41110591
+  },
+  {
+    "id": 340,
+    "name": "Dhaka Trade Center Total 6 Floor",
+    "latitude": 23.72407734,
+    "longitude": 90.41110591
+  },
+  {
+    "id": 341,
+    "name": "Dhaka Trade Center Total 6 Floor",
+    "latitude": 23.72407734,
+    "longitude": 90.41110591
+  },
+  {
+    "id": 342,
+    "name": "Dhaka Trade Center Total 6 Floor",
+    "latitude": 23.72407734,
+    "longitude": 90.41110591
+  },
+  {
+    "id": 343,
+    "name": "Dhaka Trade Center Total 6 Floor",
+    "latitude": 23.72407734,
+    "longitude": 90.41110591
+  },
+  {
+    "id": 344,
+    "name": "Dhaka Trade Center Total 6 Floor",
+    "latitude": 23.72407734,
+    "longitude": 90.41110591
+  },
+  {
+    "id": 345,
+    "name": "Dhaka Trade Center Total 6 Floor",
+    "latitude": 23.72407734,
+    "longitude": 90.41110591
+  },
+  {
+    "id": 346,
+    "name": "Dhaka Trade Center Total 6 Floor",
+    "latitude": 23.72407734,
+    "longitude": 90.41110591
+  },
+  {
+    "id": 347,
+    "name": "Dhaka Trade Center Total 6 Floor",
+    "latitude": 23.72407734,
+    "longitude": 90.41110591
+  },
+  {
+    "id": 348,
+    "name": "Dhaka Trade Center Total 6 Floor",
+    "latitude": 23.72407734,
+    "longitude": 90.41110591
+  },
+  {
+    "id": 349,
+    "name": "Dhaka Trade Center Total 6 Floor",
+    "latitude": 23.72407734,
+    "longitude": 90.41110591
+  },
+  {
+    "id": 350,
+    "name": "Dhaka Trade Center Total 6 Floor",
+    "latitude": 23.72407734,
+    "longitude": 90.41110591
+  },
+  {
+    "id": 351,
+    "name": "Dhaka Trade Center Total 6 Floor",
+    "latitude": 23.72407734,
+    "longitude": 90.41110591
+  },
+  {
+    "id": 352,
+    "name": "Dhaka Trade Center Total 6 Floor",
+    "latitude": 23.72407734,
+    "longitude": 90.41110591
+  },
+  {
+    "id": 353,
+    "name": "Dhaka Trade Center Total 6 Floor",
+    "latitude": 23.72407734,
+    "longitude": 90.41110591
+  },
+  {
+    "id": 354,
+    "name": "Dhaka Trade Center Total 6 Floor",
+    "latitude": 23.72407734,
+    "longitude": 90.41110591
+  },
+  {
+    "id": 355,
+    "name": "Dhaka Trade Center Total 6 Floor",
+    "latitude": 23.72407734,
+    "longitude": 90.41110591
+  },
+  {
+    "id": 356,
+    "name": "Dhaka Trade Center Total 6 Floor",
+    "latitude": 23.72407734,
+    "longitude": 90.41110591
+  },
+  {
+    "id": 357,
+    "name": "Dhaka Trade Center Total 6 Floor",
+    "latitude": 23.72407734,
+    "longitude": 90.41110591
+  },
+  {
+    "id": 358,
+    "name": "Dhaka Trade Center Total 6 Floor",
+    "latitude": 23.72407734,
+    "longitude": 90.41110591
+  },
+  {
+    "id": 359,
+    "name": "Dhaka Trade Center Total 6 Floor",
+    "latitude": 23.72407734,
+    "longitude": 90.41110591
+  },
+  {
+    "id": 360,
+    "name": "Dhaka Trade Center Total 6 Floor",
+    "latitude": 23.72407734,
+    "longitude": 90.41110591
+  },
+  {
+    "id": 361,
+    "name": "Dhaka Trade Center Total 6 Floor",
+    "latitude": 23.72407734,
+    "longitude": 90.41110591
+  },
+  {
+    "id": 362,
+    "name": "Dhaka Trade Center Total 6 Floor",
+    "latitude": 23.72407734,
+    "longitude": 90.41110591
+  },
+  {
+    "id": 363,
+    "name": "Dhaka Trade Center Total 6 Floor",
+    "latitude": 23.72407734,
+    "longitude": 90.41110591
+  },
+  {
+    "id": 364,
+    "name": "Sundarban Super Market Total 4 Floor",
+    "latitude": 23.72277318,
+    "longitude": 90.41131168
+  },
+  {
+    "id": 365,
+    "name": "Sundarban Super Market Total 4 Floor",
+    "latitude": 23.72277318,
+    "longitude": 90.41131168
+  },
+  {
+    "id": 366,
+    "name": "Sundarban Super Market Total 4 Floor",
+    "latitude": 23.72277318,
+    "longitude": 90.41131168
+  },
+  {
+    "id": 367,
+    "name": "Sundarban Super Market Total 4 Floor",
+    "latitude": 23.72277318,
+    "longitude": 90.41131168
+  },
+  {
+    "id": 368,
+    "name": "Sundarban Super Market Total 4 Floor",
+    "latitude": 23.72277318,
+    "longitude": 90.41131168
+  },
+  {
+    "id": 369,
+    "name": "Sundarban Super Market Total 4 Floor",
+    "latitude": 23.72277318,
+    "longitude": 90.41131168
+  },
+  {
+    "id": 370,
+    "name": "Sundarban Super Market Total 4 Floor",
+    "latitude": 23.72277318,
+    "longitude": 90.41131168
+  },
+  {
+    "id": 371,
+    "name": "Sundarban Super Market Total 4 Floor",
+    "latitude": 23.72277318,
+    "longitude": 90.41131168
+  },
+  {
+    "id": 372,
+    "name": "Sundarban Super Market Total 4 Floor",
+    "latitude": 23.72277318,
+    "longitude": 90.41131168
+  },
+  {
+    "id": 373,
+    "name": "Sundarban Super Market Total 4 Floor",
+    "latitude": 23.72277318,
+    "longitude": 90.41131168
+  },
+  {
+    "id": 374,
+    "name": "Sundarban Super Market Total 4 Floor",
+    "latitude": 23.72277318,
+    "longitude": 90.41131168
+  },
+  {
+    "id": 375,
+    "name": "Sundarban Super Market Total 4 Floor",
+    "latitude": 23.72277318,
+    "longitude": 90.41131168
+  },
+  {
+    "id": 376,
+    "name": "Sundarban Super Market Total 4 Floor",
+    "latitude": 23.72277318,
+    "longitude": 90.41131168
+  },
+  {
+    "id": 377,
+    "name": "Sundarban Super Market Total 4 Floor",
+    "latitude": 23.72277318,
+    "longitude": 90.41131168
+  },
+  {
+    "id": 378,
+    "name": "Sundarban Super Market Total 4 Floor",
+    "latitude": 23.72277318,
+    "longitude": 90.41131168
+  },
+  {
+    "id": 379,
+    "name": "Sundarban Super Market Total 4 Floor",
+    "latitude": 23.72277318,
+    "longitude": 90.41131168
+  },
+  {
+    "id": 380,
+    "name": "Sundarban Super Market Total 4 Floor",
+    "latitude": 23.72277318,
+    "longitude": 90.41131168
+  },
+  {
+    "id": 381,
+    "name": "Sundarban Super Market Total 4 Floor",
+    "latitude": 23.72277318,
+    "longitude": 90.41131168
+  },
+  {
+    "id": 382,
+    "name": "Sundarban Super Market Total 4 Floor",
+    "latitude": 23.72277318,
+    "longitude": 90.41131168
+  },
+  {
+    "id": 383,
+    "name": "Sundarban Super Market Total 4 Floor",
+    "latitude": 23.72277318,
+    "longitude": 90.41131168
+  },
+  {
+    "id": 384,
+    "name": "Sundarban Super Market Total 4 Floor",
+    "latitude": 23.72277318,
+    "longitude": 90.41131168
+  },
+  {
+    "id": 385,
+    "name": "Sundarban Super Market Total 4 Floor",
+    "latitude": 23.72277318,
+    "longitude": 90.41131168
+  },
+  {
+    "id": 386,
+    "name": "Sundarban Super Market Total 4 Floor",
+    "latitude": 23.72277318,
+    "longitude": 90.41131168
+  },
+  {
+    "id": 387,
+    "name": "Sundarban Super Market Total 4 Floor",
+    "latitude": 23.72277318,
+    "longitude": 90.41131168
+  },
+  {
+    "id": 388,
+    "name": "Sundarban Super Market Total 4 Floor",
+    "latitude": 23.72277318,
+    "longitude": 90.41131168
+  },
+  {
+    "id": 389,
+    "name": "Sundarban Super Market Total 4 Floor",
+    "latitude": 23.72277318,
+    "longitude": 90.41131168
+  },
+  {
+    "id": 390,
+    "name": "Sundarban Super Market Total 4 Floor",
+    "latitude": 23.72277318,
+    "longitude": 90.41131168
+  },
+  {
+    "id": 391,
+    "name": "Sundarban Super Market Total 4 Floor",
+    "latitude": 23.72277318,
+    "longitude": 90.41131168
+  },
+  {
+    "id": 392,
+    "name": "Sundarban Super Market Total 4 Floor",
+    "latitude": 23.72277318,
+    "longitude": 90.41131168
+  },
+  {
+    "id": 393,
+    "name": "Sundarban Super Market Total 4 Floor",
+    "latitude": 23.72277318,
+    "longitude": 90.41131168
+  },
+  {
+    "id": 394,
+    "name": "Gulistan Trade Center GR Floor",
+    "latitude": 23.72443895,
+    "longitude": 90.41093295
+  },
+  {
+    "id": 395,
+    "name": "Gulistan Trade Center GR Floor",
+    "latitude": 23.72443895,
+    "longitude": 90.41093295
+  },
+  {
+    "id": 396,
+    "name": "Gulistan Trade Center GR Floor",
+    "latitude": 23.72443895,
+    "longitude": 90.41093295
+  },
+  {
+    "id": 397,
+    "name": "Gulistan Trade Center GR Floor",
+    "latitude": 23.72443895,
+    "longitude": 90.41093295
+  },
+  {
+    "id": 398,
+    "name": "Gulistan Trade Center GR Floor",
+    "latitude": 23.72443895,
+    "longitude": 90.41093295
+  },
+  {
+    "id": 399,
+    "name": "Gulistan Trade Center GR Floor",
+    "latitude": 23.72443895,
+    "longitude": 90.41093295
+  },
+  {
+    "id": 400,
+    "name": "Gulistan Trade Center GR Floor",
+    "latitude": 23.72443895,
+    "longitude": 90.41093295
+  },
+  {
+    "id": 401,
+    "name": "Gulistan Trade Center GR Floor",
+    "latitude": 23.72443895,
+    "longitude": 90.41093295
+  },
+  {
+    "id": 402,
+    "name": "Gulistan Shopping Complex Total 10 Floor",
+    "latitude": 23.72464852,
+    "longitude": 90.41147434
+  },
+  {
+    "id": 403,
+    "name": "Gulistan Shopping Complex Total 10 Floor",
+    "latitude": 23.72464852,
+    "longitude": 90.41147434
+  },
+  {
+    "id": 404,
+    "name": "Gulistan Shopping Complex Total 10 Floor",
+    "latitude": 23.72464852,
+    "longitude": 90.41147434
+  },
+  {
+    "id": 405,
+    "name": "Gulistan Shopping Complex Total 10 Floor",
+    "latitude": 23.72464852,
+    "longitude": 90.41147434
+  },
+  {
+    "id": 406,
+    "name": "Gulistan Shopping Complex Total 10 Floor",
+    "latitude": 23.72464852,
+    "longitude": 90.41147434
+  },
+  {
+    "id": 407,
+    "name": "Gulistan Shopping Complex Total 10 Floor",
+    "latitude": 23.72464852,
+    "longitude": 90.41147434
+  },
+  {
+    "id": 408,
+    "name": "Gulistan Shopping Complex Total 10 Floor",
+    "latitude": 23.72464852,
+    "longitude": 90.41147434
+  },
+  {
+    "id": 409,
+    "name": "Gulistan Shopping Complex Total 10 Floor",
+    "latitude": 23.72464852,
+    "longitude": 90.41147434
+  },
+  {
+    "id": 410,
+    "name": "Gulistan Shopping Complex Total 10 Floor",
+    "latitude": 23.72464852,
+    "longitude": 90.41147434
+  },
+  {
+    "id": 411,
+    "name": "Gulistan Shopping Complex Total 10 Floor",
+    "latitude": 23.72464852,
+    "longitude": 90.41147434
+  },
+  {
+    "id": 412,
+    "name": "Gulistan Shopping Complex Total 10 Floor",
+    "latitude": 23.72464852,
+    "longitude": 90.41147434
+  },
+  {
+    "id": 413,
+    "name": "Gulistan Shopping Complex Total 10 Floor",
+    "latitude": 23.72464852,
+    "longitude": 90.41147434
+  },
+  {
+    "id": 414,
+    "name": "Gulistan Shopping Complex Total 10 Floor",
+    "latitude": 23.72464852,
+    "longitude": 90.41147434
+  },
+  {
+    "id": 415,
+    "name": "Gulistan Shopping Complex Total 10 Floor",
+    "latitude": 23.72464852,
+    "longitude": 90.41147434
+  },
+  {
+    "id": 416,
+    "name": "Gulistan Shopping Complex Total 10 Floor",
+    "latitude": 23.72464852,
+    "longitude": 90.41147434
+  },
+  {
+    "id": 417,
+    "name": "Gulistan Shopping Complex Total 10 Floor",
+    "latitude": 23.72464852,
+    "longitude": 90.41147434
+  },
+  {
+    "id": 418,
+    "name": "Gulistan Shopping Complex Total 10 Floor",
+    "latitude": 23.72464852,
+    "longitude": 90.41147434
+  },
+  {
+    "id": 419,
+    "name": "Gulistan Shopping Complex Total 10 Floor",
+    "latitude": 23.72464852,
+    "longitude": 90.41147434
+  },
+  {
+    "id": 420,
+    "name": "Gulistan Shopping Complex Total 10 Floor",
+    "latitude": 23.72464852,
+    "longitude": 90.41147434
+  },
+  {
+    "id": 421,
+    "name": "Gulistan Shopping Complex Total 10 Floor",
+    "latitude": 23.72464852,
+    "longitude": 90.41147434
+  },
+  {
+    "id": 422,
+    "name": "Gulistan Shopping Complex Total 10 Floor",
+    "latitude": 23.72464852,
+    "longitude": 90.41147434
+  },
+  {
+    "id": 423,
+    "name": "Gulistan Shopping Complex Total 10 Floor",
+    "latitude": 23.72464852,
+    "longitude": 90.41147434
+  },
+  {
+    "id": 424,
+    "name": "Gulistan Shopping Complex Total 10 Floor",
+    "latitude": 23.72464852,
+    "longitude": 90.41147434
+  },
+  {
+    "id": 425,
+    "name": "Gulistan Shopping Complex Total 10 Floor",
+    "latitude": 23.72464852,
+    "longitude": 90.41147434
+  },
+  {
+    "id": 426,
+    "name": "Gulistan Shopping Complex Total 10 Floor",
+    "latitude": 23.72464852,
+    "longitude": 90.41147434
+  },
+  {
+    "id": 427,
+    "name": "Gulistan Shopping Complex Total 10 Floor",
+    "latitude": 23.72464852,
+    "longitude": 90.41147434
+  },
+  {
+    "id": 428,
+    "name": "Gulistan Shopping Complex Total 10 Floor",
+    "latitude": 23.72464852,
+    "longitude": 90.41147434
+  },
+  {
+    "id": 429,
+    "name": "Gulistan Shopping Complex Total 10 Floor",
+    "latitude": 23.72464852,
+    "longitude": 90.41147434
+  },
+  {
+    "id": 430,
+    "name": "Gulistan Shopping Complex Total 10 Floor",
+    "latitude": 23.72464852,
+    "longitude": 90.41147434
+  },
+  {
+    "id": 431,
+    "name": "Gulistan Shopping Complex Total 10 Floor",
+    "latitude": 23.72464852,
+    "longitude": 90.41147434
+  },
+  {
+    "id": 432,
+    "name": "78 Motijheel Rd",
+    "latitude": 23.72868607,
+    "longitude": 90.41860895
+  },
+  {
+    "id": 433,
+    "name": "78 Motijheel Rd",
+    "latitude": 23.72868607,
+    "longitude": 90.41860895
+  },
+  {
+    "id": 434,
+    "name": "78 Motijheel Rd",
+    "latitude": 23.72868607,
+    "longitude": 90.41860895
+  },
+  {
+    "id": 435,
+    "name": "88 Motijheel Rd, Dhaka 1000",
+    "latitude": 23.72887996,
+    "longitude": 90.41816854
+  },
+  {
+    "id": 436,
+    "name": "88 Motijheel Rd, Dhaka 1000",
+    "latitude": 23.72887996,
+    "longitude": 90.41816854
+  },
+  {
+    "id": 437,
+    "name": "88 Motijheel Rd, Dhaka 1000",
+    "latitude": 23.72887996,
+    "longitude": 90.41816854
+  },
+  {
+    "id": 438,
+    "name": "88 Motijheel Rd, Dhaka 1000",
+    "latitude": 23.72887996,
+    "longitude": 90.41816854
+  },
+  {
+    "id": 439,
+    "name": "73 Motijheel Rd, Dhaka 1000",
+    "latitude": 23.72823496,
+    "longitude": 90.41900767
+  },
+  {
+    "id": 440,
+    "name": "73 Motijheel Rd, Dhaka 1000",
+    "latitude": 23.72823496,
+    "longitude": 90.41900767
+  },
+  {
+    "id": 441,
+    "name": "73 Motijheel Rd, Dhaka 1000",
+    "latitude": 23.72823496,
+    "longitude": 90.41900767
+  },
+  {
+    "id": 442,
+    "name": "73 Motijheel Rd, Dhaka 1000",
+    "latitude": 23.72823496,
+    "longitude": 90.41900767
+  },
+  {
+    "id": 443,
+    "name": "68 Motijheel Rd, Dhaka 1000",
+    "latitude": 23.72794166,
+    "longitude": 90.41972001
+  },
+  {
+    "id": 444,
+    "name": "69 Motijheel Rd, Dhaka 1000",
+    "latitude": 23.72794166,
+    "longitude": 90.41972001
+  },
+  {
+    "id": 445,
+    "name": "70 Motijheel Rd, Dhaka 1000",
+    "latitude": 23.72794166,
+    "longitude": 90.41972001
+  },
+  {
+    "id": 446,
+    "name": "71 Motijheel Rd, Dhaka 1000",
+    "latitude": 23.72794166,
+    "longitude": 90.41972001
+  },
+  {
+    "id": 447,
+    "name": "86 Motijheel Rd",
+    "latitude": 23.72850829,
+    "longitude": 90.41848831
+  },
+  {
+    "id": 448,
+    "name": "87 Motijheel Rd",
+    "latitude": 23.72850829,
+    "longitude": 90.41848831
+  },
+  {
+    "id": 449,
+    "name": "88 Motijheel Rd",
+    "latitude": 23.72850829,
+    "longitude": 90.41848831
+  },
+  {
+    "id": 450,
+    "name": "89 Motijheel Rd",
+    "latitude": 23.72850829,
+    "longitude": 90.41848831
+  },
+  {
+    "id": 451,
+    "name": "Biman Bhaban",
+    "latitude": 23.72809332,
+    "longitude": 90.41720584
+  },
+  {
+    "id": 452,
+    "name": "Biman Bhaban",
+    "latitude": 23.72809332,
+    "longitude": 90.41720584
+  },
+  {
+    "id": 453,
+    "name": "Biman Bhaban",
+    "latitude": 23.72809332,
+    "longitude": 90.41720584
+  },
+  {
+    "id": 454,
+    "name": "Biman Bhaban",
+    "latitude": 23.72809332,
+    "longitude": 90.41720584
+  },
+  {
+    "id": 455,
+    "name": "Biman Bhaban",
+    "latitude": 23.72809332,
+    "longitude": 90.41720584
+  },
+  {
+    "id": 456,
+    "name": "Biman Bhaban",
+    "latitude": 23.72809332,
+    "longitude": 90.41720584
+  },
+  {
+    "id": 457,
+    "name": "Biman Bhaban",
+    "latitude": 23.72809332,
+    "longitude": 90.41720584
+  },
+  {
+    "id": 458,
+    "name": "Biman Bhaban",
+    "latitude": 23.72809332,
+    "longitude": 90.41720584
+  },
+  {
+    "id": 459,
+    "name": "99 Motijheel Road",
+    "latitude": 23.72860008,
+    "longitude": 90.41748874
+  },
+  {
+    "id": 460,
+    "name": "100 Motijheel Road",
+    "latitude": 23.72860008,
+    "longitude": 90.41748874
+  },
+  {
+    "id": 461,
+    "name": "101 Motijheel Road",
+    "latitude": 23.72860008,
+    "longitude": 90.41748874
+  },
+  {
+    "id": 462,
+    "name": "102 Motijheel Road",
+    "latitude": 23.72860008,
+    "longitude": 90.41748874
+  },
+  {
+    "id": 463,
+    "name": "11 Toyenbee Circular Road",
+    "latitude": 23.72932004,
+    "longitude": 90.4221003
+  },
+  {
+    "id": 464,
+    "name": "11/A Toyenbee Circular Road",
+    "latitude": 23.72786243,
+    "longitude": 90.42160222
+  },
+  {
+    "id": 465,
+    "name": "11/B Toyenbee Circular Road",
+    "latitude": 23.73178795,
+    "longitude": 90.42111257
+  },
+  {
+    "id": 466,
+    "name": "11/B Toyenbee Circular Road",
+    "latitude": 23.73178795,
+    "longitude": 90.42111257
+  },
+  {
+    "id": 467,
+    "name": "11/A Toyenbee Circular Road",
+    "latitude": 23.72786243,
+    "longitude": 90.42160222
+  },
+  {
+    "id": 468,
+    "name": "11/A Toyenbee Circular Road",
+    "latitude": 23.73180759,
+    "longitude": 90.42158463
+  },
+  {
+    "id": 469,
+    "name": "10/1 Toyenbee Circular Road",
+    "latitude": 23.72812519,
+    "longitude": 90.42174918
+  },
+  {
+    "id": 470,
+    "name": "10/1 Toyenbee Circular Road",
+    "latitude": 23.72812519,
+    "longitude": 90.42174918
+  },
+  {
+    "id": 471,
+    "name": "10/1 Toyenbee Circular Road",
+    "latitude": 23.72812519,
+    "longitude": 90.42174918
+  },
+  {
+    "id": 472,
+    "name": "Bengal Commercial Bank, 19 Dilkusha, Dhaka 1000",
+    "latitude": 23.72857279,
+    "longitude": 90.41662714
+  },
+  {
+    "id": 473,
+    "name": "Bengal Commercial Bank, 19 Dilkusha, Dhaka 1001",
+    "latitude": 23.72857279,
+    "longitude": 90.41662714
+  },
+  {
+    "id": 474,
+    "name": "Bengal Commercial Bank, 19 Dilkusha, Dhaka 1002",
+    "latitude": 23.72857279,
+    "longitude": 90.41662714
+  },
+  {
+    "id": 475,
+    "name": "Bengal Commercial Bank, 19 Dilkusha, Dhaka 1003",
+    "latitude": 23.72857279,
+    "longitude": 90.41662714
+  },
+  {
+    "id": 476,
+    "name": "Bengal Commercial Bank, 19 Dilkusha, Dhaka 1004",
+    "latitude": 23.72857279,
+    "longitude": 90.41662714
+  },
+  {
+    "id": 477,
+    "name": "Bengal Commercial Bank, 19 Dilkusha, Dhaka 1005",
+    "latitude": 23.72857279,
+    "longitude": 90.41662714
+  },
+  {
+    "id": 478,
+    "name": "Bengal Commercial Bank, 19 Dilkusha, Dhaka 1006",
+    "latitude": 23.72857279,
+    "longitude": 90.41662714
+  },
+  {
+    "id": 479,
+    "name": "Bengal Commercial Bank, 19 Dilkusha, Dhaka 1007",
+    "latitude": 23.72857279,
+    "longitude": 90.41662714
+  },
+  {
+    "id": 480,
+    "name": "20 Dilkusha, Dhaka 1000",
+    "latitude": 23.72690823,
+    "longitude": 90.41831658
+  },
+  {
+    "id": 481,
+    "name": "20 Dilkusha, Dhaka 1000",
+    "latitude": 23.72690823,
+    "longitude": 90.41831658
+  },
+  {
+    "id": 482,
+    "name": "20 Dilkusha, Dhaka 1000",
+    "latitude": 23.72690823,
+    "longitude": 90.41831658
+  },
+  {
+    "id": 483,
+    "name": "20 Dilkusha, Dhaka 1000",
+    "latitude": 23.72690823,
+    "longitude": 90.41831658
+  },
+  {
+    "id": 484,
+    "name": "20 Dilkusha, Dhaka 1000",
+    "latitude": 23.72690823,
+    "longitude": 90.41831658
+  },
+  {
+    "id": 485,
+    "name": "20 Dilkusha, Dhaka 1000",
+    "latitude": 23.72690823,
+    "longitude": 90.41831658
+  },
+  {
+    "id": 486,
+    "name": "20 Dilkusha, Dhaka 1000",
+    "latitude": 23.72690823,
+    "longitude": 90.41831658
+  },
+  {
+    "id": 487,
+    "name": "21.22.23 Dilkusha, Dhaka 1000",
+    "latitude": 23.72692788,
+    "longitude": 90.41862772
+  },
+  {
+    "id": 488,
+    "name": "21.22.23 Dilkusha, Dhaka 1001",
+    "latitude": 23.7268493,
+    "longitude": 90.41806982
+  },
+  {
+    "id": 489,
+    "name": "21.22.23 Dilkusha, Dhaka 1002",
+    "latitude": 23.72700645,
+    "longitude": 90.41868136
+  },
+  {
+    "id": 490,
+    "name": "21.22.23 Dilkusha, Dhaka 1003",
+    "latitude": 23.72694752,
+    "longitude": 90.41862772
+  },
+  {
+    "id": 491,
+    "name": "21.22.23 Dilkusha, Dhaka 1004",
+    "latitude": 23.72694752,
+    "longitude": 90.41862772
+  },
+  {
+    "id": 492,
+    "name": "21.22.23 Dilkusha, Dhaka 1005",
+    "latitude": 23.72694752,
+    "longitude": 90.41862772
+  },
+  {
+    "id": 493,
+    "name": "21.22.23 Dilkusha, Dhaka 1006",
+    "latitude": 23.72694752,
+    "longitude": 90.41862772
+  },
+  {
+    "id": 494,
+    "name": "21.22.23 Dilkusha, Dhaka 1007",
+    "latitude": 23.72694752,
+    "longitude": 90.41862772
+  },
+  {
+    "id": 495,
+    "name": "21.22.23 Dilkusha, Dhaka 1008",
+    "latitude": 23.72694752,
+    "longitude": 90.41862772
+  },
+  {
+    "id": 496,
+    "name": "21.22.23 Dilkusha, Dhaka 1009",
+    "latitude": 23.72694752,
+    "longitude": 90.41862772
+  },
+  {
+    "id": 497,
+    "name": "25/A Dilkusha",
+    "latitude": 23.72676056,
+    "longitude": 90.41935096
+  },
+  {
+    "id": 498,
+    "name": "25/A Dilkusha",
+    "latitude": 23.72676056,
+    "longitude": 90.41935096
+  },
+  {
+    "id": 499,
+    "name": "25/A Dilkusha",
+    "latitude": 23.72676056,
+    "longitude": 90.41935096
+  },
+  {
+    "id": 500,
+    "name": "25/A Dilkusha",
+    "latitude": 23.72676056,
+    "longitude": 90.41935096
+  },
+  {
+    "id": 501,
+    "name": "25/A Dilkusha",
+    "latitude": 23.72676056,
+    "longitude": 90.41935096
+  },
+  {
+    "id": 502,
+    "name": "25/A Dilkusha",
+    "latitude": 23.72676056,
+    "longitude": 90.41935096
+  },
+  {
+    "id": 503,
+    "name": "25/A Dilkusha",
+    "latitude": 23.72676056,
+    "longitude": 90.41935096
+  },
+  {
+    "id": 504,
+    "name": "25/A Dilkusha",
+    "latitude": 23.72676056,
+    "longitude": 90.41935096
+  },
+  {
+    "id": 505,
+    "name": "9/D Dilkusha",
+    "latitude": 23.72728056,
+    "longitude": 90.41880413
+  },
+  {
+    "id": 506,
+    "name": "9/D Dilkusha",
+    "latitude": 23.72728056,
+    "longitude": 90.41880413
+  },
+  {
+    "id": 507,
+    "name": "9/D Dilkusha",
+    "latitude": 23.72728056,
+    "longitude": 90.41880413
+  },
+  {
+    "id": 508,
+    "name": "9/D Dilkusha",
+    "latitude": 23.72728056,
+    "longitude": 90.41880413
+  },
+  {
+    "id": 509,
+    "name": "9/D Dilkusha",
+    "latitude": 23.72728056,
+    "longitude": 90.41880413
+  },
+  {
+    "id": 510,
+    "name": "9/D Dilkusha",
+    "latitude": 23.72728056,
+    "longitude": 90.41880413
+  },
+  {
+    "id": 511,
+    "name": "9/D Dilkusha",
+    "latitude": 23.72728056,
+    "longitude": 90.41880413
+  },
+  {
+    "id": 512,
+    "name": "9/D Dilkusha",
+    "latitude": 23.72728056,
+    "longitude": 90.41880413
+  },
+  {
+    "id": 513,
+    "name": "9/D Dilkusha",
+    "latitude": 23.72728056,
+    "longitude": 90.41880413
+  },
+  {
+    "id": 514,
+    "name": "9/D Dilkusha",
+    "latitude": 23.72728056,
+    "longitude": 90.41880413
+  },
+  {
+    "id": 515,
+    "name": "9/D Dilkusha",
+    "latitude": 23.72728056,
+    "longitude": 90.41880413
+  },
+  {
+    "id": 516,
+    "name": "9/D Dilkusha",
+    "latitude": 23.72728056,
+    "longitude": 90.41880413
+  },
+  {
+    "id": 517,
+    "name": "9/D Dilkusha",
+    "latitude": 23.72728056,
+    "longitude": 90.41880413
+  },
+  {
+    "id": 518,
+    "name": "9/D Dilkusha",
+    "latitude": 23.72728056,
+    "longitude": 90.41880413
+  },
+  {
+    "id": 519,
+    "name": "9/D Dilkusha",
+    "latitude": 23.72728056,
+    "longitude": 90.41880413
+  },
+  {
+    "id": 520,
+    "name": "9/D Dilkusha",
+    "latitude": 23.72728056,
+    "longitude": 90.41880413
+  },
+  {
+    "id": 521,
+    "name": "Ministry of Industries, 91 Motijheel Road",
+    "latitude": 23.727566,
+    "longitude": 90.41828769
+  },
+  {
+    "id": 522,
+    "name": "Ministry of Industries, 91 Motijheel Road",
+    "latitude": 23.727566,
+    "longitude": 90.41828769
+  },
+  {
+    "id": 523,
+    "name": "Ministry of Industries, 91 Motijheel Road",
+    "latitude": 23.727566,
+    "longitude": 90.41828769
+  },
+  {
+    "id": 524,
+    "name": "Ministry of Industries, 91 Motijheel Road",
+    "latitude": 23.727566,
+    "longitude": 90.41828769
+  },
+  {
+    "id": 525,
+    "name": "Ministry of Industries, 91 Motijheel Road",
+    "latitude": 23.727566,
+    "longitude": 90.41828769
+  },
+  {
+    "id": 526,
+    "name": "Ministry of Industries, 91 Motijheel Road",
+    "latitude": 23.727566,
+    "longitude": 90.41828769
+  },
+  {
+    "id": 527,
+    "name": "Ministry of Industries, 91 Motijheel Road",
+    "latitude": 23.727566,
+    "longitude": 90.41828769
+  },
+  {
+    "id": 528,
+    "name": "Ministry of Industries, 91 Motijheel Road",
+    "latitude": 23.727566,
+    "longitude": 90.41828769
+  },
+  {
+    "id": 529,
+    "name": "Ministry of Industries, 91 Motijheel Road",
+    "latitude": 23.727566,
+    "longitude": 90.41828769
+  },
+  {
+    "id": 530,
+    "name": "Ministry of Industries, 91 Motijheel Road",
+    "latitude": 23.727566,
+    "longitude": 90.41828769
+  },
+  {
+    "id": 531,
+    "name": "Ministry of Industries, 91 Motijheel Road",
+    "latitude": 23.727566,
+    "longitude": 90.41828769
+  },
+  {
+    "id": 532,
+    "name": "Ministry of Industries, 91 Motijheel Road",
+    "latitude": 23.727566,
+    "longitude": 90.41828769
+  },
+  {
+    "id": 533,
+    "name": "Ministry of Industries, 91 Motijheel Road",
+    "latitude": 23.727566,
+    "longitude": 90.41828769
+  },
+  {
+    "id": 534,
+    "name": "Ministry of Industries, 91 Motijheel Road",
+    "latitude": 23.727566,
+    "longitude": 90.41828769
+  },
+  {
+    "id": 535,
+    "name": "Ministry of Industries, 91 Motijheel Road",
+    "latitude": 23.727566,
+    "longitude": 90.41828769
+  },
+  {
+    "id": 536,
+    "name": "Ministry of Industries, 91 Motijheel Road",
+    "latitude": 23.727566,
+    "longitude": 90.41828769
+  },
+  {
+    "id": 537,
+    "name": "26 Dilkusha",
+    "latitude": 23.72698895,
+    "longitude": 90.41893078
+  },
+  {
+    "id": 538,
+    "name": "27 Dilkusha",
+    "latitude": 23.72698895,
+    "longitude": 90.41893078
+  },
+  {
+    "id": 539,
+    "name": "28 Dilkusha",
+    "latitude": 23.72698895,
+    "longitude": 90.41893078
+  },
+  {
+    "id": 540,
+    "name": "29 Dilkusha",
+    "latitude": 23.72698895,
+    "longitude": 90.41893078
+  },
+  {
+    "id": 541,
+    "name": "30 Dilkusha",
+    "latitude": 23.72698895,
+    "longitude": 90.41893078
+  },
+  {
+    "id": 542,
+    "name": "31 Dilkusha",
+    "latitude": 23.72698895,
+    "longitude": 90.41893078
+  },
+  {
+    "id": 543,
+    "name": "32 Dilkusha",
+    "latitude": 23.72698895,
+    "longitude": 90.41893078
+  },
+  {
+    "id": 544,
+    "name": "33 Dilkusha",
+    "latitude": 23.72698895,
+    "longitude": 90.41893078
+  },
+  {
+    "id": 545,
+    "name": "34 Dilkusha",
+    "latitude": 23.72698895,
+    "longitude": 90.41893078
+  },
+  {
+    "id": 546,
+    "name": "35 Dilkusha",
+    "latitude": 23.72698895,
+    "longitude": 90.41893078
+  },
+  {
+    "id": 547,
+    "name": "27, dilkhusha, Motijheel",
+    "latitude": 23.72719205,
+    "longitude": 90.41926623
+  },
+  {
+    "id": 548,
+    "name": "27, dilkhusha, Motijheel",
+    "latitude": 23.72719205,
+    "longitude": 90.41926623
+  },
+  {
+    "id": 549,
+    "name": "27, dilkhusha, Motijheel",
+    "latitude": 23.72719205,
+    "longitude": 90.41926623
+  },
+  {
+    "id": 550,
+    "name": "27, dilkhusha, Motijheel",
+    "latitude": 23.72719205,
+    "longitude": 90.41926623
+  },
+  {
+    "id": 551,
+    "name": "27, dilkhusha, Motijheel",
+    "latitude": 23.72719205,
+    "longitude": 90.41926623
+  },
+  {
+    "id": 552,
+    "name": "27, dilkhusha, Motijheel",
+    "latitude": 23.72719205,
+    "longitude": 90.41926623
+  },
+  {
+    "id": 553,
+    "name": "27, dilkhusha, Motijheel",
+    "latitude": 23.72719205,
+    "longitude": 90.41926623
+  },
+  {
+    "id": 554,
+    "name": "27, dilkhusha, Motijheel",
+    "latitude": 23.72719205,
+    "longitude": 90.41926623
+  },
+  {
+    "id": 555,
+    "name": "28 Dilkusha",
+    "latitude": 23.72685453,
+    "longitude": 90.41942371
+  },
+  {
+    "id": 556,
+    "name": "29 Dilkusha",
+    "latitude": 23.72685453,
+    "longitude": 90.41942371
+  },
+  {
+    "id": 557,
+    "name": "30 Dilkusha",
+    "latitude": 23.72685453,
+    "longitude": 90.41942371
+  },
+  {
+    "id": 558,
+    "name": "31 Dilkusha",
+    "latitude": 23.72685453,
+    "longitude": 90.41942371
+  },
+  {
+    "id": 559,
+    "name": "29 Dilkusha Rd",
+    "latitude": 23.7257826,
+    "longitude": 90.42063777
+  },
+  {
+    "id": 560,
+    "name": "30 Dilkusha Rd",
+    "latitude": 23.7257826,
+    "longitude": 90.42063777
+  },
+  {
+    "id": 561,
+    "name": "31 Dilkusha Rd",
+    "latitude": 23.7257826,
+    "longitude": 90.42063777
+  },
+  {
+    "id": 562,
+    "name": "32 Dilkusha Rd",
+    "latitude": 23.7257826,
+    "longitude": 90.42063777
+  },
+  {
+    "id": 563,
+    "name": "বিসিআইসি ভবন, 31 Dilkusha, Dhaka 1000",
+    "latitude": 23.72670841,
+    "longitude": 90.41996191
+  },
+  {
+    "id": 564,
+    "name": "বিসিআইসি ভবন, 31 Dilkusha, Dhaka 1001",
+    "latitude": 23.72670841,
+    "longitude": 90.41996191
+  },
+  {
+    "id": 565,
+    "name": "বিসিআইসি ভবন, 31 Dilkusha, Dhaka 1002",
+    "latitude": 23.72670841,
+    "longitude": 90.41996191
+  },
+  {
+    "id": 566,
+    "name": "বিসিআইসি ভবন, 31 Dilkusha, Dhaka 1003",
+    "latitude": 23.72670841,
+    "longitude": 90.41996191
+  },
+  {
+    "id": 567,
+    "name": "বিসিআইসি ভবন, 31 Dilkusha, Dhaka 1004",
+    "latitude": 23.72670841,
+    "longitude": 90.41996191
+  },
+  {
+    "id": 568,
+    "name": "বিসিআইসি ভবন, 31 Dilkusha, Dhaka 1005",
+    "latitude": 23.72670841,
+    "longitude": 90.41996191
+  },
+  {
+    "id": 569,
+    "name": "বিসিআইসি ভবন, 31 Dilkusha, Dhaka 1006",
+    "latitude": 23.72670841,
+    "longitude": 90.41996191
+  },
+  {
+    "id": 570,
+    "name": "বিসিআইসি ভবন, 31 Dilkusha, Dhaka 1007",
+    "latitude": 23.72670841,
+    "longitude": 90.41996191
+  },
+  {
+    "id": 571,
+    "name": "বিসিআইসি ভবন, 31 Dilkusha, Dhaka 1008",
+    "latitude": 23.72670841,
+    "longitude": 90.41996191
+  },
+  {
+    "id": 572,
+    "name": "বিসিআইসি ভবন, 31 Dilkusha, Dhaka 1009",
+    "latitude": 23.72670841,
+    "longitude": 90.41996191
+  },
+  {
+    "id": 573,
+    "name": "বিসিআইসি ভবন, 31 Dilkusha, Dhaka 1010",
+    "latitude": 23.72670841,
+    "longitude": 90.41996191
+  },
+  {
+    "id": 574,
+    "name": "বিসিআইসি ভবন, 31 Dilkusha, Dhaka 1011",
+    "latitude": 23.72670841,
+    "longitude": 90.41996191
+  },
+  {
+    "id": 575,
+    "name": "বিসিআইসি ভবন, 31 Dilkusha, Dhaka 1012",
+    "latitude": 23.72670841,
+    "longitude": 90.41996191
+  },
+  {
+    "id": 576,
+    "name": "বিসিআইসি ভবন, 31 Dilkusha, Dhaka 1013",
+    "latitude": 23.72670841,
+    "longitude": 90.41996191
+  },
+  {
+    "id": 577,
+    "name": "বিসিআইসি ভবন, 31 Dilkusha, Dhaka 1014",
+    "latitude": 23.72670841,
+    "longitude": 90.41996191
+  },
+  {
+    "id": 578,
+    "name": "বিসিআইসি ভবন, 31 Dilkusha, Dhaka 1015",
+    "latitude": 23.72670841,
+    "longitude": 90.41996191
+  },
+  {
+    "id": 579,
+    "name": "33 Dilkusha, Dhaka 1000 সাধারণ বীমা",
+    "latitude": 23.72627568,
+    "longitude": 90.41976384
+  },
+  {
+    "id": 580,
+    "name": "34 Dilkusha, Dhaka 1000 সাধারণ বীমা",
+    "latitude": 23.72627568,
+    "longitude": 90.41976384
+  },
+  {
+    "id": 581,
+    "name": "35 Dilkusha, Dhaka 1000 সাধারণ বীমা",
+    "latitude": 23.72627568,
+    "longitude": 90.41976384
+  },
+  {
+    "id": 582,
+    "name": "36 Dilkusha, Dhaka 1000 সাধারণ বীমা",
+    "latitude": 23.72627568,
+    "longitude": 90.41976384
+  },
+  {
+    "id": 583,
+    "name": "37 Dilkusha, Dhaka 1000 সাধারণ বীমা",
+    "latitude": 23.72627568,
+    "longitude": 90.41976384
+  },
+  {
+    "id": 584,
+    "name": "38 Dilkusha, Dhaka 1000 সাধারণ বীমা",
+    "latitude": 23.72627568,
+    "longitude": 90.41976384
+  },
+  {
+    "id": 585,
+    "name": "39 Dilkusha, Dhaka 1000 সাধারণ বীমা",
+    "latitude": 23.72627568,
+    "longitude": 90.41976384
+  },
+  {
+    "id": 586,
+    "name": "40 Dilkusha, Dhaka 1000 সাধারণ বীমা",
+    "latitude": 23.72627568,
+    "longitude": 90.41976384
+  },
+  {
+    "id": 587,
+    "name": "41 Dilkusha, Dhaka 1000 সাধারণ বীমা",
+    "latitude": 23.72627568,
+    "longitude": 90.41976384
+  },
+  {
+    "id": 588,
+    "name": "42 Dilkusha, Dhaka 1000 সাধারণ বীমা",
+    "latitude": 23.72627568,
+    "longitude": 90.41976384
+  },
+  {
+    "id": 589,
+    "name": "24/25 Dilkusha C/A, Dhaka 1000",
+    "latitude": 23.7268495,
+    "longitude": 90.41879364
+  },
+  {
+    "id": 590,
+    "name": "24/25 Dilkusha C/A, Dhaka 1001",
+    "latitude": 23.7268495,
+    "longitude": 90.41879364
+  },
+  {
+    "id": 591,
+    "name": "24/25 Dilkusha C/A, Dhaka 1002",
+    "latitude": 23.7268495,
+    "longitude": 90.41879364
+  },
+  {
+    "id": 592,
+    "name": "24/25 Dilkusha C/A, Dhaka 1003",
+    "latitude": 23.7268495,
+    "longitude": 90.41879364
+  },
+  {
+    "id": 593,
+    "name": "24/25 Dilkusha C/A, Dhaka 1004",
+    "latitude": 23.7268495,
+    "longitude": 90.41879364
+  },
+  {
+    "id": 594,
+    "name": "24/25 Dilkusha C/A, Dhaka 1005",
+    "latitude": 23.7268495,
+    "longitude": 90.41879364
+  },
+  {
+    "id": 595,
+    "name": "24/25 Dilkusha C/A, Dhaka 1006",
+    "latitude": 23.7268495,
+    "longitude": 90.41879364
+  },
+  {
+    "id": 596,
+    "name": "24/25 Dilkusha C/A, Dhaka 1007",
+    "latitude": 23.7268495,
+    "longitude": 90.41879364
+  },
+  {
+    "id": 597,
+    "name": "24/25 Dilkusha C/A, Dhaka 1008",
+    "latitude": 23.7268495,
+    "longitude": 90.41879364
+  },
+  {
+    "id": 598,
+    "name": "24/25 Dilkusha C/A, Dhaka 1009",
+    "latitude": 23.7268495,
+    "longitude": 90.41879364
+  },
+  {
+    "id": 599,
+    "name": "34 Dilkusha, Dhaka 1000",
+    "latitude": 23.72674312,
+    "longitude": 90.4191847
+  },
+  {
+    "id": 600,
+    "name": "35 Dilkusha, Dhaka 1000",
+    "latitude": 23.72674312,
+    "longitude": 90.4191847
+  },
+  {
+    "id": 601,
+    "name": "36 Dilkusha, Dhaka 1000",
+    "latitude": 23.72674312,
+    "longitude": 90.4191847
+  },
+  {
+    "id": 602,
+    "name": "37 Dilkusha, Dhaka 1000",
+    "latitude": 23.72674312,
+    "longitude": 90.4191847
+  },
+  {
+    "id": 603,
+    "name": "38 Dilkusha, Dhaka 1000",
+    "latitude": 23.72674312,
+    "longitude": 90.4191847
+  },
+  {
+    "id": 604,
+    "name": "39 Dilkusha, Dhaka 1000",
+    "latitude": 23.72674312,
+    "longitude": 90.4191847
+  },
+  {
+    "id": 605,
+    "name": "40 Dilkusha, Dhaka 1000",
+    "latitude": 23.72674312,
+    "longitude": 90.4191847
+  },
+  {
+    "id": 606,
+    "name": "41 Dilkusha, Dhaka 1000",
+    "latitude": 23.72674312,
+    "longitude": 90.4191847
+  },
+  {
+    "id": 607,
+    "name": "36 Dilkusha Rd, Dhaka 1000",
+    "latitude": 23.72560482,
+    "longitude": 90.42059729
+  },
+  {
+    "id": 608,
+    "name": "36 Dilkusha Rd, Dhaka 1000",
+    "latitude": 23.72560482,
+    "longitude": 90.42059729
+  },
+  {
+    "id": 609,
+    "name": "36 Dilkusha Rd, Dhaka 1000",
+    "latitude": 23.72560482,
+    "longitude": 90.42059729
+  },
+  {
+    "id": 610,
+    "name": "36 Dilkusha Rd, Dhaka 1000",
+    "latitude": 23.72560482,
+    "longitude": 90.42059729
+  },
+  {
+    "id": 611,
+    "name": "37 Dilkusha Rd, Dhaka",
+    "latitude": 23.7261343,
+    "longitude": 90.41933886
+  },
+  {
+    "id": 612,
+    "name": "38 Dilkusha Rd, Dhaka",
+    "latitude": 23.7261343,
+    "longitude": 90.41933886
+  },
+  {
+    "id": 613,
+    "name": "39 Dilkusha Rd, Dhaka",
+    "latitude": 23.7261343,
+    "longitude": 90.41933886
+  },
+  {
+    "id": 614,
+    "name": "40 Dilkusha Rd, Dhaka",
+    "latitude": 23.7261343,
+    "longitude": 90.41933886
+  },
+  {
+    "id": 615,
+    "name": "41 Dilkusha Rd, Dhaka",
+    "latitude": 23.7261343,
+    "longitude": 90.41933886
+  },
+  {
+    "id": 616,
+    "name": "42 Dilkusha Rd, Dhaka",
+    "latitude": 23.7261343,
+    "longitude": 90.41933886
+  },
+  {
+    "id": 617,
+    "name": "43 Dilkusha Rd, Dhaka",
+    "latitude": 23.7261343,
+    "longitude": 90.41933886
+  },
+  {
+    "id": 618,
+    "name": "44 Dilkusha Rd, Dhaka",
+    "latitude": 23.7261343,
+    "longitude": 90.41933886
+  },
+  {
+    "id": 619,
+    "name": "45 Dilkusha Rd, Dhaka",
+    "latitude": 23.7261343,
+    "longitude": 90.41933886
+  },
+  {
+    "id": 620,
+    "name": "37a Dilkusha Rd, Dhaka 1000",
+    "latitude": 23.72604841,
+    "longitude": 90.419604
+  },
+  {
+    "id": 621,
+    "name": "37a Dilkusha Rd, Dhaka 1001",
+    "latitude": 23.72604841,
+    "longitude": 90.419604
+  },
+  {
+    "id": 622,
+    "name": "37a Dilkusha Rd, Dhaka 1002",
+    "latitude": 23.72604841,
+    "longitude": 90.419604
+  },
+  {
+    "id": 623,
+    "name": "37a Dilkusha Rd, Dhaka 1003",
+    "latitude": 23.72604841,
+    "longitude": 90.419604
+  },
+  {
+    "id": 624,
+    "name": "1-3, Motijheel Commercial Area, Dhaka 100",
+    "latitude": 23.72364205,
+    "longitude": 90.42305231
+  },
+  {
+    "id": 625,
+    "name": "1-3, Motijheel Commercial Area, Dhaka 101",
+    "latitude": 23.72364205,
+    "longitude": 90.42305231
+  },
+  {
+    "id": 626,
+    "name": "1-3, Motijheel Commercial Area, Dhaka 102",
+    "latitude": 23.72364205,
+    "longitude": 90.42305231
+  },
+  {
+    "id": 627,
+    "name": "1-3, Motijheel Commercial Area, Dhaka 103",
+    "latitude": 23.72364205,
+    "longitude": 90.42305231
+  },
+  {
+    "id": 628,
+    "name": "1-3, Motijheel Commercial Area, Dhaka 104",
+    "latitude": 23.72364205,
+    "longitude": 90.42305231
+  },
+  {
+    "id": 629,
+    "name": "1-3, Motijheel Commercial Area, Dhaka 105",
+    "latitude": 23.72364205,
+    "longitude": 90.42305231
+  },
+  {
+    "id": 630,
+    "name": "1-3, Motijheel Commercial Area, Dhaka 106",
+    "latitude": 23.72364205,
+    "longitude": 90.42305231
+  },
+  {
+    "id": 631,
+    "name": "Sena Kalyan Bhaban",
+    "latitude": 23.72702899,
+    "longitude": 90.42291806
+  },
+  {
+    "id": 632,
+    "name": "Sena Kalyan Bhaban",
+    "latitude": 23.72702899,
+    "longitude": 90.42291806
+  },
+  {
+    "id": 633,
+    "name": "Sena Kalyan Bhaban",
+    "latitude": 23.72702899,
+    "longitude": 90.42291806
+  },
+  {
+    "id": 634,
+    "name": "Sena Kalyan Bhaban",
+    "latitude": 23.72702899,
+    "longitude": 90.42291806
+  },
+  {
+    "id": 635,
+    "name": "Sena Kalyan Bhaban",
+    "latitude": 23.72702899,
+    "longitude": 90.42291806
+  },
+  {
+    "id": 636,
+    "name": "Sena Kalyan Bhaban",
+    "latitude": 23.72702899,
+    "longitude": 90.42291806
+  },
+  {
+    "id": 637,
+    "name": "Sena Kalyan Bhaban",
+    "latitude": 23.72702899,
+    "longitude": 90.42291806
+  },
+  {
+    "id": 638,
+    "name": "Sena Kalyan Bhaban",
+    "latitude": 23.72702899,
+    "longitude": 90.42291806
+  },
+  {
+    "id": 639,
+    "name": "Sena Kalyan Bhaban",
+    "latitude": 23.72702899,
+    "longitude": 90.42291806
+  },
+  {
+    "id": 640,
+    "name": "Sena Kalyan Bhaban",
+    "latitude": 23.72702899,
+    "longitude": 90.42291806
+  },
+  {
+    "id": 641,
+    "name": "23 Motijheel Rd",
+    "latitude": 23.72689935,
+    "longitude": 90.42126793
+  },
+  {
+    "id": 642,
+    "name": "24 Motijheel Rd",
+    "latitude": 23.72689935,
+    "longitude": 90.42126793
+  },
+  {
+    "id": 643,
+    "name": "25 Motijheel Rd",
+    "latitude": 23.72689935,
+    "longitude": 90.42126793
+  },
+  {
+    "id": 644,
+    "name": "26 Motijheel Rd",
+    "latitude": 23.72689935,
+    "longitude": 90.42126793
+  },
+  {
+    "id": 645,
+    "name": "149 Motijheel Commercial Area, Dhaka",
+    "latitude": 23.72541305,
+    "longitude": 90.42232448
+  },
+  {
+    "id": 646,
+    "name": "150 Motijheel Commercial Area, Dhaka",
+    "latitude": 23.72541305,
+    "longitude": 90.42232448
+  },
+  {
+    "id": 647,
+    "name": "151 Motijheel Commercial Area, Dhaka",
+    "latitude": 23.72541305,
+    "longitude": 90.42232448
+  },
+  {
+    "id": 648,
+    "name": "152 Motijheel Commercial Area, Dhaka",
+    "latitude": 23.72541305,
+    "longitude": 90.42232448
+  },
+  {
+    "id": 649,
+    "name": "21 Motijheel Commercial Area, Dhaka",
+    "latitude": 23.72369162,
+    "longitude": 90.4231425
+  },
+  {
+    "id": 650,
+    "name": "22 Motijheel Commercial Area, Dhaka",
+    "latitude": 23.72369162,
+    "longitude": 90.4231425
+  },
+  {
+    "id": 651,
+    "name": "23 Motijheel Commercial Area, Dhaka",
+    "latitude": 23.72369162,
+    "longitude": 90.4231425
+  },
+  {
+    "id": 652,
+    "name": "24 Motijheel Commercial Area, Dhaka",
+    "latitude": 23.72369162,
+    "longitude": 90.4231425
+  },
+  {
+    "id": 653,
+    "name": "Bangladesh Power Development Board (WAPDA Building )",
+    "latitude": 23.72355036,
+    "longitude": 90.42230815
+  },
+  {
+    "id": 654,
+    "name": "Bangladesh Power Development Board (WAPDA Building )",
+    "latitude": 23.72355036,
+    "longitude": 90.42230815
+  },
+  {
+    "id": 655,
+    "name": "Bangladesh Power Development Board (WAPDA Building )",
+    "latitude": 23.72355036,
+    "longitude": 90.42230815
+  },
+  {
+    "id": 656,
+    "name": "Bangladesh Power Development Board (WAPDA Building )",
+    "latitude": 23.72355036,
+    "longitude": 90.42230815
+  },
+  {
+    "id": 657,
+    "name": "Bangladesh Power Development Board (WAPDA Building )",
+    "latitude": 23.72355036,
+    "longitude": 90.42230815
+  },
+  {
+    "id": 658,
+    "name": "Bangladesh Power Development Board (WAPDA Building )",
+    "latitude": 23.72355036,
+    "longitude": 90.42230815
+  },
+  {
+    "id": 659,
+    "name": "Bangladesh Power Development Board (WAPDA Building )",
+    "latitude": 23.72355036,
+    "longitude": 90.42230815
+  },
+  {
+    "id": 660,
+    "name": "Bangladesh Power Development Board (WAPDA Building )",
+    "latitude": 23.72355036,
+    "longitude": 90.42230815
+  },
+  {
+    "id": 661,
+    "name": "Bangladesh Power Development Board (WAPDA Building )",
+    "latitude": 23.72355036,
+    "longitude": 90.42230815
+  },
+  {
+    "id": 662,
+    "name": "Bangladesh Power Development Board (WAPDA Building )",
+    "latitude": 23.72355036,
+    "longitude": 90.42230815
+  },
+  {
+    "id": 663,
+    "name": "Modhumita Cinema Hall",
+    "latitude": 23.72278226,
+    "longitude": 90.4218534
+  },
+  {
+    "id": 664,
+    "name": "Modhumita Cinema Hall",
+    "latitude": 23.72278226,
+    "longitude": 90.4218534
+  },
+  {
+    "id": 665,
+    "name": "Modhumita Cinema Hall",
+    "latitude": 23.72278226,
+    "longitude": 90.4218534
+  },
+  {
+    "id": 666,
+    "name": "Modhumita Cinema Hall",
+    "latitude": 23.72278226,
+    "longitude": 90.4218534
+  },
+  {
+    "id": 667,
+    "name": "Modhumita Cinema Hall",
+    "latitude": 23.72278226,
+    "longitude": 90.4218534
+  },
+  {
+    "id": 668,
+    "name": "Modhumita Cinema Hall",
+    "latitude": 23.72278226,
+    "longitude": 90.4218534
+  },
+  {
+    "id": 669,
+    "name": "Modhumita Cinema Hall",
+    "latitude": 23.72278226,
+    "longitude": 90.4218534
+  },
+  {
+    "id": 670,
+    "name": "Modhumita Cinema Hall",
+    "latitude": 23.72278226,
+    "longitude": 90.4218534
+  },
+  {
+    "id": 671,
+    "name": "বাংলাদেশ ব্যাংক নিবাস ",
+    "latitude": 23.72270388,
+    "longitude": 90.42263525
+  },
+  {
+    "id": 672,
+    "name": "বাংলাদেশ ব্যাংক নিবাস ",
+    "latitude": 23.72270388,
+    "longitude": 90.42263525
+  },
+  {
+    "id": 673,
+    "name": "বাংলাদেশ ব্যাংক নিবাস ",
+    "latitude": 23.72270388,
+    "longitude": 90.42263525
+  },
+  {
+    "id": 674,
+    "name": "বাংলাদেশ ব্যাংক নিবাস ",
+    "latitude": 23.72270388,
+    "longitude": 90.42263525
+  },
+  {
+    "id": 675,
+    "name": "বাংলাদেশ ব্যাংক নিবাস ",
+    "latitude": 23.72270388,
+    "longitude": 90.42263525
+  },
+  {
+    "id": 676,
+    "name": "বাংলাদেশ ব্যাংক নিবাস ",
+    "latitude": 23.72270388,
+    "longitude": 90.42263525
+  },
+  {
+    "id": 677,
+    "name": "বাংলাদেশ ব্যাংক নিবাস ",
+    "latitude": 23.72270388,
+    "longitude": 90.42263525
+  },
+  {
+    "id": 678,
+    "name": "বাংলাদেশ ব্যাংক নিবাস ",
+    "latitude": 23.72270388,
+    "longitude": 90.42263525
+  },
+  {
+    "id": 679,
+    "name": "Sonali Bank Staff Quarter",
+    "latitude": 23.72293477,
+    "longitude": 90.42325548
+  },
+  {
+    "id": 680,
+    "name": "Sonali Bank Staff Quarter",
+    "latitude": 23.72293477,
+    "longitude": 90.42325548
+  },
+  {
+    "id": 681,
+    "name": "Sonali Bank Staff Quarter",
+    "latitude": 23.72293477,
+    "longitude": 90.42325548
+  },
+  {
+    "id": 682,
+    "name": "Sonali Bank Staff Quarter",
+    "latitude": 23.72285136,
+    "longitude": 90.42346964
+  },
+  {
+    "id": 683,
+    "name": "Sonali Bank Staff Quarter",
+    "latitude": 23.72285136,
+    "longitude": 90.42346964
+  },
+  {
+    "id": 684,
+    "name": "Sonali Bank Staff Quarter",
+    "latitude": 23.72285136,
+    "longitude": 90.42346964
+  },
+  {
+    "id": 685,
+    "name": "Sonali Bank Staff Quarter",
+    "latitude": 23.72285136,
+    "longitude": 90.42346964
+  },
+  {
+    "id": 686,
+    "name": "Sonali Bank Staff Quarter",
+    "latitude": 23.72285136,
+    "longitude": 90.42346964
+  },
+  {
+    "id": 687,
+    "name": "Design & Inspection, BPDB",
+    "latitude": 23.72358634,
+    "longitude": 90.42135349
+  },
+  {
+    "id": 688,
+    "name": "Design & Inspection, BPDB",
+    "latitude": 23.72358634,
+    "longitude": 90.42135349
+  },
+  {
+    "id": 689,
+    "name": "Design & Inspection, BPDB",
+    "latitude": 23.72358634,
+    "longitude": 90.42135349
+  },
+  {
+    "id": 690,
+    "name": "Design & Inspection, BPDB",
+    "latitude": 23.72358634,
+    "longitude": 90.42135349
+  }
+]
