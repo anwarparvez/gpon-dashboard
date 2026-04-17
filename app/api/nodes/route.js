@@ -42,3 +42,26 @@ export async function POST(req) {
     });
   }
 }
+
+export async function PUT(req) {
+  await connectDB();
+  const body = await req.json();
+
+  const updated = await Node.findByIdAndUpdate(
+    body._id,
+    body,
+    { new: true }
+  );
+
+  return Response.json(updated);
+}
+
+
+export async function DELETE(req) {
+  await connectDB();
+  const body = await req.json();
+
+  await Node.findByIdAndDelete(body.id);
+
+  return Response.json({ success: true });
+}
