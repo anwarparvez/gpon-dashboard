@@ -9,7 +9,6 @@ async function getNextSequence(category) {
     { $inc: { seq: 1 } },
     { new: true, upsert: true }
   );
-
   return counter.seq;
 }
 
@@ -27,12 +26,12 @@ export async function GET() {
     console.log("📡 GET /api/nodes");
 
     await connectDB();
-
     const nodes = await Node.find().sort({ createdAt: -1 });
 
     console.log(`✅ Fetched ${nodes.length} nodes`);
 
     return Response.json(nodes);
+
   } catch (error) {
     console.error("❌ GET Error:", error.message);
 
@@ -63,6 +62,11 @@ export async function POST(req) {
         const lon = Number(item.longitude);
         const category = item.node_category || 'HODP';
 
+        // 🆕 NEW FIELDS
+        const status = item.status || 'proposed';
+        const dgm = item.dgm || '';
+        const region = item.region || '';
+
         // ❌ Validation
         if (!name || isNaN(lat) || isNaN(lon)) {
           console.warn(`⚠ Row ${index + 1}: Invalid data`);
@@ -71,14 +75,13 @@ export async function POST(req) {
         }
 
         // ❌ Duplicate coordinate
-        const existsCoord = await isDuplicateCoord(lat, lon);
-        if (existsCoord) {
+        if (await isDuplicateCoord(lat, lon)) {
           console.warn(`⚠ Row ${index + 1}: Duplicate coordinate`);
           skipped.push({ item, reason: 'Duplicate coordinates' });
           continue;
         }
 
-        // ✅ Generate ID
+        // ✅ Generate node_id
         const seq = await getNextSequence(category);
         const node_id = `${category}-${String(seq).padStart(3, '0')}`;
 
@@ -89,7 +92,12 @@ export async function POST(req) {
           latitude: lat,
           longitude: lon,
           node_category: category,
-          node_id
+          node_id,
+
+          // 🆕 SAVE NEW FIELDS
+          status,
+          dgm,
+          region
         });
       }
 
@@ -110,6 +118,11 @@ export async function POST(req) {
     const lon = Number(body.longitude);
     const category = body.node_category || 'HODP';
 
+    // 🆕 NEW FIELDS
+    const status = body.status || 'proposed';
+    const dgm = body.dgm || '';
+    const region = body.region || '';
+
     if (!name || isNaN(lat) || isNaN(lon)) {
       console.warn("⚠ Invalid single insert data");
 
@@ -118,8 +131,7 @@ export async function POST(req) {
       });
     }
 
-    const existsCoord = await isDuplicateCoord(lat, lon);
-    if (existsCoord) {
+    if (await isDuplicateCoord(lat, lon)) {
       console.warn("⚠ Duplicate coordinate (single insert)");
 
       return new Response(JSON.stringify({ error: 'Duplicate coordinates' }), {
@@ -135,7 +147,12 @@ export async function POST(req) {
       latitude: lat,
       longitude: lon,
       node_category: category,
-      node_id
+      node_id,
+
+      // 🆕 SAVE NEW FIELDS
+      status,
+      dgm,
+      region
     });
 
     console.log(`✅ Single insert: ${node_id} (${name})`);
@@ -151,7 +168,7 @@ export async function POST(req) {
   }
 }
 
-// ✅ PUT
+// ✅ PUT (UPDATED)
 export async function PUT(req) {
   try {
     console.log("📡 PUT /api/nodes");
@@ -163,7 +180,10 @@ export async function PUT(req) {
       body._id,
       {
         name: body.name,
-        node_category: body.node_category
+        node_category: body.node_category,
+        status: body.status,
+        dgm: body.dgm,
+        region: body.region
       },
       { new: true }
     );

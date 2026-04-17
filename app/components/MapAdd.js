@@ -11,17 +11,29 @@ import {
 } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 
-// 📍 Handle click + popup form
+// 📍 Add Node Popup
 function AddNodePopup({ onSave }) {
   const [position, setPosition] = useState(null);
   const [name, setName] = useState('');
   const [category, setCategory] = useState('ODP');
 
+  // ✅ DEFAULT VALUES
+  const [status, setStatus] = useState('proposed');
+  const [dgm, setDgm] = useState('DGM Phones Secretariate');
+  const [region, setRegion] = useState('DTR South');
+
   useMapEvents({
     click(e) {
       setPosition(e.latlng);
+
+      // reset form
       setName('');
       setCategory('ODP');
+      setStatus('proposed');
+
+      // 🔥 default values
+      setDgm('DGM Phones Secretariate');
+      setRegion('DTR South');
     },
   });
 
@@ -35,37 +47,64 @@ function AddNodePopup({ onSave }) {
       name,
       latitude: position.lat,
       longitude: position.lng,
-      node_category: category
+      node_category: category,
+      status,
+      dgm,
+      region
     });
 
     setPosition(null);
   };
 
   return position ? (
-    <CircleMarker center={[position.lat, position.lng]} radius={8} pathOptions={{ color: 'red' }}>
+    <CircleMarker
+      center={[position.lat, position.lng]}
+      radius={8}
+      pathOptions={{ color: 'red' }}
+    >
       <Popup open={true}>
-        <div style={{ width: '200px' }}>
+        <div style={{ width: '220px' }}>
           <b>Add Node</b><br /><br />
 
           <input
-            type="text"
             placeholder="Node Name"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            style={{ width: '100%', marginBottom: '8px' }}
+            style={{ width: '100%', marginBottom: '6px' }}
           />
 
           <select
             value={category}
             onChange={(e) => setCategory(e.target.value)}
-            style={{ width: '100%', marginBottom: '8px' }}
+            style={{ width: '100%', marginBottom: '6px' }}
           >
-            <option value="OLT">OLT</option>
-            <option value="OCC">OCC</option>
-            <option value="ODP">ODP</option>
-            <option value="HODP">HODP</option>
-            <option value="Branch Point">Branch Point</option>
+            <option>OLT</option>
+            <option>OCC</option>
+            <option>ODP</option>
+            <option>HODP</option>
+            <option>Branch Point</option>
           </select>
+
+          <select
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
+            style={{ width: '100%', marginBottom: '6px' }}
+          >
+            <option value="existing">Existing</option>
+            <option value="proposed">Proposed</option>
+          </select>
+
+          <input
+            value={dgm}
+            onChange={(e) => setDgm(e.target.value)}
+            style={{ width: '100%', marginBottom: '6px' }}
+          />
+
+          <input
+            value={region}
+            onChange={(e) => setRegion(e.target.value)}
+            style={{ width: '100%', marginBottom: '6px' }}
+          />
 
           <button
             onClick={handleSubmit}
@@ -88,14 +127,14 @@ function AddNodePopup({ onSave }) {
 export default function MapAdd() {
   const [nodes, setNodes] = useState([]);
 
-  // Load nodes
+  // 📡 Load nodes
   useEffect(() => {
     fetch('/api/nodes')
       .then(res => res.json())
-      .then(data => setNodes(data));
+      .then(setNodes);
   }, []);
 
-  // Save node
+  // 💾 Save node
   const handleSave = async (node) => {
     try {
       const res = await fetch('/api/nodes', {
@@ -106,6 +145,7 @@ export default function MapAdd() {
 
       const saved = await res.json();
       setNodes(prev => [saved, ...prev]);
+
     } catch (err) {
       console.error(err);
       alert("Failed to save");
@@ -113,8 +153,11 @@ export default function MapAdd() {
   };
 
   // 🎨 Color logic
-  const getColor = (type) => {
-    switch (type) {
+  const getColor = (node) => {
+    if (node.status === 'existing') return 'green';
+    if (node.status === 'proposed') return 'orange';
+
+    switch (node.node_category) {
       case 'OLT': return 'black';
       case 'OCC': return 'purple';
       case 'HODP': return 'orange';
@@ -138,20 +181,24 @@ export default function MapAdd() {
           key={node._id}
           center={[node.latitude, node.longitude]}
           radius={6}
-          pathOptions={{ color: getColor(node.node_category) }}
+          pathOptions={{ color: getColor(node) }}
         >
           <Popup>
             <b>{node.name}</b><br />
             ID: {node.node_id}<br />
-            Type: {node.node_category}
+            Type: {node.node_category}<br />
+            Status: {node.status}<br />
+            DGM: {node.dgm}<br />
+            Region: {node.region}
           </Popup>
 
           <Tooltip>{node.node_id}</Tooltip>
         </CircleMarker>
       ))}
 
-      {/* Popup Form */}
+      {/* Add node form */}
       <AddNodePopup onSave={handleSave} />
+
     </MapContainer>
   );
 }

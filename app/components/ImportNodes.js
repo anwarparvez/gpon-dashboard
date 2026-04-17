@@ -31,6 +31,12 @@ export default function ImportNodes() {
             latitude: lat,
             longitude: lon,
             node_category: row.node_category || 'HODP',
+
+            // 🆕 NEW FIELDS
+            status: row.status || 'proposed',
+            dgm: row.dgm || '',
+            region: row.region || '',
+
             row: index + 1
           };
         });
@@ -45,7 +51,7 @@ export default function ImportNodes() {
           r.name && !isNaN(r.latitude) && !isNaN(r.longitude)
         );
 
-        // 🔁 Remove duplicate coordinates (within CSV)
+        // 🔁 Remove duplicate coordinates
         const seen = new Set();
         const unique = [];
         const dup = [];
@@ -91,9 +97,14 @@ export default function ImportNodes() {
 
       const result = await res.json();
 
+      if (result.error) {
+        alert("❌ " + result.error);
+        return;
+      }
+
       alert(`✅ Inserted: ${result.inserted}\n⚠ Skipped: ${result.skipped}`);
 
-      console.log(result);
+      console.log("Import Result:", result);
 
     } catch (err) {
       console.error(err);
@@ -104,53 +115,71 @@ export default function ImportNodes() {
   };
 
   return (
-    <div>
+    <div className="p-4 bg-gray-900 text-white rounded">
 
-      <h3>📂 Import GPON Nodes</h3>
+      <h3 className="text-lg font-bold mb-3">📂 Import GPON Nodes</h3>
 
-      <input type="file" accept=".csv" onChange={handleFile} />
-      <p>{fileName}</p>
+      <input
+        type="file"
+        accept=".csv"
+        onChange={handleFile}
+        className="mb-2"
+      />
+
+      <p className="text-gray-400">{fileName}</p>
 
       {/* ✅ VALID DATA */}
       {data.length > 0 && (
         <>
-          <h4>✅ Valid Data ({data.length})</h4>
+          <h4 className="text-green-400 mt-4">
+            ✅ Valid Data ({data.length})
+          </h4>
 
-          <table border="1" cellPadding="5">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Latitude</th>
-                <th>Longitude</th>
-                <th>Category</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {data.slice(0, 10).map((row, i) => (
-                <tr key={i}>
-                  <td>{row.name}</td>
-                  <td>{row.latitude}</td>
-                  <td>{row.longitude}</td>
-                  <td>{row.node_category}</td>
+          <div className="overflow-auto">
+            <table className="w-full text-sm border border-gray-700 mt-2">
+              <thead className="bg-gray-700">
+                <tr>
+                  <th>Name</th>
+                  <th>Lat</th>
+                  <th>Lon</th>
+                  <th>Category</th>
+                  <th>Status</th>
+                  <th>DGM</th>
+                  <th>Region</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+
+              <tbody>
+                {data.slice(0, 10).map((row, i) => (
+                  <tr key={i} className="border-t border-gray-700">
+                    <td>{row.name}</td>
+                    <td>{row.latitude}</td>
+                    <td>{row.longitude}</td>
+                    <td>{row.node_category}</td>
+                    <td className={row.status === 'existing' ? 'text-green-400' : 'text-yellow-400'}>
+                      {row.status}
+                    </td>
+                    <td>{row.dgm}</td>
+                    <td>{row.region}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </>
       )}
 
-      {/* ❌ INVALID DATA */}
+      {/* ❌ INVALID */}
       {errors.length > 0 && (
         <>
-          <h4 style={{ color: 'red' }}>
+          <h4 className="text-red-400 mt-4">
             ❌ Invalid Rows ({errors.length})
           </h4>
 
           <ul>
             {errors.slice(0, 10).map((row, i) => (
               <li key={i}>
-                Row {row.row} → Missing/Invalid data
+                Row {row.row} → Invalid
               </li>
             ))}
           </ul>
@@ -160,7 +189,7 @@ export default function ImportNodes() {
       {/* 🔁 DUPLICATES */}
       {duplicates.length > 0 && (
         <>
-          <h4 style={{ color: 'orange' }}>
+          <h4 className="text-orange-400 mt-4">
             🔁 Duplicate Coordinates ({duplicates.length})
           </h4>
 
@@ -176,7 +205,11 @@ export default function ImportNodes() {
 
       <br />
 
-      <button onClick={handleUpload} disabled={loading}>
+      <button
+        onClick={handleUpload}
+        disabled={loading}
+        className="bg-blue-600 px-4 py-2 rounded mt-2"
+      >
         {loading ? "Uploading..." : "🚀 Import to Database"}
       </button>
 
