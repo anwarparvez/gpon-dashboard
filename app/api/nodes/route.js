@@ -7,7 +7,7 @@ async function getNextSequence(category) {
   const counter = await Counter.findOneAndUpdate(
     { category },
     { $inc: { seq: 1 } },
-    { new: true, upsert: true }
+    { returnDocument: 'after', upsert: true }
   );
   return counter.seq;
 }
@@ -185,7 +185,7 @@ export async function PUT(req) {
         dgm: body.dgm,
         region: body.region
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     console.log(`✏ Updated node: ${updated.node_id}`);

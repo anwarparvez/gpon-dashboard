@@ -1,44 +1,46 @@
 'use client';
 
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { useEffect, useState } from 'react';
+import dynamic from 'next/dynamic';
 import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
-import { useEffect } from 'react';
 
-// 🔥 Fix marker icon issue
-delete L.Icon.Default.prototype._getIconUrl;
-
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-});
+// 🔥 Load Leaflet components dynamically
+const MapContainer = dynamic(() => import('react-leaflet').then(m => m.MapContainer), { ssr: false });
+const TileLayer = dynamic(() => import('react-leaflet').then(m => m.TileLayer), { ssr: false });
+const Marker = dynamic(() => import('react-leaflet').then(m => m.Marker), { ssr: false });
+const Popup = dynamic(() => import('react-leaflet').then(m => m.Popup), { ssr: false });
 
 export default function NodeMapView({ node }) {
+  const [mounted, setMounted] = useState(false);
 
-  if (!node) return null;
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted || !node) return null;
 
   const position = [node.latitude, node.longitude];
 
   return (
     <MapContainer
+      key={`${node._id}-${position}`}   // 🔥 CRITICAL FIX
       center={position}
       zoom={17}
       style={{ height: '100%', width: '100%' }}
     >
       <TileLayer
-        attribution='© OpenStreetMap'
+        attribution="© OpenStreetMap"
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
 
       <Marker position={position}>
         <Popup>
           <b>{node.name}</b><br />
-          ID: {node.node_id}<br />
-          Category: {node.node_category}<br />
-          Status: {node.status}<br />
-          DGM: {node.dgm}<br />
-          Region: {node.region}
+          {node.node_id}<br />
+          {node.node_category}<br />
+          {node.status}<br />
+          {node.dgm}<br />
+          {node.region}
         </Popup>
       </Marker>
     </MapContainer>

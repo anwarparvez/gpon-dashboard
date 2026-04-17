@@ -1,35 +1,49 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import ThemeToggle from './ThemeToggle';
 
 export default function Navbar() {
+  const pathname = usePathname();
+
+  const linkClass = (path) =>
+    `hover:opacity-80 ${
+      pathname === path
+        ? 'font-bold border-b-2 border-white'
+        : ''
+    }`;
+
   return (
-    <div
-      style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: '10px 20px',
-        background: '#0b3d91',
-        color: 'white'
-      }}
-    >
-      {/* Logo / Title */}
-      <h3 style={{ margin: 0 }}>GPON Dashboard</h3>
+    <div className="flex justify-between items-center px-5 py-3 bg-blue-900 text-white">
+
+      {/* Logo */}
+      <h3 className="m-0 font-semibold">
+        GPON Dashboard
+      </h3>
 
       {/* Navigation */}
-      <div style={{ display: 'flex', gap: '15px' }}>
-        <Link href="/" style={{ color: 'white' }}>
+      <div className="flex items-center gap-6">
+
+        <Link href="/" className={linkClass('/')}>
+          Home
+        </Link>
+
+        <Link href="/map" className={linkClass('/map')}>
           Map
         </Link>
 
-        <Link href="/add-node" style={{ color: 'white' }}>
-          Add Node
-        </Link>
-
-        <Link href="/nodes" style={{ color: 'white' }}>
+        <Link href="/nodes" className={linkClass('/nodes')}>
           Node Table
         </Link>
+
+        <Link href="/import" className={linkClass('/import')}>
+          Import
+        </Link>
+
+        {/* 🌙 Theme Toggle */}
+        <ThemeToggle />
+
       </div>
     </div>
   );

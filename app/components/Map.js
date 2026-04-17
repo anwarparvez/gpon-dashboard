@@ -1,83 +1,70 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import {
-  MapContainer,
-  TileLayer,
-  CircleMarker,
-  Popup,
-  useMapEvents
-} from 'react-leaflet';
+import dynamic from 'next/dynamic';
 import 'leaflet/dist/leaflet.css';
 
-function LocationMarker({ setSelected }) {
-  useMapEvents({
-    click(e) {
-      const { lat, lng } = e.latlng;
-      setSelected({ lat, lng });
-    },
-  });
+// 🔥 Dynamic imports (CRITICAL FIX)
+const MapContainer = dynamic(() => import('react-leaflet').then(m => m.MapContainer), { ssr: false });
+const TileLayer = dynamic(() => import('react-leaflet').then(m => m.TileLayer), { ssr: false });
 
-  return null;
-}
+import MapClickHandler from './MapClickHandler';
+import NodeSidebar from './NodeSidebar';
+import LinkSidebar from './LinkSidebar';
+import NodeMarker from './NodeMarker';
+import LinkLine from './LinkLine';
 
-export default function Map() {
+export default function MapView() {
+  const [mounted, setMounted] = useState(false);
+
   const [nodes, setNodes] = useState([]);
-  const [selected, setSelected] = useState(null);
+  const [links, setLinks] = useState([]);
+  const [draftNode, setDraftNode] = useState(null);
+  const [selectedNodes, setSelectedNodes] = useState([]);
 
   useEffect(() => {
-    fetch('/gpon_nodes.json')
-      .then(res => res.json())
-      .then(data => setNodes(data));
+    setMounted(true);
+
+    fetch('/api/nodes').then(r => r.json()).then(setNodes);
+    fetch('/api/links').then(r => r.json()).then(setLinks);
   }, []);
+
+  // 🚫 Prevent hydration issues
+  if (!mounted) return null;
 
   return (
     <>
+      <NodeSidebar draft={draftNode} setDraft={setDraftNode} setNodes={setNodes} />
+
+      <LinkSidebar
+        selectedNodes={selectedNodes}
+        setSelectedNodes={setSelectedNodes}
+        setLinks={setLinks}
+      />
+
       <MapContainer
+        key="main-map"
         center={[23.73, 90.41]}
         zoom={13}
-        style={{ height: '80vh', width: '100%' }}
+        style={{ height: '90vh', width: '100%' }}
       >
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 
-        {/* Existing Nodes */}
-        {nodes.map(node => (
-          <CircleMarker
-            key={node.id}
-            center={[node.latitude, node.longitude]}
-            radius={4}
-          >
-            <Popup>{node.name}</Popup>
-          </CircleMarker>
+        <MapClickHandler setDraft={setDraftNode} />
+
+        {nodes.map(n => (
+          <NodeMarker
+            key={n._id}
+            node={n}
+            selectedNodes={selectedNodes}
+            setSelectedNodes={setSelectedNodes}
+          />
         ))}
 
-        {/* Click handler */}
-        <LocationMarker setSelected={setSelected} />
-
-        {/* Show selected point */}
-        {selected && (
-          <CircleMarker
-            center={[selected.lat, selected.lng]}
-            radius={6}
-            pathOptions={{ color: 'red' }}
-          >
-            <Popup>
-              Selected Point<br />
-              Lat: {selected.lat}<br />
-              Lon: {selected.lng}
-            </Popup>
-          </CircleMarker>
-        )}
+        {links.map(l => (
+          <LinkLine key={l._id} link={l} />
+        ))}
       </MapContainer>
-
-      {/* Display outside map */}
-      {selected && (
-        <div style={{ padding: '10px' }}>
-          <b>Selected Coordinates:</b><br />
-          Latitude: {selected.lat} <br />
-          Longitude: {selected.lng}
-        </div>
-      )}
     </>
   );
 }

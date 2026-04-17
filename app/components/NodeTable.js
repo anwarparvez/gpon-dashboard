@@ -1,47 +1,71 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function NodeTable() {
   const [nodes, setNodes] = useState([]);
-  const [editingId, setEditingId] = useState(null);
-  const [editData, setEditData] = useState({});
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
+  const [sortKey, setSortKey] = useState('node_id');
+  const [sortDir, setSortDir] = useState('asc');
+
+  const [selectedIds, setSelectedIds] = useState([]);
+
   const router = useRouter();
-  
-  // 📡 Load nodes
+
+  // 📡 Load
   useEffect(() => {
     fetch('/api/nodes')
       .then(res => res.json())
-      .then(data => {
-        if (Array.isArray(data)) setNodes(data);
-      });
+      .then(data => Array.isArray(data) && setNodes(data));
   }, []);
 
-  // ✏ Edit
-  const handleEdit = (node) => {
-    setEditingId(node._id);
-    setEditData(node);
-  };
-
-  // 💾 Save
-  const handleSave = async () => {
-    const res = await fetch('/api/nodes', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(editData)
+  // 🔍 Filter
+  const filtered = useMemo(() => {
+    return nodes.filter(n => {
+      const text = `${n.node_id} ${n.name} ${n.node_category} ${n.region}`.toLowerCase();
+      const matchSearch = text.includes(search.toLowerCase());
+      const matchStatus = statusFilter === 'all' || n.status === statusFilter;
+      return matchSearch && matchStatus;
     });
+  }, [nodes, search, statusFilter]);
 
-    const updated = await res.json();
+  // 🔼 Sort
+  const sorted = useMemo(() => {
+    return [...filtered].sort((a, b) => {
+      const A = (a[sortKey] ?? '').toString().toLowerCase();
+      const B = (b[sortKey] ?? '').toString().toLowerCase();
 
-    setNodes(prev =>
-      prev.map(n => (n._id === updated._id ? updated : n))
-    );
+      if (A < B) return sortDir === 'asc' ? -1 : 1;
+      if (A > B) return sortDir === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }, [filtered, sortKey, sortDir]);
 
-    setEditingId(null);
+  // 📄 Pagination
+  const totalPages = pageSize === 'all'
+    ? 1
+    : Math.ceil(sorted.length / pageSize);
+
+  const pageData = pageSize === 'all'
+    ? sorted
+    : sorted.slice((page - 1) * pageSize, page * pageSize);
+
+  // 🔼 Sort toggle
+  const handleSort = (key) => {
+    if (sortKey === key) {
+      setSortDir(prev => (prev === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortKey(key);
+      setSortDir('asc');
+    }
   };
 
-  // ❌ Delete
+  // ❌ Delete single
   const handleDelete = async (id) => {
     if (!confirm("Delete this node?")) return;
 
@@ -51,17 +75,54 @@ export default function NodeTable() {
       body: JSON.stringify({ id })
     });
 
-    setNodes(prev => prev.filter(n => n._id !== id));
+    setNodes(prev =>
+      prev.filter(n => String(n._id) !== String(id))
+    );
   };
 
-  // 📥 Export CSV
-  const exportToCSV = () => {
-    const headers = [
-      "node_id", "name", "latitude", "longitude",
-      "node_category", "status", "dgm", "region"
-    ];
+  // ❌ Bulk delete
+  const handleBulkDelete = async () => {
+    if (selectedIds.length === 0) return;
+    if (!confirm(`Delete ${selectedIds.length} nodes?`)) return;
 
-    const rows = nodes.map(n => [
+    await Promise.all(
+      selectedIds.map(id =>
+        fetch('/api/nodes', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id })
+        })
+      )
+    );
+
+    setNodes(prev => prev.filter(n => !selectedIds.includes(n._id)));
+    setSelectedIds([]);
+  };
+
+  // ☑️ Select
+  const toggleSelect = (id) => {
+    setSelectedIds(prev =>
+      prev.includes(id)
+        ? prev.filter(i => i !== id)
+        : [...prev, id]
+    );
+  };
+
+  const toggleSelectAll = () => {
+    const ids = pageData.map(n => n._id);
+    const allSelected = ids.every(id => selectedIds.includes(id));
+
+    setSelectedIds(allSelected
+      ? selectedIds.filter(id => !ids.includes(id))
+      : [...new Set([...selectedIds, ...ids])]
+    );
+  };
+
+  // 📤 Export
+  const exportFilteredCSV = () => {
+    const headers = ["node_id","name","latitude","longitude","node_category","status","dgm","region"];
+
+    const rows = sorted.map(n => [
       n.node_id,
       `"${n.name}"`,
       n.latitude,
@@ -79,163 +140,132 @@ export default function NodeTable() {
 
     const a = document.createElement("a");
     a.href = url;
-    a.download = "gpon_nodes.csv";
+    a.download = "filtered_nodes.csv";
     a.click();
   };
 
+  const SortHeader = ({ label, field }) => (
+    <th
+      onClick={() => handleSort(field)}
+      className="cursor-pointer"
+    >
+      {label} {sortKey === field ? (sortDir === 'asc' ? '▲' : '▼') : ''}
+    </th>
+  );
+
   return (
-    <div className="p-4 bg-gray-900 text-white">
+    <div className="p-4 bg-white dark:bg-gray-900 text-black dark:text-white min-h-screen">
 
       {/* Header */}
-      <div className="flex justify-between mb-4">
+      <div className="flex flex-wrap gap-2 justify-between mb-4 items-center">
+
         <h2 className="text-xl font-bold">📊 Node Table</h2>
 
-        <button
-          onClick={exportToCSV}
-          className="px-4 py-2 bg-green-600 rounded"
+        <input
+          placeholder="Search..."
+          value={search}
+          onChange={e => { setSearch(e.target.value); setPage(1); }}
+          className="border px-2 py-1 rounded bg-white dark:bg-gray-800"
+        />
+
+        <select
+          value={statusFilter}
+          onChange={e => { setStatusFilter(e.target.value); setPage(1); }}
+          className="border px-2 py-1 rounded bg-white dark:bg-gray-800"
         >
-          Export CSV
+          <option value="all">All</option>
+          <option value="existing">Existing</option>
+          <option value="proposed">Proposed</option>
+        </select>
+
+        {/* 📊 Rows per page */}
+        <select
+          value={pageSize}
+          onChange={(e) => {
+            const value = e.target.value === 'all'
+              ? 'all'
+              : Number(e.target.value);
+            setPageSize(value);
+            setPage(1);
+          }}
+          className="border px-2 py-1 rounded bg-white dark:bg-gray-800"
+        >
+          <option value={10}>10</option>
+          <option value={100}>100</option>
+          <option value={1000}>1000</option>
+          <option value="all">All</option>
+        </select>
+
+        <button onClick={exportFilteredCSV} className="bg-green-600 text-white px-3 py-1 rounded">
+          Export
         </button>
+
+        <button onClick={handleBulkDelete} className="bg-red-600 text-white px-3 py-1 rounded">
+          Delete Selected ({selectedIds.length})
+        </button>
+
       </div>
 
       {/* Table */}
-      <div className="overflow-auto bg-gray-800 rounded shadow">
+      <div className="overflow-auto max-h-[70vh] border rounded">
         <table className="w-full text-sm">
-          <thead className="bg-gray-700">
+
+          <thead className="sticky top-0 bg-gray-200 dark:bg-gray-700">
             <tr>
-              <th className="p-2">ID</th>
-              <th>Name</th>
-              <th>Category</th>
-              <th>Status</th>
-              <th>DGM</th>
-              <th>Region</th>
-              <th>Lat</th>
-              <th>Lon</th>
+              <th>
+                <input type="checkbox" onChange={toggleSelectAll} />
+              </th>
+              <SortHeader label="ID" field="node_id" />
+              <SortHeader label="Name" field="name" />
+              <SortHeader label="Category" field="node_category" />
+              <SortHeader label="Status" field="status" />
+              <SortHeader label="Region" field="region" />
               <th>Action</th>
             </tr>
           </thead>
 
           <tbody>
-            {nodes.map(node => (
-              <tr key={node._id} className="border-t border-gray-700 hover:bg-gray-700">
+            {pageData.map(node => (
+              <tr key={node._id} className="border-t hover:bg-gray-100 dark:hover:bg-gray-800">
 
-                <td className="p-2">{node.node_id}</td>
-
-                {/* Name */}
                 <td>
-                  {editingId === node._id ? (
-                    <input
-                      value={editData.name}
-                      onChange={e =>
-                        setEditData({ ...editData, name: e.target.value })
-                      }
-                      className="bg-gray-900 border p-1"
-                    />
-                  ) : node.name}
+                  <input
+                    type="checkbox"
+                    checked={selectedIds.includes(node._id)}
+                    onChange={() => toggleSelect(node._id)}
+                  />
                 </td>
 
-                {/* Category */}
-                <td>
-                  {editingId === node._id ? (
-                    <select
-                      value={editData.node_category}
-                      onChange={e =>
-                        setEditData({ ...editData, node_category: e.target.value })
-                      }
-                      className="bg-gray-900 border p-1"
-                    >
-                      <option>OLT</option>
-                      <option>OCC</option>
-                      <option>ODP</option>
-                      <option>HODP</option>
-                      <option>Branch Point</option>
-                    </select>
-                  ) : node.node_category}
-                </td>
+                <td>{node.node_id}</td>
+                <td>{node.name}</td>
+                <td>{node.node_category}</td>
+                <td>{node.status}</td>
+                <td>{node.region}</td>
 
-                {/* Status */}
-                <td>
-                  {editingId === node._id ? (
-                    <select
-                      value={editData.status}
-                      onChange={e =>
-                        setEditData({ ...editData, status: e.target.value })
-                      }
-                      className="bg-gray-900 border p-1"
-                    >
-                      <option value="existing">Existing</option>
-                      <option value="proposed">Proposed</option>
-                    </select>
-                  ) : (
-                    <span className={node.status === 'existing' ? 'text-green-400' : 'text-yellow-400'}>
-                      {node.status}
-                    </span>
-                  )}
-                </td>
-
-                {/* DGM */}
-                <td>
-                  {editingId === node._id ? (
-                    <input
-                      value={editData.dgm || ''}
-                      onChange={e =>
-                        setEditData({ ...editData, dgm: e.target.value })
-                      }
-                      className="bg-gray-900 border p-1"
-                    />
-                  ) : node.dgm}
-                </td>
-
-                {/* Region */}
-                <td>
-                  {editingId === node._id ? (
-                    <input
-                      value={editData.region || ''}
-                      onChange={e =>
-                        setEditData({ ...editData, region: e.target.value })
-                      }
-                      className="bg-gray-900 border p-1"
-                    />
-                  ) : node.region}
-                </td>
-
-                <td>{node.latitude}</td>
-                <td>{node.longitude}</td>
-
-                {/* Actions */}
                 <td className="flex gap-2">
-                  <button
-                    onClick={() => router.push(`/node/${node._id}`)}
-                    className="bg-green-600 px-2 py-1 rounded"
-                  >
+                  <button onClick={() => router.push(`/node/${node._id}`)} className="bg-green-500 px-2 rounded text-white">
                     View
                   </button>
-                  {editingId === node._id ? (
-                    <>
-                      <button onClick={handleSave} className="bg-blue-600 px-2 py-1 rounded">
-                        Save
-                      </button>
-                      <button onClick={() => setEditingId(null)} className="bg-gray-500 px-2 py-1 rounded">
-                        Cancel
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <button onClick={() => handleEdit(node)} className="bg-yellow-500 px-2 py-1 rounded">
-                        Edit
-                      </button>
-                      <button onClick={() => handleDelete(node._id)} className="bg-red-600 px-2 py-1 rounded">
-                        Delete
-                      </button>
-                    </>
-                  )}
+                  <button onClick={() => handleDelete(node._id)} className="bg-red-600 px-2 rounded text-white">
+                    Delete
+                  </button>
                 </td>
 
               </tr>
             ))}
           </tbody>
+
         </table>
       </div>
+
+      {/* Pagination */}
+      {pageSize !== 'all' && (
+        <div className="flex justify-center gap-2 mt-4">
+          <button disabled={page === 1} onClick={() => setPage(p => p - 1)} className="px-2 bg-gray-400 rounded">Prev</button>
+          <span>Page {page} / {totalPages || 1}</span>
+          <button disabled={page === totalPages} onClick={() => setPage(p => p + 1)} className="px-2 bg-gray-400 rounded">Next</button>
+        </div>
+      )}
 
     </div>
   );
