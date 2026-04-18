@@ -1,4 +1,4 @@
-import NodeTable from '../components/NodeTable';
+import NodeTable from '@/components/NodeTable';
 
 export default function NodesPage() {
   return (

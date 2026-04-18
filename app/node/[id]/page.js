@@ -5,7 +5,7 @@ import dynamic from 'next/dynamic';
 import { useParams } from 'next/navigation';
 
 // 🔥 Load map without SSR
-const MapView = dynamic(() => import('../../components/NodeMapView'), {
+const MapView = dynamic(() => import('@/components/NodeMapView'), {
   ssr: false
 });
 

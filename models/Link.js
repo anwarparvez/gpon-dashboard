@@ -14,6 +14,12 @@ const LinkSchema = new mongoose.Schema(
       required: true
     },
 
+    // 🔄 Normalized pair (A-B = B-A)
+    node_pair: {
+      type: String,
+      unique: true
+    },
+
     // 🧵 Fiber Properties
     fiber_type: {
       type: String,
@@ -25,34 +31,55 @@ const LinkSchema = new mongoose.Schema(
       default: 12
     },
 
-    // 📏 Engineering Data
+    // 📏 Engineering Data (km)
     length: {
-      type: Number, // km
+      type: Number,
       default: 0
     },
 
-    // 📊 Capacity Tracking
+    // 📊 Capacity
     used_core: {
       type: Number,
       default: 0
     },
 
-    // 🧠 Future use (optional)
+    // 📈 Auto computed (optional)
+    available_core: {
+      type: Number,
+      default: 12
+    },
+
+    // 📡 Status
     status: {
       type: String,
       enum: ['active', 'planned'],
       default: 'planned'
     },
 
-    // ⚡ Optional metadata
+    // 📝 Notes
     note: String
   },
   { timestamps: true }
 );
 
-// 🚫 Prevent duplicate links (A ↔ B)
+
+// 🚀 🔥 PRE-SAVE HOOK (VERY IMPORTANT)
+LinkSchema.pre('save', function (next) {
+
+  // 🔄 Normalize node pair (prevent A→B and B→A duplicate)
+  const ids = [this.from_node.toString(), this.to_node.toString()].sort();
+  this.node_pair = `${ids[0]}_${ids[1]}`;
+
+  // 📊 Calculate available core
+  this.available_core = this.fiber_core - this.used_core;
+
+  next();
+});
+
+
+// 🚫 Prevent duplicate (bidirectional)
 LinkSchema.index(
-  { from_node: 1, to_node: 1 },
+  { node_pair: 1 },
   { unique: true }
 );
 

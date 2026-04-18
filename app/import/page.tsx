@@ -1,4 +1,4 @@
-import ImportNodes from '../components/ImportNodes';
+import ImportNodes from '../../components/ImportNodes';
 
 export default function ImportPage() {
   return (

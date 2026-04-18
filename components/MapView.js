@@ -17,20 +17,22 @@ import LinkLine from './LinkLine';
 import LeftSidebar from './LeftSidebar';
 
 export default function MapView() {
+
   const [mounted, setMounted] = useState(false);
 
   const [nodes, setNodes] = useState([]);
   const [links, setLinks] = useState([]);
 
   const [draftNode, setDraftNode] = useState(null);
-  const [selectedNodes, setSelectedNodes] = useState([]);
+
+  const [selectedNode, setSelectedNode] = useState(null);   // 🔥 SINGLE
+  const [selectedNodes, setSelectedNodes] = useState([]);   // 🔗 LINK MODE
 
   const [mode, setMode] = useState('add-node');
-  const [sidebarWidth, setSidebarWidth] = useState(200);
+  const [sidebarWidth, setSidebarWidth] = useState(220);
 
   useEffect(() => {
     setMounted(true);
-
     fetch('/api/nodes').then(r => r.json()).then(setNodes);
     fetch('/api/links').then(r => r.json()).then(setLinks);
   }, []);
@@ -41,9 +43,23 @@ export default function MapView() {
     <>
       <LeftSidebar mode={mode} setMode={setMode} setSidebarWidth={setSidebarWidth} />
 
-      <NodeSidebar draft={draftNode} setDraft={setDraftNode} setNodes={setNodes} />
-      <LinkSidebar selectedNodes={selectedNodes} setSelectedNodes={setSelectedNodes} setLinks={setLinks} />
+      {/* RIGHT SIDEBAR */}
+      <NodeSidebar
+        draft={draftNode}
+        selectedNode={selectedNode}
+        setSelectedNode={setSelectedNode}
+        setDraft={setDraftNode}
+        setNodes={setNodes}
+        setLinks={setLinks}
+      />
 
+      <LinkSidebar
+        selectedNodes={selectedNodes}
+        setSelectedNodes={setSelectedNodes}
+        setLinks={setLinks}
+      />
+
+      {/* MAP */}
       <div
         className="absolute top-[60px]"
         style={{
@@ -53,12 +69,18 @@ export default function MapView() {
         }}
       >
         <MapContainer center={[23.73, 90.41]} zoom={13} className="h-full w-full">
+
           <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 
-          <MapClickHandler setDraft={setDraftNode} mode={mode} />
+          <MapClickHandler
+            setDraft={setDraftNode}
+            setSelectedNode={setSelectedNode}
+            setSelectedNodes={setSelectedNodes}
+            mode={mode}
+          />
 
           {/* Preview */}
-          {draftNode && (
+          {draftNode && !draftNode.isEdit && (
             <Marker
               position={[draftNode.latitude, draftNode.longitude]}
               icon={L.divIcon({
@@ -74,21 +96,18 @@ export default function MapView() {
               key={node._id}
               node={node}
               mode={mode}
+              selectedNode={selectedNode}
+              setSelectedNode={setSelectedNode}
               selectedNodes={selectedNodes}
               setSelectedNodes={setSelectedNodes}
-              setNodes={setNodes}   // 🔥 pass setter
-              setLinks={setLinks}   // 🔥 for auto link removal
             />
           ))}
 
           {/* Links */}
           {links.map(link => (
-            <LinkLine
-              key={link._id}
-              link={link}
-              setLinks={setLinks}
-            />
+            <LinkLine key={link._id} link={link} />
           ))}
+
         </MapContainer>
       </div>
     </>

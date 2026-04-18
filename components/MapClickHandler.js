@@ -2,17 +2,23 @@
 
 import { useMapEvents } from 'react-leaflet';
 
-export default function MapClickHandler({ setDraft, mode }) {
+export default function MapClickHandler({
+  setDraft,
+  setSelectedNode,
+  setSelectedNodes,
+  mode
+}) {
+
   useMapEvents({
     click(e) {
-      console.log("🖱 MAP CLICK:", mode);
 
-      if (mode !== 'add-node') {
-        console.log("❌ Not in add-node mode");
-        return;
-      }
+      // clear selections
+      setSelectedNode(null);
+      setSelectedNodes([]);
 
-      const newDraft = {
+      if (mode !== 'add-node') return;
+
+      setDraft({
         latitude: e.latlng.lat,
         longitude: e.latlng.lng,
         name: '',
@@ -20,11 +26,7 @@ export default function MapClickHandler({ setDraft, mode }) {
         status: 'proposed',
         dgm: 'DGM Phones Secretariate',
         region: 'DTR South'
-      };
-
-      console.log("✅ Creating draft:", newDraft);
-
-      setDraft(newDraft);
+      });
     }
   });
 
