@@ -17,14 +17,10 @@ const NodeSchema = new mongoose.Schema(
       enum: ['existing', 'proposed'],
       default: 'proposed'
     },
-
-    dgm: {
-      type: String
-    },
-
-    region: {
-      type: String
-    }
+    dgm: { type: String },
+    region: { type: String },
+    address: { type: String },
+    node_code: { type: String }, // optional ref/code
   },
   { timestamps: true }
 );

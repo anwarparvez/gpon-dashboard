@@ -5,213 +5,180 @@ import Papa from 'papaparse';
 
 export default function ImportNodes() {
   const [data, setData] = useState([]);
-  const [errors, setErrors] = useState([]);
   const [duplicates, setDuplicates] = useState([]);
-  const [fileName, setFileName] = useState('');
+  const [preview, setPreview] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // 📂 Handle file upload
+  // 📂 Parse CSV
   const handleFile = (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    setFileName(file.name);
-
     Papa.parse(file, {
       header: true,
       skipEmptyLines: true,
+      complete: async (results) => {
 
-      complete: (results) => {
-        const cleaned = results.data.map((row, index) => {
-          const lat = parseFloat(row.latitude);
-          const lon = parseFloat(row.longitude);
+        const rows = results.data.map(r => ({
+          node_id: r.node_id?.trim(),
+          name: r.name,
+          latitude: parseFloat(r.latitude),
+          longitude: parseFloat(r.longitude),
+          node_category: r.node_category,
+          status: r.status,
+          dgm: r.dgm,
+          region: r.region,
+          node_code: r.node_code,
+          address: r.address
+        }));
 
-          return {
-            name: row.name?.trim(),
-            latitude: lat,
-            longitude: lon,
-            node_category: row.node_category || 'HODP',
-
-            // 🆕 NEW FIELDS
-            status: row.status || 'proposed',
-            dgm: row.dgm || '',
-            region: row.region || '',
-
-            row: index + 1
-          };
-        });
-
-        // ❌ Invalid rows
-        const invalid = cleaned.filter(r =>
-          !r.name || isNaN(r.latitude) || isNaN(r.longitude)
-        );
-
-        // ✅ Valid rows
-        const valid = cleaned.filter(r =>
-          r.name && !isNaN(r.latitude) && !isNaN(r.longitude)
-        );
-
-        // 🔁 Remove duplicate coordinates
+        // 🔁 DUPLICATE CHECK (CSV)
         const seen = new Set();
-        const unique = [];
         const dup = [];
 
-        valid.forEach(item => {
-          const key = `${item.latitude}-${item.longitude}`;
-
-          if (seen.has(key)) {
-            dup.push(item);
+        rows.forEach(r => {
+          if (seen.has(r.node_id)) {
+            dup.push(r.node_id);
           } else {
-            seen.add(key);
-            unique.push(item);
+            seen.add(r.node_id);
           }
         });
 
-        setData(unique);
-        setErrors(invalid);
         setDuplicates(dup);
-      },
 
-      error: (err) => {
-        console.error(err);
-        alert("CSV parsing failed");
+        if (dup.length > 0) {
+          alert("❌ Duplicate node_id in CSV");
+          return;
+        }
+
+        // 🔍 FETCH EXISTING DB DATA
+        const res = await fetch('/api/nodes');
+        const dbNodes = await res.json();
+
+        const map = {};
+        dbNodes.forEach(n => {
+          map[n.node_id] = n;
+        });
+
+        // 🔥 BUILD PREVIEW
+        const result = rows.map(r => {
+
+          const existing = map[r.node_id];
+
+          if (!existing) {
+            return { ...r, type: 'insert' };
+          }
+
+          // 🔄 DIFF CHECK
+          const changes = {};
+
+          Object.keys(r).forEach(key => {
+            if (r[key] !== existing[key]) {
+              changes[key] = {
+                old: existing[key],
+                new: r[key]
+              };
+            }
+          });
+
+          return {
+            ...r,
+            type: 'update',
+            changes
+          };
+        });
+
+        setPreview(result);
+        setData(rows);
       }
     });
   };
 
-  // 💾 Upload to DB
+  // 🚀 Upload
   const handleUpload = async () => {
-    if (data.length === 0) {
-      alert("No valid data to upload");
-      return;
-    }
-
     setLoading(true);
 
-    try {
-      const res = await fetch('/api/nodes', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ bulk: true, data })
-      });
+    await fetch('/api/nodes/bulk-upsert', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ data })
+    });
 
-      const result = await res.json();
-
-      if (result.error) {
-        alert("❌ " + result.error);
-        return;
-      }
-
-      alert(`✅ Inserted: ${result.inserted}\n⚠ Skipped: ${result.skipped}`);
-
-      console.log("Import Result:", result);
-
-    } catch (err) {
-      console.error(err);
-      alert("Upload failed");
-    }
-
+    alert("✅ Upload complete");
     setLoading(false);
   };
 
   return (
-    <div className="p-4 bg-gray-900 text-white rounded">
+    <div className="p-4">
 
-      <h3 className="text-lg font-bold mb-3">📂 Import GPON Nodes</h3>
+      <h2 className="text-xl font-bold mb-3">📂 Import with Preview</h2>
 
-      <input
-        type="file"
-        accept=".csv"
-        onChange={handleFile}
-        className="mb-2"
-      />
+      <input type="file" onChange={handleFile} />
 
-      <p className="text-gray-400">{fileName}</p>
-
-      {/* ✅ VALID DATA */}
-      {data.length > 0 && (
-        <>
-          <h4 className="text-green-400 mt-4">
-            ✅ Valid Data ({data.length})
-          </h4>
-
-          <div className="overflow-auto">
-            <table className="w-full text-sm border border-gray-700 mt-2">
-              <thead className="bg-gray-700">
-                <tr>
-                  <th>Name</th>
-                  <th>Lat</th>
-                  <th>Lon</th>
-                  <th>Category</th>
-                  <th>Status</th>
-                  <th>DGM</th>
-                  <th>Region</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {data.slice(0, 10).map((row, i) => (
-                  <tr key={i} className="border-t border-gray-700">
-                    <td>{row.name}</td>
-                    <td>{row.latitude}</td>
-                    <td>{row.longitude}</td>
-                    <td>{row.node_category}</td>
-                    <td className={row.status === 'existing' ? 'text-green-400' : 'text-yellow-400'}>
-                      {row.status}
-                    </td>
-                    <td>{row.dgm}</td>
-                    <td>{row.region}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </>
-      )}
-
-      {/* ❌ INVALID */}
-      {errors.length > 0 && (
-        <>
-          <h4 className="text-red-400 mt-4">
-            ❌ Invalid Rows ({errors.length})
-          </h4>
-
-          <ul>
-            {errors.slice(0, 10).map((row, i) => (
-              <li key={i}>
-                Row {row.row} → Invalid
-              </li>
-            ))}
-          </ul>
-        </>
-      )}
-
-      {/* 🔁 DUPLICATES */}
+      {/* ❌ DUPLICATES */}
       {duplicates.length > 0 && (
-        <>
-          <h4 className="text-orange-400 mt-4">
-            🔁 Duplicate Coordinates ({duplicates.length})
-          </h4>
-
-          <ul>
-            {duplicates.slice(0, 10).map((row, i) => (
-              <li key={i}>
-                Row {row.row} → {row.name}
-              </li>
-            ))}
-          </ul>
-        </>
+        <div className="text-red-500 mt-3">
+          Duplicate node_id: {duplicates.join(', ')}
+        </div>
       )}
 
-      <br />
+      {/* 🔍 PREVIEW */}
+      {preview.length > 0 && (
+        <div className="mt-4 overflow-auto max-h-[400px] border">
 
-      <button
-        onClick={handleUpload}
-        disabled={loading}
-        className="bg-blue-600 px-4 py-2 rounded mt-2"
-      >
-        {loading ? "Uploading..." : "🚀 Import to Database"}
-      </button>
+          <table className="w-full text-sm">
+            <thead className="bg-gray-200">
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Changes</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {preview.slice(0, 20).map((row, i) => (
+                <tr key={i} className="border-t">
+
+                  <td>{row.node_id}</td>
+                  <td>{row.name}</td>
+
+                  <td>
+                    {row.type === 'insert'
+                      ? <span className="text-green-500">INSERT</span>
+                      : <span className="text-yellow-500">UPDATE</span>}
+                  </td>
+
+                  {/* 🔥 CHANGES */}
+                  <td>
+                    {row.type === 'update' && Object.keys(row.changes).length > 0 && (
+                      <ul>
+                        {Object.entries(row.changes).map(([k, v]) => (
+                          <li key={k}>
+                            <b>{k}:</b> {v.old} → <span className="text-green-500">{v.new}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </td>
+
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+        </div>
+      )}
+
+      {/* 🚀 UPLOAD */}
+      {preview.length > 0 && (
+        <button
+          onClick={handleUpload}
+          className="mt-4 bg-blue-600 text-white px-4 py-2 rounded"
+        >
+          {loading ? "Processing..." : "🚀 Confirm Upload"}
+        </button>
+      )}
 
     </div>
   );

@@ -73,6 +73,8 @@ export default function NodeMarker({
           <b>Status:</b> {node.status} <br />
           <b>DGM:</b> {node.dgm} <br />
           <b>Region:</b> {node.region} <br />
+          <b>Code:</b> {node.node_code || '-'} <br />
+          <b>Address:</b> {node.address || '-'} <br />
 
           <hr />
 
@@ -87,7 +89,7 @@ export default function NodeMarker({
           />
 
 
-          
+
         </div>
       </Popup>
     </Marker>

@@ -15,6 +15,10 @@ export default function NodeTable() {
 
   const [selectedIds, setSelectedIds] = useState([]);
 
+  // 🔥 EDIT STATE
+  const [editingId, setEditingId] = useState(null);
+  const [editData, setEditData] = useState({});
+
   const router = useRouter();
 
   // 📡 Load
@@ -24,12 +28,21 @@ export default function NodeTable() {
       .then(data => Array.isArray(data) && setNodes(data));
   }, []);
 
-  // 🔍 Filter
+  // 🔍 Filter (UPDATED)
   const filtered = useMemo(() => {
     return nodes.filter(n => {
-      const text = `${n.node_id} ${n.name} ${n.node_category} ${n.region}`.toLowerCase();
+      const text = `
+        ${n.node_id}
+        ${n.name}
+        ${n.node_category}
+        ${n.region}
+        ${n.node_code || ''}
+        ${n.address || ''}
+      `.toLowerCase();
+
       const matchSearch = text.includes(search.toLowerCase());
       const matchStatus = statusFilter === 'all' || n.status === statusFilter;
+
       return matchSearch && matchStatus;
     });
   }, [nodes, search, statusFilter]);
@@ -65,7 +78,30 @@ export default function NodeTable() {
     }
   };
 
-  // ❌ Delete single
+  // ✏️ Start Edit
+  const handleEdit = (node) => {
+    setEditingId(node._id);
+    setEditData({ ...node });
+  };
+
+  // 💾 Save Edit
+  const handleSave = async () => {
+    const res = await fetch('/api/nodes', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(editData)
+    });
+
+    const updated = await res.json();
+
+    setNodes(prev =>
+      prev.map(n => (n._id === updated._id ? updated : n))
+    );
+
+    setEditingId(null);
+  };
+
+  // ❌ Delete
   const handleDelete = async (id) => {
     if (!confirm("Delete this node?")) return;
 
@@ -120,7 +156,11 @@ export default function NodeTable() {
 
   // 📤 Export
   const exportFilteredCSV = () => {
-    const headers = ["node_id","name","latitude","longitude","node_category","status","dgm","region"];
+    const headers = [
+      "node_id","name","latitude","longitude",
+      "node_category","status","dgm","region",
+      "node_code","address"
+    ];
 
     const rows = sorted.map(n => [
       n.node_id,
@@ -130,7 +170,9 @@ export default function NodeTable() {
       n.node_category,
       n.status,
       `"${n.dgm || ''}"`,
-      n.region
+      n.region,
+      n.node_code || '',
+      `"${n.address || ''}"`
     ]);
 
     const csv = [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
@@ -140,15 +182,12 @@ export default function NodeTable() {
 
     const a = document.createElement("a");
     a.href = url;
-    a.download = "filtered_nodes.csv";
+    a.download = "nodes.csv";
     a.click();
   };
 
   const SortHeader = ({ label, field }) => (
-    <th
-      onClick={() => handleSort(field)}
-      className="cursor-pointer"
-    >
+    <th onClick={() => handleSort(field)} className="cursor-pointer">
       {label} {sortKey === field ? (sortDir === 'asc' ? '▲' : '▼') : ''}
     </th>
   );
@@ -156,8 +195,8 @@ export default function NodeTable() {
   return (
     <div className="p-4 bg-white dark:bg-gray-900 text-black dark:text-white min-h-screen">
 
-      {/* Header */}
-      <div className="flex flex-wrap gap-2 justify-between mb-4 items-center">
+      {/* HEADER */}
+      <div className="flex flex-wrap gap-2 mb-4 items-center">
 
         <h2 className="text-xl font-bold">📊 Node Table</h2>
 
@@ -178,13 +217,10 @@ export default function NodeTable() {
           <option value="proposed">Proposed</option>
         </select>
 
-        {/* 📊 Rows per page */}
         <select
           value={pageSize}
           onChange={(e) => {
-            const value = e.target.value === 'all'
-              ? 'all'
-              : Number(e.target.value);
+            const value = e.target.value === 'all' ? 'all' : Number(e.target.value);
             setPageSize(value);
             setPage(1);
           }}
@@ -203,23 +239,22 @@ export default function NodeTable() {
         <button onClick={handleBulkDelete} className="bg-red-600 text-white px-3 py-1 rounded">
           Delete Selected ({selectedIds.length})
         </button>
-
       </div>
 
-      {/* Table */}
+      {/* TABLE */}
       <div className="overflow-auto max-h-[70vh] border rounded">
         <table className="w-full text-sm">
 
           <thead className="sticky top-0 bg-gray-200 dark:bg-gray-700">
             <tr>
-              <th>
-                <input type="checkbox" onChange={toggleSelectAll} />
-              </th>
+              <th><input type="checkbox" onChange={toggleSelectAll} /></th>
               <SortHeader label="ID" field="node_id" />
               <SortHeader label="Name" field="name" />
               <SortHeader label="Category" field="node_category" />
               <SortHeader label="Status" field="status" />
               <SortHeader label="Region" field="region" />
+              <SortHeader label="Code" field="node_code" />
+              <SortHeader label="Address" field="address" />
               <th>Action</th>
             </tr>
           </thead>
@@ -236,19 +271,71 @@ export default function NodeTable() {
                   />
                 </td>
 
+                {/* ID */}
                 <td>{node.node_id}</td>
-                <td>{node.name}</td>
-                <td>{node.node_category}</td>
-                <td>{node.status}</td>
-                <td>{node.region}</td>
 
+                {/* NAME */}
+                <td>
+                  {editingId === node._id ? (
+                    <input value={editData.name || ''} onChange={e => setEditData({ ...editData, name: e.target.value })} />
+                  ) : node.name}
+                </td>
+
+                {/* CATEGORY */}
+                <td>
+                  {editingId === node._id ? (
+                    <input value={editData.node_category || ''} onChange={e => setEditData({ ...editData, node_category: e.target.value })} />
+                  ) : node.node_category}
+                </td>
+
+                {/* STATUS */}
+                <td>
+                  {editingId === node._id ? (
+                    <select value={editData.status} onChange={e => setEditData({ ...editData, status: e.target.value })}>
+                      <option value="existing">Existing</option>
+                      <option value="proposed">Proposed</option>
+                    </select>
+                  ) : node.status}
+                </td>
+
+                {/* REGION */}
+                <td>
+                  {editingId === node._id ? (
+                    <input value={editData.region || ''} onChange={e => setEditData({ ...editData, region: e.target.value })} />
+                  ) : node.region}
+                </td>
+
+                {/* CODE */}
+                <td>
+                  {editingId === node._id ? (
+                    <input value={editData.node_code || ''} onChange={e => setEditData({ ...editData, node_code: e.target.value })} />
+                  ) : node.node_code || '-'}
+                </td>
+
+                {/* ADDRESS */}
+                <td>
+                  {editingId === node._id ? (
+                    <input value={editData.address || ''} onChange={e => setEditData({ ...editData, address: e.target.value })} />
+                  ) : node.address || '-'}
+                </td>
+
+                {/* ACTION */}
                 <td className="flex gap-2">
-                  <button onClick={() => router.push(`/node/${node._id}`)} className="bg-green-500 px-2 rounded text-white">
+                  <button onClick={() => router.push(`/node/${node._id}`)} className="bg-green-500 px-2 text-white rounded">
                     View
                   </button>
-                  <button onClick={() => handleDelete(node._id)} className="bg-red-600 px-2 rounded text-white">
-                    Delete
-                  </button>
+
+                  {editingId === node._id ? (
+                    <>
+                      <button onClick={handleSave} className="bg-blue-500 px-2 text-white rounded">Save</button>
+                      <button onClick={() => setEditingId(null)} className="bg-gray-500 px-2 text-white rounded">Cancel</button>
+                    </>
+                  ) : (
+                    <>
+                      <button onClick={() => handleEdit(node)} className="bg-yellow-500 px-2 text-white rounded">Edit</button>
+                      <button onClick={() => handleDelete(node._id)} className="bg-red-600 px-2 text-white rounded">Delete</button>
+                    </>
+                  )}
                 </td>
 
               </tr>

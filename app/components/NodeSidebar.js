@@ -30,7 +30,7 @@ export default function NodeSidebar({ draft, setDraft, setNodes }) {
 
   return (
     <div className="fixed right-0 top-[60px] w-[320px] h-[calc(100%-60px)] bg-gray-900 text-white p-4 z-[2000] overflow-y-auto">
-      
+
       <h3 className="text-lg font-bold mb-4">Add Node</h3>
 
       {/* Name */}
@@ -81,6 +81,20 @@ export default function NodeSidebar({ draft, setDraft, setNodes }) {
       <div className="text-sm mb-3">
         📍 {draft.latitude.toFixed(5)}, {draft.longitude.toFixed(5)}
       </div>
+
+      <input
+        placeholder="Node Code (optional)"
+        value={draft.node_code || ''}
+        onChange={e => setDraft({ ...draft, node_code: e.target.value })}
+        className="input"
+      />
+
+      <input
+        placeholder="Address"
+        value={draft.address || ''}
+        onChange={e => setDraft({ ...draft, address: e.target.value })}
+        className="input"
+      />
 
       {/* Buttons */}
       <div className="flex gap-2">

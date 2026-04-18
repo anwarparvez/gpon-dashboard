@@ -2,7 +2,9 @@ import { connectDB } from '@/lib/mongodb';
 import Node from '@/models/Node';
 import Counter from '@/models/Counter';
 
-// 🔥 Atomic counter
+/* ================================
+   🔢 Atomic Counter for node_id
+================================ */
 async function getNextSequence(category) {
   const counter = await Counter.findOneAndUpdate(
     { category },
@@ -12,7 +14,9 @@ async function getNextSequence(category) {
   return counter.seq;
 }
 
-// 🔹 Check duplicate coordinates
+/* ================================
+   📍 Duplicate Coordinate Check
+================================ */
 async function isDuplicateCoord(lat, lon) {
   return await Node.exists({
     latitude: lat,
@@ -20,72 +24,108 @@ async function isDuplicateCoord(lat, lon) {
   });
 }
 
-// ✅ GET
+/* ================================
+   ✅ GET: Fetch all nodes
+================================ */
 export async function GET() {
   try {
-    console.log("📡 GET /api/nodes");
-
     await connectDB();
+
     const nodes = await Node.find().sort({ createdAt: -1 });
 
-    console.log(`✅ Fetched ${nodes.length} nodes`);
-
     return Response.json(nodes);
-
   } catch (error) {
-    console.error("❌ GET Error:", error.message);
-
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500
-    });
+    return new Response(JSON.stringify({ error: error.message }), { status: 500 });
   }
 }
 
-// ✅ POST
+/* ================================
+   ✅ POST: Insert / Bulk / Upsert
+================================ */
 export async function POST(req) {
   try {
-    console.log("📡 POST /api/nodes");
-
     await connectDB();
+
     const body = await req.json();
 
-    // 🔥 BULK INSERT
-    if (body.bulk) {
-      console.log(`📥 Bulk import started: ${body.data.length} rows`);
+    /* ============================
+       🔥 BULK UPSERT (UPDATE + INSERT)
+       Match by node_id
+    ============================ */
+    if (body.bulkUpsert) {
+      let skipped = 0;
 
+      const operations = body.data.map(item => {
+        if (!item.node_id) {
+          skipped++;
+          return null;
+        }
+
+        return {
+          updateOne: {
+            filter: { node_id: item.node_id },
+            update: {
+              $set: {
+                name: item.name,
+                latitude: item.latitude,
+                longitude: item.longitude,
+                node_category: item.node_category,
+                status: item.status,
+                dgm: item.dgm,
+                region: item.region,
+
+                // 🆕 NEW FIELDS
+                node_code: item.node_code,
+                address: item.address
+              }
+            },
+            upsert: true
+          }
+        };
+      }).filter(Boolean);
+
+      const result = await Node.bulkWrite(operations);
+
+      return Response.json({
+        inserted: result.upsertedCount,
+        updated: result.modifiedCount,
+        skipped
+      });
+    }
+
+    /* ============================
+       📦 BULK INSERT (AUTO ID)
+    ============================ */
+    if (body.bulk) {
       let inserted = [];
       let skipped = [];
 
-      for (const [index, item] of body.data.entries()) {
+      for (const item of body.data) {
+
         const name = item.name?.trim();
         const lat = Number(item.latitude);
         const lon = Number(item.longitude);
         const category = item.node_category || 'HODP';
 
-        // 🆕 NEW FIELDS
         const status = item.status || 'proposed';
         const dgm = item.dgm || '';
         const region = item.region || '';
 
-        // ❌ Validation
+        const node_code = item.node_code || '';
+        const address = item.address || '';
+
         if (!name || isNaN(lat) || isNaN(lon)) {
-          console.warn(`⚠ Row ${index + 1}: Invalid data`);
           skipped.push({ item, reason: 'Invalid data' });
           continue;
         }
 
-        // ❌ Duplicate coordinate
         if (await isDuplicateCoord(lat, lon)) {
-          console.warn(`⚠ Row ${index + 1}: Duplicate coordinate`);
           skipped.push({ item, reason: 'Duplicate coordinates' });
           continue;
         }
 
-        // ✅ Generate node_id
         const seq = await getNextSequence(category);
         const node_id = `${category}-${String(seq).padStart(3, '0')}`;
-
-        console.log(`➕ Row ${index + 1}: ${node_id} (${name})`);
 
         inserted.push({
           name,
@@ -93,17 +133,15 @@ export async function POST(req) {
           longitude: lon,
           node_category: category,
           node_id,
-
-          // 🆕 SAVE NEW FIELDS
           status,
           dgm,
-          region
+          region,
+          node_code,
+          address
         });
       }
 
       const result = await Node.insertMany(inserted);
-
-      console.log(`✅ Bulk complete → Inserted: ${result.length}, Skipped: ${skipped.length}`);
 
       return Response.json({
         inserted: result.length,
@@ -112,31 +150,27 @@ export async function POST(req) {
       });
     }
 
-    // 🔹 SINGLE INSERT
+    /* ============================
+       ➕ SINGLE INSERT
+    ============================ */
     const name = body.name?.trim();
     const lat = Number(body.latitude);
     const lon = Number(body.longitude);
     const category = body.node_category || 'HODP';
 
-    // 🆕 NEW FIELDS
     const status = body.status || 'proposed';
     const dgm = body.dgm || '';
     const region = body.region || '';
 
-    if (!name || isNaN(lat) || isNaN(lon)) {
-      console.warn("⚠ Invalid single insert data");
+    const node_code = body.node_code || '';
+    const address = body.address || '';
 
-      return new Response(JSON.stringify({ error: 'Invalid data' }), {
-        status: 400
-      });
+    if (!name || isNaN(lat) || isNaN(lon)) {
+      return new Response(JSON.stringify({ error: 'Invalid data' }), { status: 400 });
     }
 
     if (await isDuplicateCoord(lat, lon)) {
-      console.warn("⚠ Duplicate coordinate (single insert)");
-
-      return new Response(JSON.stringify({ error: 'Duplicate coordinates' }), {
-        status: 400
-      });
+      return new Response(JSON.stringify({ error: 'Duplicate coordinates' }), { status: 400 });
     }
 
     const seq = await getNextSequence(category);
@@ -148,32 +182,26 @@ export async function POST(req) {
       longitude: lon,
       node_category: category,
       node_id,
-
-      // 🆕 SAVE NEW FIELDS
       status,
       dgm,
-      region
+      region,
+      node_code,
+      address
     });
-
-    console.log(`✅ Single insert: ${node_id} (${name})`);
 
     return Response.json(node);
-
   } catch (error) {
-    console.error("❌ POST Error:", error.message);
-
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500
-    });
+    return new Response(JSON.stringify({ error: error.message }), { status: 500 });
   }
 }
 
-// ✅ PUT (UPDATED)
+/* ================================
+   🔄 PUT: Update Node
+================================ */
 export async function PUT(req) {
   try {
-    console.log("📡 PUT /api/nodes");
-
     await connectDB();
+
     const body = await req.json();
 
     const updated = await Node.findByIdAndUpdate(
@@ -183,43 +211,34 @@ export async function PUT(req) {
         node_category: body.node_category,
         status: body.status,
         dgm: body.dgm,
-        region: body.region
+        region: body.region,
+
+        // 🆕 NEW FIELDS
+        node_code: body.node_code,
+        address: body.address
       },
       { returnDocument: 'after' }
     );
 
-    console.log(`✏ Updated node: ${updated.node_id}`);
-
     return Response.json(updated);
-
   } catch (error) {
-    console.error("❌ PUT Error:", error.message);
-
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500
-    });
+    return new Response(JSON.stringify({ error: error.message }), { status: 500 });
   }
 }
 
-// ✅ DELETE
+/* ================================
+   ❌ DELETE: Remove Node
+================================ */
 export async function DELETE(req) {
   try {
-    console.log("📡 DELETE /api/nodes");
-
     await connectDB();
+
     const body = await req.json();
 
     await Node.findByIdAndDelete(body.id);
 
-    console.log(`🗑 Deleted node: ${body.id}`);
-
     return Response.json({ success: true });
-
   } catch (error) {
-    console.error("❌ DELETE Error:", error.message);
-
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500
-    });
+    return new Response(JSON.stringify({ error: error.message }), { status: 500 });
   }
 }
