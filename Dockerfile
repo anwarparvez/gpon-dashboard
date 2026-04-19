@@ -1,23 +1,12 @@
-# Use Node image
-FROM node:20-alpine
-
-# Set working directory
+FROM node:20-alpine AS builder
 WORKDIR /app
-
-# Copy package files
 COPY package*.json ./
-
-# Install dependencies
-RUN npm install
-
-# Copy project files
+RUN npm ci
 COPY . .
-
-# Build Next.js app
 RUN npm run build
 
-# Expose port
+FROM node:20-alpine
+WORKDIR /app
+COPY --from=builder /app ./
 EXPOSE 3000
-
-# Start app
 CMD ["npm", "start"]
