@@ -35,6 +35,15 @@ export async function POST(req) {
   let skipped = 0;
   let errors = [];
 
+  // 🚀 LOAD EVERYTHING ONCE
+  const allNodes = await Node.find({});
+  const nodeMap = new Map(allNodes.map(n => [n.node_id, n]));
+
+  const allLinks = await Link.find({});
+  const linkMap = new Map(allLinks.map(l => [l.node_pair, l]));
+
+  let bulkOps = [];
+
   for (let i = 1; i < rows.length; i++) {
     const values = rows[i].split(',');
 
@@ -44,22 +53,26 @@ export async function POST(req) {
     });
 
     try {
-      const fromNode = await Node.findOne({ node_id: row.from_node });
-      const toNode = await Node.findOne({ node_id: row.to_node });
-
-      let status = 'ok'; // ok | update | error
+      let status = 'ok';
       let error = null;
 
+      const fromNode = nodeMap.get(row.from_node);
+      const toNode = nodeMap.get(row.to_node);
+
+      // ❌ Node validation
       if (!fromNode || !toNode) {
         status = 'error';
         error = 'Node not found';
       }
 
-      if (fromNode && toNode && fromNode._id.toString() === toNode._id.toString()) {
+      // ❌ Same node
+      if (fromNode && toNode &&
+        fromNode._id.toString() === toNode._id.toString()) {
         status = 'error';
         error = 'Same node';
       }
 
+      // 🔢 Core validation
       const fiber_core = Number(row.fiber_core) || 12;
       const used_core = Number(row.used_core) || 0;
 
@@ -70,7 +83,6 @@ export async function POST(req) {
 
       let node_pair = null;
       let distance = 0;
-      let existing = null;
 
       if (fromNode && toNode) {
         const ids = [
@@ -80,14 +92,12 @@ export async function POST(req) {
 
         node_pair = `${ids[0]}_${ids[1]}`;
 
-        // 🔍 Check duplicate
-        existing = await Link.findOne({ node_pair });
-
-        if (existing && status === 'ok') {
+        // 🔍 Duplicate check (IN MEMORY ⚡)
+        if (linkMap.has(node_pair) && status === 'ok') {
           status = 'update';
         }
 
-        // 🌍 Calculate distance
+        // 🌍 Distance
         if (
           fromNode.latitude != null &&
           fromNode.longitude != null &&
@@ -103,39 +113,35 @@ export async function POST(req) {
         }
       }
 
-      // 👀 PREVIEW DATA
+      // 👀 Preview
       preview.push({
         ...row,
-        length: distance ? Number(distance.toFixed(3)) : 0,
+        length: Number(distance.toFixed(3)),
         status_check: status,
         error
       });
 
-      // 🚀 IMPORT
+      // 🚀 IMPORT (BULK)
       if (mode === 'import' && status !== 'error') {
-        await Link.findOneAndUpdate(
-          { node_pair },
-          {
-            from_node: fromNode._id,
-            to_node: toNode._id,
-            node_pair,
+        bulkOps.push({
+          updateOne: {
+            filter: { node_pair },
+            update: {
+              from_node: fromNode._id,
+              to_node: toNode._id,
+              node_pair,
 
-            fiber_type: row.fiber_type || 'GPON',
-            fiber_core,
-            used_core,
+              fiber_type: row.fiber_type || 'GPON',
+              fiber_core,
+              used_core,
+              length: Number(distance.toFixed(3)),
 
-            // 🔥 AUTO DISTANCE
-            length: Number(distance.toFixed(3)),
-
-            status: row.status || 'proposed',
-            note: row.note || ''
-          },
-          {
-            upsert: true,
-            new: true,
-            runValidators: true
+              status: row.status || 'proposed',
+              note: row.note || ''
+            },
+            upsert: true
           }
-        );
+        });
 
         success++;
       } else if (status === 'error') {
@@ -146,6 +152,11 @@ export async function POST(req) {
       skipped++;
       errors.push(err.message);
     }
+  }
+
+  // 🚀 EXECUTE BULK ONCE (VERY FAST)
+  if (mode === 'import' && bulkOps.length > 0) {
+    await Link.bulkWrite(bulkOps);
   }
 
   return Response.json({
