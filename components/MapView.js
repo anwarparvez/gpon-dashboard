@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import dynamic from 'next/dynamic';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -25,17 +25,70 @@ export default function MapView() {
 
   const [draftNode, setDraftNode] = useState(null);
 
-  const [selectedNode, setSelectedNode] = useState(null);   // 🔥 SINGLE
-  const [selectedNodes, setSelectedNodes] = useState([]);   // 🔗 LINK MODE
+  const [selectedNode, setSelectedNode] = useState(null);
+  const [selectedNodes, setSelectedNodes] = useState([]);
 
   const [mode, setMode] = useState('add-node');
   const [sidebarWidth, setSidebarWidth] = useState(220);
 
+  // ✅ FILTER STATES
+  const [showExisting, setShowExisting] = useState(true);
+  const [showProposed, setShowProposed] = useState(true);
+
+  const [showOLT, setShowOLT] = useState(true);
+  const [showOCC, setShowOCC] = useState(true);
+  const [showODP, setShowODP] = useState(true);
+  const [showHODP, setShowHODP] = useState(true);
+  const [showBranch, setShowBranch] = useState(true);
+
   useEffect(() => {
     setMounted(true);
-    fetch('/api/nodes').then(r => r.json()).then(setNodes);
-    fetch('/api/links').then(r => r.json()).then(setLinks);
+
+    fetch('/api/nodes')
+      .then(r => r.json())
+      .then(data => setNodes(Array.isArray(data) ? data : []));
+
+    fetch('/api/links')
+      .then(r => r.json())
+      .then(data => setLinks(Array.isArray(data) ? data : []));
   }, []);
+
+  // ✅ FILTER NODES
+  const filteredNodes = useMemo(() => {
+    return nodes.filter(node => {
+
+      // Status
+      if (node.status === 'existing' && !showExisting) return false;
+      if (node.status === 'proposed' && !showProposed) return false;
+
+      // Category
+      if (node.node_category === 'OLT' && !showOLT) return false;
+      if (node.node_category === 'OCC' && !showOCC) return false;
+      if (node.node_category === 'ODP' && !showODP) return false;
+      if (node.node_category === 'HODP' && !showHODP) return false;
+      if (node.node_category === 'Branch Point' && !showBranch) return false;
+
+      return true;
+    });
+  }, [nodes, showExisting, showProposed, showOLT, showOCC, showODP, showHODP, showBranch]);
+
+  // ✅ FILTER LINKS
+  const filteredLinks = useMemo(() => {
+    return links.filter(link => {
+      const from = link.from_node;
+      const to = link.to_node;
+
+      if (!from || !to) return false;
+
+      // existing
+      if (!showExisting && from.status === 'existing' && to.status === 'existing') return false;
+
+      // proposed
+      if (!showProposed && (from.status === 'proposed' || to.status === 'proposed')) return false;
+
+      return true;
+    });
+  }, [links, showExisting, showProposed]);
 
   if (!mounted) return null;
 
@@ -59,6 +112,24 @@ export default function MapView() {
         setLinks={setLinks}
       />
 
+      {/* 🎛️ FILTER PANEL */}
+      <div className="absolute top-[80px] left-[240px] z-[1000] bg-white p-3 rounded shadow text-sm space-y-2">
+
+        <div className="font-semibold">Status</div>
+        <label><input type="checkbox" checked={showExisting} onChange={() => setShowExisting(!showExisting)} /> Existing</label>
+        <label><input type="checkbox" checked={showProposed} onChange={() => setShowProposed(!showProposed)} /> Proposed</label>
+
+        <hr />
+
+        <div className="font-semibold">Category</div>
+        <label><input type="checkbox" checked={showOLT} onChange={() => setShowOLT(!showOLT)} /> OLT</label>
+        <label><input type="checkbox" checked={showOCC} onChange={() => setShowOCC(!showOCC)} /> OCC</label>
+        <label><input type="checkbox" checked={showODP} onChange={() => setShowODP(!showODP)} /> ODP</label>
+        <label><input type="checkbox" checked={showHODP} onChange={() => setShowHODP(!showHODP)} /> HODP</label>
+        <label><input type="checkbox" checked={showBranch} onChange={() => setShowBranch(!showBranch)} /> Branch</label>
+
+      </div>
+
       {/* MAP */}
       <div
         className="absolute top-[60px]"
@@ -79,19 +150,18 @@ export default function MapView() {
             mode={mode}
           />
 
-          {/* Preview */}
+          {/* Draft Preview */}
           {draftNode && !draftNode.isEdit && (
             <Marker
               position={[draftNode.latitude, draftNode.longitude]}
               icon={L.divIcon({
-                className: '',
                 html: `<div style="width:16px;height:16px;border-radius:50%;background:yellow;border:2px solid black;"></div>`
               })}
             />
           )}
 
-          {/* Nodes */}
-          {nodes.map(node => (
+          {/* FILTERED NODES */}
+          {filteredNodes.map(node => (
             <NodeMarker
               key={node._id}
               node={node}
@@ -103,8 +173,8 @@ export default function MapView() {
             />
           ))}
 
-          {/* Links */}
-          {links.map(link => (
+          {/* FILTERED LINKS */}
+          {filteredLinks.map(link => (
             <LinkLine key={link._id} link={link} />
           ))}
 

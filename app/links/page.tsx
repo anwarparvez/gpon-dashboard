@@ -1,6 +1,6 @@
 'use client';
 
-import LinkTable from '../../components/LinkTable';
+import LinkTable from '@/components/LinkTable';
 
 export default function LinksPage() {
   return (
