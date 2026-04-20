@@ -174,7 +174,7 @@ export async function POST(req) {
     }
 
     const seq = await getNextSequence(category);
-    const node_id = `${category}-${String(seq).padStart(3, '0')}`;
+    const node_id = `${category}-${String(seq).padStart(5, '0')}`;
 
     const node = await Node.create({
       name,
