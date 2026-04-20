@@ -18,7 +18,7 @@ function distanceKm(lat1, lon1, lat2, lon2) {
   return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
 }
 
-// 🔧 Optimized distance calculation
+// 📏 Distance
 async function calculateDistance(fromId, toId) {
   const nodes = await Node.find({
     _id: { $in: [fromId, toId] }
@@ -35,7 +35,7 @@ async function calculateDistance(fromId, toId) {
     to.latitude == null ||
     to.longitude == null
   ) {
-    return 0; // fallback safe
+    return 0;
   }
 
   return distanceKm(
@@ -44,6 +44,11 @@ async function calculateDistance(fromId, toId) {
     to.latitude,
     to.longitude
   );
+}
+
+// 🔄 Normalize pair
+function normalizePair(a, b) {
+  return [a.toString(), b.toString()].sort().join('_');
 }
 
 // ✅ GET
@@ -63,7 +68,7 @@ export async function GET() {
   }
 }
 
-// ✅ CREATE LINK
+// ✅ CREATE / UPSERT LINK (SAFE)
 export async function POST(req) {
   try {
     await connectDB();
@@ -75,26 +80,11 @@ export async function POST(req) {
       return new Response(JSON.stringify({ error: "Missing node IDs" }), { status: 400 });
     }
 
-    // ❌ same node
     if (from === to) {
-      return new Response(JSON.stringify({
-        error: "Cannot link same node"
-      }), { status: 400 });
+      return new Response(JSON.stringify({ error: "Cannot link same node" }), { status: 400 });
     }
 
-    // 🔄 normalized pair
-    const pair = [from, to].sort().join('_');
-
-    // ❌ duplicate
-    const exists = await Link.findOne({ node_pair: pair });
-    if (exists) {
-      return new Response(JSON.stringify({
-        error: "Link already exists"
-      }), { status: 400 });
-    }
-
-    // 📏 distance
-    const length = await calculateDistance(from, to);
+    const pair = normalizePair(from, to);
 
     const fiber_core = Number(body.fiber_core) || 12;
     const used_core = Number(body.used_core) || 0;
@@ -105,39 +95,56 @@ export async function POST(req) {
       }), { status: 400 });
     }
 
-    const link = await Link.create({
-      from_node: from,
-      to_node: to,
-      node_pair: pair,
+    const length = await calculateDistance(from, to);
 
-      fiber_core,
-      used_core,
-      fiber_type: body.fiber_type || 'GPON',
-      status: body.status || 'proposed',
+    // 🔥 UPSERT (no race condition)
+    const link = await Link.findOneAndUpdate(
+      { node_pair: pair },
+      {
+        from_node: from,
+        to_node: to,
+        node_pair: pair,
 
-      length: Number(length.toFixed(3))
-    });
+        fiber_core,
+        used_core,
+        fiber_type: body.fiber_type || 'GPON',
+        status: body.status || 'planned',
 
-    const populated = await link.populate('from_node to_node');
+        length: Number(length.toFixed(3))
+      },
+      {
+        upsert: true,
+        returnDocument: 'after',
+        runValidators: true
+      }
+    ).populate('from_node to_node');
 
-    return Response.json(populated);
+    return Response.json(link);
 
   } catch (error) {
     return new Response(JSON.stringify({ error: error.message }), { status: 500 });
   }
 }
 
-// ✅ UPDATE LINK
+// ✅ UPDATE LINK (supports changing nodes)
 export async function PUT(req) {
   try {
     await connectDB();
     const body = await req.json();
 
     const link = await Link.findById(body._id);
-
     if (!link) {
       return new Response(JSON.stringify({ error: "Link not found" }), { status: 404 });
     }
+
+    const from = body.from || link.from_node;
+    const to = body.to || link.to_node;
+
+    if (from.toString() === to.toString()) {
+      return new Response(JSON.stringify({ error: "Cannot link same node" }), { status: 400 });
+    }
+
+    const pair = normalizePair(from, to);
 
     const fiber_core = Number(body.fiber_core) || link.fiber_core;
     const used_core = Number(body.used_core) || link.used_core;
@@ -148,19 +155,20 @@ export async function PUT(req) {
       }), { status: 400 });
     }
 
-    // 📏 always recalc
-    const length = await calculateDistance(
-      link.from_node,
-      link.to_node
-    );
+    const length = await calculateDistance(from, to);
 
-    const updated = await Link.findByIdAndUpdate(
-      body._id,
+    const updated = await Link.findOneAndUpdate(
+      { _id: body._id },
       {
+        from_node: from,
+        to_node: to,
+        node_pair: pair,
+
         fiber_core,
         used_core,
         fiber_type: body.fiber_type || link.fiber_type,
         status: body.status || link.status,
+
         length: Number(length.toFixed(3))
       },
       {

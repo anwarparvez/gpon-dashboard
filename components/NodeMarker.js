@@ -2,6 +2,15 @@
 
 import { Marker, Tooltip } from 'react-leaflet';
 import L from 'leaflet';
+import { renderToStaticMarkup } from 'react-dom/server';
+
+import {
+  Server,     // OLT
+  Package,    // OCC
+  MapPin,     // ODP
+  Home,       // HODP
+  GitBranch   // Branch
+} from 'lucide-react';
 
 export default function NodeMarker({
   node,
@@ -14,18 +23,69 @@ export default function NodeMarker({
 
   const isSelected = selectedNode?._id === node._id;
 
+  // 🎯 Color by NODE TYPE
+  const getColor = () => {
+    switch (node.node_category) {
+      case 'OLT':
+        return '#7c3aed'; // purple
+      case 'OCC':
+        return '#2563eb'; // blue
+      case 'ODP':
+        return '#16a34a'; // green
+      case 'HODP':
+        return '#ea580c'; // orange
+      case 'Branch Point':
+        return '#374151'; // gray
+      default:
+        return '#6b7280';
+    }
+  };
+
+  // 🎯 Icon by type
+  const getIcon = () => {
+    switch (node.node_category) {
+      case 'OLT':
+        return <Server size={12} />;
+      case 'OCC':
+        return <Package size={12} />;
+      case 'ODP':
+        return <MapPin size={12} />;
+      case 'HODP':
+        return <Home size={12} />;
+      case 'Branch Point':
+        return <GitBranch size={12} />;
+      default:
+        return <MapPin size={12} />;
+    }
+  };
+
+  const iconHtml = renderToStaticMarkup(
+    <div
+      style={{
+        width: 20,
+        height: 20,
+        borderRadius: '50%',
+        background: getColor(),
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        border: '1px solid #111',
+
+        // subtle highlight when selected
+        boxShadow: isSelected
+          ? '0 0 6px yellow'
+          : '0 0 2px rgba(0,0,0,0.4)'
+      }}
+    >
+      {getIcon()}
+    </div>
+  );
+
   const icon = L.divIcon({
     className: '',
-    html: `
-      <div style="
-        width:14px;
-        height:14px;
-        border-radius:50%;
-        background:${node.status === 'existing' ? '#22c55e' : '#f97316'};
-        border:2px solid #1f2937;
-        box-shadow:${isSelected ? '0 0 10px yellow' : '0 0 2px rgba(0,0,0,0.5)'};
-      "></div>
-    `
+    html: iconHtml,
+    iconSize: [20, 20],
+    iconAnchor: [10, 10]
   });
 
   return (
@@ -35,7 +95,6 @@ export default function NodeMarker({
       eventHandlers={{
         click: () => {
 
-          // 🔗 LINK MODE
           if (mode === 'link') {
             setSelectedNodes(prev => {
               if (prev.find(n => n._id === node._id)) return prev;
@@ -46,13 +105,17 @@ export default function NodeMarker({
             return;
           }
 
-          // 📍 NORMAL → OPEN SIDEBAR
           setSelectedNode(node);
         }
       }}
     >
-      <Tooltip direction="top">
-        {node.node_id} - {node.name}
+      <Tooltip direction="top" offset={[0, -10]}>
+        <div>
+          <b>{node.node_id}</b><br />
+          {node.address}<br />
+          {node.node_category}<br />
+          
+        </div>
       </Tooltip>
     </Marker>
   );

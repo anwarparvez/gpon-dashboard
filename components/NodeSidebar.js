@@ -110,6 +110,10 @@ export default function NodeSidebar({
           <div><b>Name:</b> {selectedNode.name}</div>
           <div><b>Type:</b> {selectedNode.node_category}</div>
           <div><b>Status:</b> {selectedNode.status}</div>
+          <div><b>Address:</b> {selectedNode.address}</div>
+          <div><b>DGM:</b> {selectedNode.dgm}</div>
+          <div><b>Region:</b> {selectedNode.region}</div>
+
 
           <div className="flex gap-2 mt-4">
             <Button onClick={startEdit} className="flex-1">Edit</Button>
