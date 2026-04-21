@@ -3,19 +3,40 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 
+/* =========================
+   🔒 STRICT TYPES
+========================= */
+
+type NodeCategory =
+  | 'OLT'
+  | 'OCC'
+  | 'ODP'
+  | 'HODP'
+  | 'Branch Point';
+
 type NodeType = {
   _id: string;
   node_id: string;
   name: string;
   latitude: number;
   longitude: number;
-  node_category: string;
+  node_category: NodeCategory;
   status: 'existing' | 'proposed';
 };
 
 type LinkType = {
   _id: string;
 };
+
+type CategoryStat = {
+  existing: number;
+  proposed: number;
+  total: number;
+};
+
+/* =========================
+   🏠 PAGE
+========================= */
 
 export default function Home() {
   const [nodes, setNodes] = useState<NodeType[]>([]);
@@ -31,26 +52,30 @@ export default function Home() {
       .then((data: LinkType[]) => setLinks(data));
   }, []);
 
-  // 📊 Summary
+  /* =========================
+     📊 SUMMARY
+  ========================= */
+
   const totalNodes = nodes.length;
   const totalLinks = links.length;
 
   const existingNodes = nodes.filter(n => n.status === 'existing').length;
   const proposedNodes = nodes.filter(n => n.status === 'proposed').length;
 
-  // 🔥 CATEGORY-WISE COUNT
-  const categoryStats = {};
+  /* =========================
+     🔥 CATEGORY STATS (STRICT)
+  ========================= */
+
+  const categoryStats: Record<NodeCategory, CategoryStat> = {
+    OLT: { existing: 0, proposed: 0, total: 0 },
+    OCC: { existing: 0, proposed: 0, total: 0 },
+    ODP: { existing: 0, proposed: 0, total: 0 },
+    HODP: { existing: 0, proposed: 0, total: 0 },
+    'Branch Point': { existing: 0, proposed: 0, total: 0 }
+  };
 
   nodes.forEach(node => {
     const cat = node.node_category;
-
-    if (!categoryStats[cat]) {
-      categoryStats[cat] = {
-        existing: 0,
-        proposed: 0,
-        total: 0
-      };
-    }
 
     categoryStats[cat].total++;
 
@@ -60,6 +85,10 @@ export default function Home() {
       categoryStats[cat].proposed++;
     }
   });
+
+  /* =========================
+     🎨 UI
+  ========================= */
 
   return (
     <div className="p-6 bg-white dark:bg-gray-900 text-black dark:text-white min-h-screen">
@@ -98,7 +127,9 @@ export default function Home() {
 
       {/* 🔥 CATEGORY TABLE */}
       <div className="mb-8">
-        <h2 className="text-lg font-bold mb-3">📊 Node Category Summary</h2>
+        <h2 className="text-lg font-bold mb-3">
+          📊 Node Category Summary
+        </h2>
 
         <table className="w-full border text-sm">
           <thead className="bg-gray-200 dark:bg-gray-800">
@@ -111,14 +142,18 @@ export default function Home() {
           </thead>
 
           <tbody>
-            {Object.entries(categoryStats).map(([cat, val]: any) => (
-              <tr key={cat} className="border-t">
-                <td className="p-2 font-medium">{cat}</td>
-                <td className="p-2 text-center text-green-600">{val.existing}</td>
-                <td className="p-2 text-center text-orange-500">{val.proposed}</td>
-                <td className="p-2 text-center font-bold">{val.total}</td>
-              </tr>
-            ))}
+            {(Object.keys(categoryStats) as NodeCategory[]).map(cat => {
+              const val = categoryStats[cat];
+
+              return (
+                <tr key={cat} className="border-t">
+                  <td className="p-2 font-medium">{cat}</td>
+                  <td className="p-2 text-center text-green-600">{val.existing}</td>
+                  <td className="p-2 text-center text-orange-500">{val.proposed}</td>
+                  <td className="p-2 text-center font-bold">{val.total}</td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
