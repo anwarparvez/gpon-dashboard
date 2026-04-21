@@ -55,7 +55,7 @@ export default function DeleteLinkButton({ link, setLinks }) {
         }}
         className="mt-2 w-full bg-red-600 hover:bg-red-700 text-white p-2 rounded"
       >
-        🗑 Delete Link
+        🗑 
       </button>
 
       {/* 🧩 Confirmation Modal */}

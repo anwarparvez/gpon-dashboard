@@ -31,7 +31,7 @@ export default function MapView() {
   const [mode, setMode] = useState('add-node');
   const [sidebarWidth, setSidebarWidth] = useState(220);
 
-  // ✅ FILTER STATES
+  // 🎛️ FILTER STATES
   const [showExisting, setShowExisting] = useState(true);
   const [showProposed, setShowProposed] = useState(true);
 
@@ -41,6 +41,7 @@ export default function MapView() {
   const [showHODP, setShowHODP] = useState(true);
   const [showBranch, setShowBranch] = useState(true);
 
+  // 🚀 LOAD DATA
   useEffect(() => {
     setMounted(true);
 
@@ -53,15 +54,13 @@ export default function MapView() {
       .then(data => setLinks(Array.isArray(data) ? data : []));
   }, []);
 
-  // ✅ FILTER NODES
+  // 🧠 FILTER NODES
   const filteredNodes = useMemo(() => {
     return nodes.filter(node => {
 
-      // Status
       if (node.status === 'existing' && !showExisting) return false;
       if (node.status === 'proposed' && !showProposed) return false;
 
-      // Category
       if (node.node_category === 'OLT' && !showOLT) return false;
       if (node.node_category === 'OCC' && !showOCC) return false;
       if (node.node_category === 'ODP' && !showODP) return false;
@@ -72,7 +71,7 @@ export default function MapView() {
     });
   }, [nodes, showExisting, showProposed, showOLT, showOCC, showODP, showHODP, showBranch]);
 
-  // ✅ FILTER LINKS
+  // 🧠 FILTER LINKS
   const filteredLinks = useMemo(() => {
     return links.filter(link => {
       const from = link.from_node;
@@ -80,10 +79,7 @@ export default function MapView() {
 
       if (!from || !to) return false;
 
-      // existing
       if (!showExisting && from.status === 'existing' && to.status === 'existing') return false;
-
-      // proposed
       if (!showProposed && (from.status === 'proposed' || to.status === 'proposed')) return false;
 
       return true;
@@ -96,7 +92,7 @@ export default function MapView() {
     <>
       <LeftSidebar mode={mode} setMode={setMode} setSidebarWidth={setSidebarWidth} />
 
-      {/* RIGHT SIDEBAR */}
+      {/* RIGHT SIDEBARS */}
       <NodeSidebar
         draft={draftNode}
         selectedNode={selectedNode}
@@ -113,7 +109,7 @@ export default function MapView() {
       />
 
       {/* 🎛️ FILTER PANEL */}
-      <div className="absolute top-[80px] left-[240px] z-[1000] bg-white p-3 rounded shadow text-sm space-y-2">
+      <div className="absolute top-[80px] left-[240px] z-[1000] bg-white dark:bg-gray-900 p-3 rounded shadow text-sm space-y-2">
 
         <div className="font-semibold">Status</div>
         <label><input type="checkbox" checked={showExisting} onChange={() => setShowExisting(!showExisting)} /> Existing</label>
@@ -130,7 +126,7 @@ export default function MapView() {
 
       </div>
 
-      {/* MAP */}
+      {/* 🗺️ MAP */}
       <div
         className="absolute top-[60px]"
         style={{
@@ -150,7 +146,7 @@ export default function MapView() {
             mode={mode}
           />
 
-          {/* Draft Preview */}
+          {/* 🟡 Draft Node */}
           {draftNode && !draftNode.isEdit && (
             <Marker
               position={[draftNode.latitude, draftNode.longitude]}
@@ -160,7 +156,7 @@ export default function MapView() {
             />
           )}
 
-          {/* FILTERED NODES */}
+          {/* 📍 Nodes */}
           {filteredNodes.map(node => (
             <NodeMarker
               key={node._id}
@@ -173,9 +169,13 @@ export default function MapView() {
             />
           ))}
 
-          {/* FILTERED LINKS */}
+          {/* 🔗 Links (FIXED HERE) */}
           {filteredLinks.map(link => (
-            <LinkLine key={link._id} link={link} />
+            <LinkLine
+              key={link._id}
+              link={link}
+              setLinks={setLinks}   // ✅ FIX
+            />
           ))}
 
         </MapContainer>

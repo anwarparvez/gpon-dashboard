@@ -27,7 +27,7 @@ export default function NodeSidebar({
 
   const node = draft;
 
-  // ✅ SAVE
+  // ✅ SAVE NODE
   const handleSave = async () => {
     try {
       const res = await fetch('/api/nodes', {
@@ -59,34 +59,50 @@ export default function NodeSidebar({
     }
   };
 
-  // 🗑 DELETE
+  // 🗑 DELETE NODE
   const handleDelete = async () => {
     if (!confirm(`Delete node ${selectedNode.node_id}?`)) return;
 
-    await fetch('/api/nodes', {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: selectedNode._id })
-    });
+    try {
+      const res = await fetch('/api/nodes', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: selectedNode._id })
+      });
 
-    setNodes(prev => prev.filter(n => n._id !== selectedNode._id));
+      if (!res.ok) {
+        alert("Delete failed");
+        return;
+      }
 
-    setLinks(prev =>
-      prev.filter(l =>
-        l.from_node?._id !== selectedNode._id &&
-        l.to_node?._id !== selectedNode._id
-      )
-    );
+      // ✅ remove node
+      setNodes(prev =>
+        prev.filter(n => n._id !== selectedNode._id)
+      );
 
-    setSelectedNode(null);
+      // ✅ remove related links
+      setLinks(prev =>
+        prev.filter(l =>
+          l.from_node?._id !== selectedNode._id &&
+          l.to_node?._id !== selectedNode._id
+        )
+      );
+
+      setSelectedNode(null);
+
+    } catch (err) {
+      console.error(err);
+      alert("Delete error");
+    }
   };
 
-  // ✏️ EDIT START
+  // ✏️ START EDIT
   const startEdit = () => {
     setDraft({ ...selectedNode, isEdit: true });
     setSelectedNode(null);
   };
 
+  // 🔄 UPDATE FIELD
   const updateField = (key, value) => {
     setDraft(prev => ({
       ...prev,
@@ -95,7 +111,7 @@ export default function NodeSidebar({
   };
 
   return (
-    <div className="fixed right-0 top-[60px] w-[340px] h-[calc(100%-60px)] bg-card border-l p-4 z-[3000] overflow-y-auto">
+    <div className="fixed right-0 top-[60px] w-[320px] h-[calc(100%-60px)] bg-white dark:bg-gray-900 text-black dark:text-white p-4 z-[2000] shadow-lg">
 
       <h3 className="text-lg font-semibold mb-4">
         {isView && '📍 Node Details'}
@@ -103,17 +119,21 @@ export default function NodeSidebar({
         {isEdit && '✏️ Edit Node'}
       </h3>
 
-      {/* ===== VIEW MODE ===== */}
+      {/* ================= VIEW ================= */}
       {isView && (
         <div className="space-y-2 text-sm">
+
           <div><b>ID:</b> {selectedNode.node_id}</div>
           <div><b>Name:</b> {selectedNode.name}</div>
           <div><b>Type:</b> {selectedNode.node_category}</div>
           <div><b>Status:</b> {selectedNode.status}</div>
-          <div><b>Address:</b> {selectedNode.address}</div>
-          <div><b>DGM:</b> {selectedNode.dgm}</div>
           <div><b>Region:</b> {selectedNode.region}</div>
+          <div><b>Code:</b> {selectedNode.node_code}</div>
+          <div><b>Address:</b> {selectedNode.address}</div>
 
+          <div className="text-xs text-muted-foreground mt-2">
+            📍 {selectedNode.latitude?.toFixed(5)}, {selectedNode.longitude?.toFixed(5)}
+          </div>
 
           <div className="flex gap-2 mt-4">
             <Button onClick={startEdit} className="flex-1">Edit</Button>
@@ -121,10 +141,11 @@ export default function NodeSidebar({
               Delete
             </Button>
           </div>
+
         </div>
       )}
 
-      {/* ===== ADD / EDIT ===== */}
+      {/* ================= ADD / EDIT ================= */}
       {(isAdd || isEdit) && draft && (
         <div className="space-y-3">
 
@@ -134,7 +155,7 @@ export default function NodeSidebar({
             onChange={(e) => updateField('name', e.target.value)}
           />
 
-          {/* 🔥 CATEGORY FIX */}
+          {/* CATEGORY */}
           <Select
             value={draft.node_category ?? 'ODP'}
             onValueChange={(v) => updateField('node_category', v)}
@@ -143,15 +164,16 @@ export default function NodeSidebar({
               <SelectValue placeholder="Select Category" />
             </SelectTrigger>
 
-            <SelectContent position="popper" className="z-[4000]">
+            <SelectContent className="z-[4000]">
               <SelectItem value="OLT">OLT</SelectItem>
               <SelectItem value="OCC">OCC</SelectItem>
               <SelectItem value="ODP">ODP</SelectItem>
               <SelectItem value="HODP">HODP</SelectItem>
+              <SelectItem value="Branch Point">Branch Point</SelectItem>
             </SelectContent>
           </Select>
 
-          {/* 🔥 STATUS FIX */}
+          {/* STATUS */}
           <Select
             value={draft.status ?? 'proposed'}
             onValueChange={(v) => updateField('status', v)}
@@ -160,7 +182,7 @@ export default function NodeSidebar({
               <SelectValue placeholder="Select Status" />
             </SelectTrigger>
 
-            <SelectContent position="popper" className="z-[4000]">
+            <SelectContent className="z-[4000]">
               <SelectItem value="existing">Existing</SelectItem>
               <SelectItem value="proposed">Proposed</SelectItem>
             </SelectContent>
@@ -184,10 +206,12 @@ export default function NodeSidebar({
             onChange={(e) => updateField('address', e.target.value)}
           />
 
+          {/* LOCATION */}
           <div className="text-xs text-muted-foreground">
             📍 {draft.latitude?.toFixed(5)}, {draft.longitude?.toFixed(5)}
           </div>
 
+          {/* ACTIONS */}
           <div className="flex gap-2">
             <Button onClick={handleSave} className="flex-1">
               {isEdit ? 'Update' : 'Save'}
@@ -205,6 +229,7 @@ export default function NodeSidebar({
         </div>
       )}
 
+      {/* CLOSE */}
       <Button
         variant="outline"
         className="w-full mt-4"
