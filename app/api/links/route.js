@@ -1,54 +1,17 @@
 import { connectDB } from '@/lib/mongodb';
 import Node from '@/models/Node';
 import Link from '@/models/Link';
+import { buildLink } from '@/lib/gponRules';
 
-// 🌍 Haversine (km)
-function distanceKm(lat1, lon1, lat2, lon2) {
-  const R = 6371;
-
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLon = (lon2 - lon1) * Math.PI / 180;
-
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(lat1 * Math.PI / 180) *
-    Math.cos(lat2 * Math.PI / 180) *
-    Math.sin(dLon / 2) ** 2;
-
-  return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
-}
-
-// 📏 Distance
-async function calculateDistance(fromId, toId) {
-  const nodes = await Node.find({
-    _id: { $in: [fromId, toId] }
-  });
-
-  const from = nodes.find(n => n._id.toString() === fromId.toString());
-  const to = nodes.find(n => n._id.toString() === toId.toString());
-
-  if (!from || !to) throw new Error("Node not found");
-
-  if (
-    from.latitude == null ||
-    from.longitude == null ||
-    to.latitude == null ||
-    to.longitude == null
-  ) {
-    return 0;
-  }
-
-  return distanceKm(
-    from.latitude,
-    from.longitude,
-    to.latitude,
-    to.longitude
-  );
-}
-
-// 🔄 Normalize pair
+// 🔄 Normalize pair (fallback only)
 function normalizePair(a, b) {
   return [a.toString(), b.toString()].sort().join('_');
+}
+
+// 🔧 Load nodes once (helper)
+async function getNodesMap(ids) {
+  const nodes = await Node.find({ _id: { $in: ids } });
+  return new Map(nodes.map(n => [n._id.toString(), n]));
 }
 
 // ✅ GET
@@ -68,7 +31,7 @@ export async function GET() {
   }
 }
 
-// ✅ CREATE / UPSERT LINK (SAFE)
+// ✅ CREATE / UPSERT LINK (GPON SAFE)
 export async function POST(req) {
   try {
     await connectDB();
@@ -80,38 +43,25 @@ export async function POST(req) {
       return new Response(JSON.stringify({ error: "Missing node IDs" }), { status: 400 });
     }
 
-    if (from === to) {
-      return new Response(JSON.stringify({ error: "Cannot link same node" }), { status: 400 });
-    }
+    // 🚀 Load nodes once
+    const nodeMap = await getNodesMap([from, to]);
 
-    const pair = normalizePair(from, to);
+    const fromNode = nodeMap.get(from.toString());
+    const toNode = nodeMap.get(to.toString());
 
-    const fiber_core = Number(body.fiber_core) || 12;
-    const used_core = Number(body.used_core) || 0;
+    // 🔥 CENTRAL ENGINE
+    const result = buildLink(fromNode, toNode, body);
 
-    if (used_core > fiber_core) {
+    if (!result.valid) {
       return new Response(JSON.stringify({
-        error: "Used core cannot exceed total core"
+        error: result.error
       }), { status: 400 });
     }
 
-    const length = await calculateDistance(from, to);
-
-    // 🔥 UPSERT (no race condition)
+    // 🚀 UPSERT (SAFE + NO DUPLICATE)
     const link = await Link.findOneAndUpdate(
-      { node_pair: pair },
-      {
-        from_node: from,
-        to_node: to,
-        node_pair: pair,
-
-        fiber_core,
-        used_core,
-        fiber_type: body.fiber_type || 'GPON',
-        status: body.status || 'planned',
-
-        length: Number(length.toFixed(3))
-      },
+      { node_pair: result.data.node_pair },
+      result.data,
       {
         upsert: true,
         returnDocument: 'after',
@@ -126,7 +76,7 @@ export async function POST(req) {
   }
 }
 
-// ✅ UPDATE LINK (supports changing nodes)
+// ✅ UPDATE LINK (GPON SAFE)
 export async function PUT(req) {
   try {
     await connectDB();
@@ -140,37 +90,29 @@ export async function PUT(req) {
     const from = body.from || link.from_node;
     const to = body.to || link.to_node;
 
-    if (from.toString() === to.toString()) {
-      return new Response(JSON.stringify({ error: "Cannot link same node" }), { status: 400 });
-    }
+    // 🚀 Load nodes
+    const nodeMap = await getNodesMap([from, to]);
 
-    const pair = normalizePair(from, to);
+    const fromNode = nodeMap.get(from.toString());
+    const toNode = nodeMap.get(to.toString());
 
-    const fiber_core = Number(body.fiber_core) || link.fiber_core;
-    const used_core = Number(body.used_core) || link.used_core;
+    // 🔥 REBUILD LINK (FULL VALIDATION)
+    const result = buildLink(fromNode, toNode, {
+      fiber_core: body.fiber_core ?? link.fiber_core,
+      used_core: body.used_core ?? link.used_core,
+      status: body.status ?? link.status,
+      fiber_type: body.fiber_type ?? link.fiber_type
+    });
 
-    if (used_core > fiber_core) {
+    if (!result.valid) {
       return new Response(JSON.stringify({
-        error: "Used core cannot exceed total core"
+        error: result.error
       }), { status: 400 });
     }
 
-    const length = await calculateDistance(from, to);
-
-    const updated = await Link.findOneAndUpdate(
-      { _id: body._id },
-      {
-        from_node: from,
-        to_node: to,
-        node_pair: pair,
-
-        fiber_core,
-        used_core,
-        fiber_type: body.fiber_type || link.fiber_type,
-        status: body.status || link.status,
-
-        length: Number(length.toFixed(3))
-      },
+    const updated = await Link.findByIdAndUpdate(
+      body._id,
+      result.data,
       {
         returnDocument: 'after',
         runValidators: true

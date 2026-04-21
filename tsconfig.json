@@ -29,6 +29,6 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
     "**/*.mts"
-  ],
+, "app/api/nodes/manual-match-hodp/route.js"  ],
   "exclude": ["node_modules"]
 }
