@@ -1,20 +1,21 @@
 import { connectDB } from '@/lib/mongodb';
 import Node from '@/models/Node';
 import Link from '@/models/Link';
+
 import { buildLink } from '@/lib/gponRules';
+import { validateHODP } from '@/lib/linkUtils';
 
-// 🔄 Normalize pair (fallback only)
-function normalizePair(a, b) {
-  return [a.toString(), b.toString()].sort().join('_');
-}
-
-// 🔧 Load nodes once (helper)
+/* =========================
+   🔧 Load nodes helper
+========================= */
 async function getNodesMap(ids) {
   const nodes = await Node.find({ _id: { $in: ids } });
   return new Map(nodes.map(n => [n._id.toString(), n]));
 }
 
-// ✅ GET
+/* =========================
+   ✅ GET ALL LINKS
+========================= */
 export async function GET() {
   try {
     await connectDB();
@@ -27,11 +28,15 @@ export async function GET() {
     return Response.json(links);
 
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), { status: 500 });
+    return new Response(JSON.stringify({
+      error: error.message
+    }), { status: 500 });
   }
 }
 
-// ✅ CREATE / UPSERT LINK (GPON SAFE)
+/* =========================
+   ✅ CREATE / UPSERT LINK
+========================= */
 export async function POST(req) {
   try {
     await connectDB();
@@ -40,16 +45,27 @@ export async function POST(req) {
     const { from, to } = body;
 
     if (!from || !to) {
-      return new Response(JSON.stringify({ error: "Missing node IDs" }), { status: 400 });
+      return new Response(JSON.stringify({
+        error: "Missing node IDs"
+      }), { status: 400 });
     }
 
-    // 🚀 Load nodes once
+    // 🔧 Load nodes
     const nodeMap = await getNodesMap([from, to]);
 
     const fromNode = nodeMap.get(from.toString());
     const toNode = nodeMap.get(to.toString());
 
-    // 🔥 CENTRAL ENGINE
+    if (!fromNode || !toNode) {
+      return new Response(JSON.stringify({
+        error: "Node not found"
+      }), { status: 404 });
+    }
+
+    // 🔥 DB VALIDATION (HODP rule)
+    await validateHODP(fromNode, toNode);
+
+    // 🔥 GPON ENGINE
     const result = buildLink(fromNode, toNode, body);
 
     if (!result.valid) {
@@ -58,7 +74,7 @@ export async function POST(req) {
       }), { status: 400 });
     }
 
-    // 🚀 UPSERT (SAFE + NO DUPLICATE)
+    // 🚀 UPSERT (safe, no duplicates)
     const link = await Link.findOneAndUpdate(
       { node_pair: result.data.node_pair },
       result.data,
@@ -72,36 +88,53 @@ export async function POST(req) {
     return Response.json(link);
 
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), { status: 500 });
+    return new Response(JSON.stringify({
+      error: error.message
+    }), { status: 500 });
   }
 }
 
-// ✅ UPDATE LINK (GPON SAFE)
+/* =========================
+   ✅ UPDATE LINK
+========================= */
 export async function PUT(req) {
   try {
     await connectDB();
     const body = await req.json();
 
     const link = await Link.findById(body._id);
+
     if (!link) {
-      return new Response(JSON.stringify({ error: "Link not found" }), { status: 404 });
+      return new Response(JSON.stringify({
+        error: "Link not found"
+      }), { status: 404 });
     }
 
     const from = body.from || link.from_node;
     const to = body.to || link.to_node;
 
-    // 🚀 Load nodes
+    // 🔧 Load nodes
     const nodeMap = await getNodesMap([from, to]);
 
     const fromNode = nodeMap.get(from.toString());
     const toNode = nodeMap.get(to.toString());
 
-    // 🔥 REBUILD LINK (FULL VALIDATION)
+    if (!fromNode || !toNode) {
+      return new Response(JSON.stringify({
+        error: "Node not found"
+      }), { status: 404 });
+    }
+
+    // 🔥 HODP RULE (exclude current link)
+    await validateHODP(fromNode, toNode, link._id);
+
+    // 🔥 GPON ENGINE (rebuild)
     const result = buildLink(fromNode, toNode, {
       fiber_core: body.fiber_core ?? link.fiber_core,
       used_core: body.used_core ?? link.used_core,
       status: body.status ?? link.status,
-      fiber_type: body.fiber_type ?? link.fiber_type
+      fiber_type: body.fiber_type ?? link.fiber_type,
+      note: body.note ?? link.note
     });
 
     if (!result.valid) {
@@ -122,25 +155,35 @@ export async function PUT(req) {
     return Response.json(updated);
 
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), { status: 500 });
+    return new Response(JSON.stringify({
+      error: error.message
+    }), { status: 500 });
   }
 }
 
-// ✅ DELETE
+/* =========================
+   ✅ DELETE LINK
+========================= */
 export async function DELETE(req) {
   try {
     await connectDB();
     const body = await req.json();
 
     if (!body.id) {
-      return new Response(JSON.stringify({ error: "Missing ID" }), { status: 400 });
+      return new Response(JSON.stringify({
+        error: "Missing ID"
+      }), { status: 400 });
     }
 
     await Link.findByIdAndDelete(body.id);
 
-    return Response.json({ success: true });
+    return Response.json({
+      success: true
+    });
 
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), { status: 500 });
+    return new Response(JSON.stringify({
+      error: error.message
+    }), { status: 500 });
   }
 }

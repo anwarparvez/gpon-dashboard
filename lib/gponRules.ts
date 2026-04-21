@@ -1,4 +1,4 @@
-// 🔥 GPON RULE + LINK ENGINE (FINAL)
+// 🔥 GPON RULE + LINK ENGINE (FINAL - CLEAN)
 
 export type NodeType =
   | 'OLT'
@@ -6,6 +6,14 @@ export type NodeType =
   | 'ODP'
   | 'HODP'
   | 'Branch Point';
+
+export interface GponNode {
+  _id: any;
+  node_id: string;
+  node_category: NodeType;
+  latitude?: number;
+  longitude?: number;
+}
 
 type FiberType = 'UG' | 'OH';
 
@@ -15,8 +23,8 @@ type ValidateResult =
   | { valid: false; error: string }
   | {
       valid: true;
-      fromNode: any;
-      toNode: any;
+      fromNode: GponNode;
+      toNode: GponNode;
       fiber_type: FiberType;
       reversed: boolean;
     };
@@ -35,9 +43,14 @@ type BuildResult =
         used_core: number;
         available_core: number;
 
-        length: number; // km
+        length: number;
+
         status: 'active' | 'planned' | 'proposed';
         note: string;
+
+        // 🔍 Debug (optional but useful)
+        from_category: NodeType;
+        to_category: NodeType;
       };
     };
 
@@ -49,16 +62,16 @@ export function getLinkRule(from: NodeType, to: NodeType): Rule | null {
     OLT: {
       OCC: { fiber: 'UG' },
       'Branch Point': { fiber: 'UG' },
-      ODP: { fiber: 'UG' },
+      ODP: { fiber: 'UG' }
     },
     OCC: {
       ODP: { fiber: 'UG' },
-      'Branch Point': { fiber: 'UG' },
+      'Branch Point': { fiber: 'UG' }
     },
     ODP: {
       HODP: { fiber: 'OH' },
-      'Branch Point': { fiber: 'OH' },
-    },
+      'Branch Point': { fiber: 'OH' }
+    }
   };
 
   return rules[from]?.[to] || null;
@@ -67,50 +80,50 @@ export function getLinkRule(from: NodeType, to: NodeType): Rule | null {
 /* =========================
    🔍 VALIDATE + AUTO FIX
 ========================= */
-export function validateLink(fromNode: any, toNode: any): ValidateResult {
+export function validateLink(
+  fromNode: GponNode,
+  toNode: GponNode
+): ValidateResult {
+
   if (!fromNode || !toNode) {
     return { valid: false, error: 'Node missing' };
   }
 
-  // 🔒 Safe ObjectId compare
+  // 🔒 Prevent same node
   if (String(fromNode._id) === String(toNode._id)) {
     return { valid: false, error: 'Same node not allowed' };
   }
 
-  let rule = getLinkRule(
-    fromNode.node_category as NodeType,
-    toNode.node_category as NodeType
-  );
+  let A = fromNode;
+  let B = toNode;
 
+  let rule = getLinkRule(A.node_category, B.node_category);
   let reversed = false;
 
-  // 🔄 Try reverse
+  // 🔄 Try reverse direction
   if (!rule) {
-    const reverseRule = getLinkRule(
-      toNode.node_category as NodeType,
-      fromNode.node_category as NodeType
-    );
+    const reverseRule = getLinkRule(B.node_category, A.node_category);
 
     if (reverseRule) {
       reversed = true;
       rule = reverseRule;
-      [fromNode, toNode] = [toNode, fromNode];
+      [A, B] = [B, A]; // safe swap
     }
   }
 
   if (!rule) {
     return {
       valid: false,
-      error: `Invalid: ${fromNode.node_category} → ${toNode.node_category}`,
+      error: `Invalid: ${fromNode.node_category} → ${toNode.node_category}`
     };
   }
 
   return {
     valid: true,
-    fromNode,
-    toNode,
+    fromNode: A,
+    toNode: B,
     fiber_type: rule.fiber,
-    reversed,
+    reversed
   };
 }
 
@@ -123,6 +136,7 @@ export function calculateDistanceKm(
   lat2?: number,
   lon2?: number
 ): number {
+
   if (
     lat1 == null ||
     lon1 == null ||
@@ -148,8 +162,8 @@ export function calculateDistanceKm(
    🔗 BUILD LINK (MAIN ENGINE)
 ========================= */
 export function buildLink(
-  fromNode: any,
-  toNode: any,
+  fromNode: GponNode,
+  toNode: GponNode,
   extra: any = {}
 ): BuildResult {
 
@@ -158,7 +172,7 @@ export function buildLink(
   if (!validation.valid) {
     return {
       valid: false,
-      error: validation.error,
+      error: validation.error
     };
   }
 
@@ -172,18 +186,22 @@ export function buildLink(
     B.longitude
   );
 
-  // 🔄 Normalize pair (A-B = B-A)
+  const safeDistance = distance > 0
+    ? Number(distance.toFixed(3))
+    : 0;
+
+  // 🔄 Normalize pair
   const ids = [String(A._id), String(B._id)].sort();
   const node_pair = `${ids[0]}_${ids[1]}`;
 
-  // 🔢 Core
+  // 🔢 Core validation
   const fiber_core = Number(extra.fiber_core) || 12;
   const used_core = Number(extra.used_core) || 0;
 
   if (used_core > fiber_core) {
     return {
       valid: false,
-      error: 'Used core exceeds total core',
+      error: 'Used core exceeds total core'
     };
   }
 
@@ -196,15 +214,19 @@ export function buildLink(
       to_node: B._id,
       node_pair,
 
-      fiber_type,
+      fiber_type: extra.fiber_type || fiber_type,
       fiber_core,
       used_core,
       available_core,
 
-      length: Number(distance.toFixed(3)),
+      length: safeDistance,
 
-      status: (extra.status as 'active' | 'planned' | 'proposed') || 'planned',
+      status: extra.status || 'planned',
       note: extra.note || '',
-    },
+
+      // 🔍 helpful for UI/debug
+      from_category: A.node_category,
+      to_category: B.node_category
+    }
   };
 }
