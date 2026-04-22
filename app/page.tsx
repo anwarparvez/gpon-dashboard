@@ -3,8 +3,26 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 
+/* ✅ shadcn */
+import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableHeader,
+  TableHead,
+  TableRow,
+  TableBody,
+  TableCell
+} from "@/components/ui/table";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+
 /* =========================
-   🔒 STRICT TYPES
+   🔒 TYPES
 ========================= */
 
 type NodeCategory =
@@ -17,15 +35,14 @@ type NodeCategory =
 type NodeType = {
   _id: string;
   node_id: string;
-  name: string;
-  latitude: number;
-  longitude: number;
   node_category: NodeCategory;
   status: 'existing' | 'proposed';
 };
 
 type LinkType = {
   _id: string;
+  from_node: any;
+  to_node: any;
 };
 
 type CategoryStat = {
@@ -41,15 +58,11 @@ type CategoryStat = {
 export default function Home() {
   const [nodes, setNodes] = useState<NodeType[]>([]);
   const [links, setLinks] = useState<LinkType[]>([]);
+  const [filter, setFilter] = useState<'all' | 'existing' | 'proposed'>('all');
 
   useEffect(() => {
-    fetch('/api/nodes')
-      .then(res => res.json())
-      .then((data: NodeType[]) => setNodes(data));
-
-    fetch('/api/links')
-      .then(res => res.json())
-      .then((data: LinkType[]) => setLinks(data));
+    fetch('/api/nodes').then(res => res.json()).then(setNodes);
+    fetch('/api/links').then(res => res.json()).then(setLinks);
   }, []);
 
   /* =========================
@@ -63,7 +76,7 @@ export default function Home() {
   const proposedNodes = nodes.filter(n => n.status === 'proposed').length;
 
   /* =========================
-     🔥 CATEGORY STATS (STRICT)
+     📊 CATEGORY STATS
   ========================= */
 
   const categoryStats: Record<NodeCategory, CategoryStat> = {
@@ -75,15 +88,97 @@ export default function Home() {
   };
 
   nodes.forEach(node => {
-    const cat = node.node_category;
-
-    categoryStats[cat].total++;
+    categoryStats[node.node_category].total++;
 
     if (node.status === 'existing') {
-      categoryStats[cat].existing++;
+      categoryStats[node.node_category].existing++;
     } else {
-      categoryStats[cat].proposed++;
+      categoryStats[node.node_category].proposed++;
     }
+  });
+
+  /* =========================
+     🔗 OCC SUMMARY
+  ========================= */
+
+  const nodeMap = new Map(nodes.map(n => [n._id, n]));
+  const odpToOcc: Record<string, string> = {};
+
+  links.forEach(link => {
+    const from = nodeMap.get(link.from_node?._id || link.from_node);
+    const to = nodeMap.get(link.to_node?._id || link.to_node);
+
+    if (!from || !to) return;
+
+    if (from.node_category === 'OCC' && to.node_category === 'ODP') {
+      odpToOcc[to.node_id] = from.node_id;
+    }
+
+    if (to.node_category === 'OCC' && from.node_category === 'ODP') {
+      odpToOcc[from.node_id] = to.node_id;
+    }
+  });
+
+  const occSummary: Record<
+    string,
+    { odp: number; hodp: number; branch: number; total: number }
+  > = {};
+
+  links.forEach(link => {
+    const from = nodeMap.get(link.from_node?._id || link.from_node);
+    const to = nodeMap.get(link.to_node?._id || link.to_node);
+
+    if (!from || !to) return;
+
+    let odp: any = null;
+    let other: any = null;
+
+    if (from.node_category === 'ODP') {
+      odp = from;
+      other = to;
+    } else if (to.node_category === 'ODP') {
+      odp = to;
+      other = from;
+    }
+
+    if (!odp || !other) return;
+
+    const occ = odpToOcc[odp.node_id];
+    if (!occ) return;
+
+    if (!occSummary[occ]) {
+      occSummary[occ] = { odp: 0, hodp: 0, branch: 0, total: 0 };
+    }
+
+    occSummary[occ].total++;
+
+    if (other.node_category === 'HODP') {
+      occSummary[occ].hodp++;
+    }
+
+    if (other.node_category === 'Branch Point') {
+      occSummary[occ].branch++;
+    }
+  });
+
+  /* =========================
+     🚫 UNCONNECTED
+  ========================= */
+
+  const connectedSet = new Set<string>();
+
+  links.forEach(link => {
+    connectedSet.add(String(link.from_node?._id || link.from_node));
+    connectedSet.add(String(link.to_node?._id || link.to_node));
+  });
+
+  const unconnectedNodes = nodes.filter(
+    n => !connectedSet.has(String(n._id))
+  );
+
+  const filteredUnconnectedNodes = unconnectedNodes.filter(n => {
+    if (filter === 'all') return true;
+    return n.status === filter;
   });
 
   /* =========================
@@ -91,88 +186,203 @@ export default function Home() {
   ========================= */
 
   return (
-    <div className="p-6 bg-white dark:bg-gray-900 text-black dark:text-white min-h-screen">
+    <div className="p-6 space-y-6">
 
-      <h1 className="text-2xl font-bold mb-6 text-center">
+      <h1 className="text-2xl font-bold text-center">
         GPON Planning Dashboard
       </h1>
 
-      {/* 📊 Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      {/* SUMMARY */}
+      <div className="grid md:grid-cols-3 gap-4">
+        <Card>
+          <CardHeader><CardTitle>Total Nodes</CardTitle></CardHeader>
+          <CardContent className="text-3xl font-bold">{totalNodes}</CardContent>
+        </Card>
 
-        <div className="bg-blue-600 text-white p-5 rounded shadow">
-          <h3>Total Nodes</h3>
-          <p className="text-3xl font-bold">{totalNodes}</p>
-        </div>
+        <Card>
+          <CardHeader><CardTitle>Total Links</CardTitle></CardHeader>
+          <CardContent className="text-3xl font-bold">{totalLinks}</CardContent>
+        </Card>
 
-        <div className="bg-green-600 text-white p-5 rounded shadow">
-          <h3>Total Links</h3>
-          <p className="text-3xl font-bold">{totalLinks}</p>
-        </div>
-
-        <div className="bg-purple-600 text-white p-5 rounded shadow">
-          <h3>Existing Nodes</h3>
-          <p className="text-3xl font-bold">{existingNodes}</p>
-        </div>
-
+        <Card>
+          <CardHeader><CardTitle>Unconnected</CardTitle></CardHeader>
+          <CardContent className="text-3xl font-bold text-red-500">
+            {unconnectedNodes.length}
+          </CardContent>
+        </Card>
       </div>
 
-      {/* 📊 Proposed Count */}
-      <div className="mb-6">
-        <div className="bg-gray-200 dark:bg-gray-800 p-4 rounded">
-          <h4 className="font-bold mb-2">Proposed Nodes</h4>
-          <p className="text-xl">{proposedNodes}</p>
-        </div>
+      {/* EXISTING vs PROPOSED */}
+      <div className="grid md:grid-cols-2 gap-4">
+        <Card>
+          <CardHeader><CardTitle>Existing Network</CardTitle></CardHeader>
+          <CardContent className="flex justify-between">
+            <span className="text-3xl text-green-600 font-bold">
+              {existingNodes}
+            </span>
+            <Badge>LIVE</Badge>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader><CardTitle>Proposed Network</CardTitle></CardHeader>
+          <CardContent className="flex justify-between">
+            <span className="text-3xl text-orange-500 font-bold">
+              {proposedNodes}
+            </span>
+            <Badge variant="outline">PLANNED</Badge>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* 🔥 CATEGORY TABLE */}
-      <div className="mb-8">
-        <h2 className="text-lg font-bold mb-3">
-          📊 Node Category Summary
-        </h2>
+      {/* CATEGORY TABLE */}
+      <Card>
+        <CardHeader>
+          <CardTitle>📊 Category-wise Status</CardTitle>
+        </CardHeader>
 
-        <table className="w-full border text-sm">
-          <thead className="bg-gray-200 dark:bg-gray-800">
-            <tr>
-              <th className="p-2 text-left">Category</th>
-              <th className="p-2 text-center">Existing</th>
-              <th className="p-2 text-center">Proposed</th>
-              <th className="p-2 text-center">Total</th>
-            </tr>
-          </thead>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Category</TableHead>
+                <TableHead className="text-center">Existing</TableHead>
+                <TableHead className="text-center">Proposed</TableHead>
+                <TableHead className="text-center">Total</TableHead>
+              </TableRow>
+            </TableHeader>
 
-          <tbody>
-            {(Object.keys(categoryStats) as NodeCategory[]).map(cat => {
-              const val = categoryStats[cat];
+            <TableBody>
+              {(Object.keys(categoryStats) as NodeCategory[]).map(cat => (
+                <TableRow key={cat}>
+                  <TableCell>{cat}</TableCell>
 
-              return (
-                <tr key={cat} className="border-t">
-                  <td className="p-2 font-medium">{cat}</td>
-                  <td className="p-2 text-center text-green-600">{val.existing}</td>
-                  <td className="p-2 text-center text-orange-500">{val.proposed}</td>
-                  <td className="p-2 text-center font-bold">{val.total}</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+                  <TableCell className="text-center">
+                    <Badge>{categoryStats[cat].existing}</Badge>
+                  </TableCell>
 
-      {/* 🚀 Navigation */}
-      <div className="flex gap-4 justify-center">
+                  <TableCell className="text-center">
+                    <Badge variant="outline">
+                      {categoryStats[cat].proposed}
+                    </Badge>
+                  </TableCell>
 
+                  <TableCell className="text-center font-bold">
+                    {categoryStats[cat].total}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+
+      {/* OCC SUMMARY */}
+      <Card>
+        <CardHeader>
+          <CardTitle>📊 OCC Summary</CardTitle>
+        </CardHeader>
+
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>OCC</TableHead>
+                <TableHead className="text-center">HODP</TableHead>
+                <TableHead className="text-center">Branch</TableHead>
+                <TableHead className="text-center">Total</TableHead>
+              </TableRow>
+            </TableHeader>
+
+            <TableBody>
+              {Object.entries(occSummary).map(([occ, val]) => (
+                <TableRow key={occ}>
+                  <TableCell className="font-bold">{occ}</TableCell>
+                  <TableCell className="text-center">{val.hodp}</TableCell>
+                  <TableCell className="text-center">{val.branch}</TableCell>
+                  <TableCell className="text-center font-bold">{val.total}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+
+      {/* UNCONNECTED */}
+      <Card>
+        <CardHeader>
+          <CardTitle>
+            ⚠️ Unconnected Nodes ({filteredUnconnectedNodes.length})
+          </CardTitle>
+        </CardHeader>
+
+        <CardContent>
+
+          <div className="flex gap-2 mb-4">
+            <Button
+              variant={filter === 'all' ? 'default' : 'outline'}
+              onClick={() => setFilter('all')}
+            >
+              All
+            </Button>
+
+            <Button
+              variant={filter === 'existing' ? 'default' : 'outline'}
+              onClick={() => setFilter('existing')}
+            >
+              Existing
+            </Button>
+
+            <Button
+              variant={filter === 'proposed' ? 'default' : 'outline'}
+              onClick={() => setFilter('proposed')}
+            >
+              Proposed
+            </Button>
+          </div>
+
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Node</TableHead>
+                <TableHead>Category</TableHead>
+                <TableHead>Status</TableHead>
+              </TableRow>
+            </TableHeader>
+
+            <TableBody>
+              {filteredUnconnectedNodes.map(node => (
+                <TableRow key={node._id}>
+                  <TableCell>{node.node_id}</TableCell>
+
+                  <TableCell>
+                    <Badge variant="secondary">
+                      {node.node_category}
+                    </Badge>
+                  </TableCell>
+
+                  <TableCell>
+                    <Badge variant={node.status === 'existing' ? 'default' : 'outline'}>
+                      {node.status}
+                    </Badge>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+
+        </CardContent>
+      </Card>
+
+      {/* NAV */}
+      <div className="flex justify-center gap-4">
         <Link href="/map">
-          <button className="bg-blue-500 hover:bg-blue-600 text-white px-5 py-2 rounded">
-            🗺 Open Map
-          </button>
+          <Button>🗺 Open Map</Button>
         </Link>
 
         <Link href="/nodes">
-          <button className="bg-gray-700 hover:bg-gray-800 text-white px-5 py-2 rounded">
-            📋 Node Table
-          </button>
+          <Button variant="outline">📋 Node Table</Button>
         </Link>
-
       </div>
 
     </div>
