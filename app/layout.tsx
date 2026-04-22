@@ -1,9 +1,12 @@
+import 'leaflet/dist/leaflet.css';
+import 'leaflet-draw/dist/leaflet.draw.css';
 import './globals.css';
 import Navbar from '@/components/Navbar';
 import { ReactNode } from 'react';
 import { Geist } from "next/font/google";
 import { cn } from "@/lib/utils";
 import { Toaster } from 'sonner';
+
 
 
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});

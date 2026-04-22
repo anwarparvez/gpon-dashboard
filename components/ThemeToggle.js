@@ -1,11 +1,17 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Sun, Moon } from 'lucide-react';
 
 export default function ThemeToggle() {
+  const [mounted, setMounted] = useState(false);
   const [dark, setDark] = useState(false);
 
+  // 🔥 prevent hydration mismatch
   useEffect(() => {
+    setMounted(true);
+
     const saved = localStorage.getItem('theme');
     const isDark = saved === 'dark';
 
@@ -22,12 +28,21 @@ export default function ThemeToggle() {
     setDark(newMode);
   };
 
+  // 🚫 avoid SSR mismatch
+  if (!mounted) return null;
+
   return (
-    <button
+    <Button
+      variant="ghost"
+      size="icon"
       onClick={toggle}
-      className="px-3 py-1 rounded bg-gray-200 dark:bg-gray-700"
+      title="Toggle Theme"
     >
-      {dark ? '🌙 Dark' : '☀️ Light'}
-    </button>
+      {dark ? (
+        <Moon className="w-5 h-5" />
+      ) : (
+        <Sun className="w-5 h-5" />
+      )}
+    </Button>
   );
 }
