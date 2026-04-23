@@ -14,14 +14,16 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 
-// ✅ Types
+/* =========================
+   TYPES
+========================= */
 type PreviewRow = {
   from_node: string;
   to_node: string;
   fiber_core?: number;
   used_core?: number;
   fiber_type?: string;
-  length?: number;
+  length?: number | string; // 🔥 allow string also
   status?: string;
 
   status_check: "ok" | "update" | "error";
@@ -36,6 +38,9 @@ type Summary = {
   inserted?: number;
 };
 
+/* =========================
+   COMPONENT
+========================= */
 export default function ImportLinks() {
 
   const [file, setFile] = useState<File | null>(null);
@@ -43,7 +48,9 @@ export default function ImportLinks() {
   const [summary, setSummary] = useState<Summary | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // 👀 PREVIEW
+  /* =========================
+     👀 PREVIEW
+  ========================= */
   const handlePreview = async () => {
     if (!file) return alert("Select CSV file");
 
@@ -72,7 +79,9 @@ export default function ImportLinks() {
     setLoading(false);
   };
 
-  // 🚀 IMPORT
+  /* =========================
+     🚀 IMPORT
+  ========================= */
   const handleImport = async () => {
     if (!file) return alert("Select file");
 
@@ -102,6 +111,14 @@ export default function ImportLinks() {
     }
 
     setLoading(false);
+  };
+
+  /* =========================
+     📏 SAFE LENGTH FORMATTER
+  ========================= */
+  const formatLength = (value: any) => {
+    const num = Number(value);
+    return !isNaN(num) && num > 0 ? num.toFixed(2) : "-";
   };
 
   return (
@@ -210,8 +227,9 @@ export default function ImportLinks() {
                     <TableCell>{row.fiber_core ?? "-"}</TableCell>
                     <TableCell>{row.used_core ?? "-"}</TableCell>
 
+                    {/* ✅ FIXED HERE */}
                     <TableCell>
-                      {row.length ? row.length.toFixed(2) : "-"}
+                      {formatLength(row.length)}
                     </TableCell>
 
                     <TableCell>

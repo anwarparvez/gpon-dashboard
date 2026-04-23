@@ -63,24 +63,4 @@ const LinkSchema = new mongoose.Schema(
 );
 
 
-// 🚀 🔥 PRE-SAVE HOOK (VERY IMPORTANT)
-LinkSchema.pre('save', function (next) {
-
-  // 🔄 Normalize node pair (prevent A→B and B→A duplicate)
-  const ids = [this.from_node.toString(), this.to_node.toString()].sort();
-  this.node_pair = `${ids[0]}_${ids[1]}`;
-
-  // 📊 Calculate available core
-  this.available_core = this.fiber_core - this.used_core;
-
-  next();
-});
-
-
-// 🚫 Prevent duplicate (bidirectional)
-LinkSchema.index(
-  { node_pair: 1 },
-  { unique: true }
-);
-
 export default mongoose.models.Link || mongoose.model('Link', LinkSchema);

@@ -32,20 +32,47 @@ export async function POST(req) {
     let success = 0;
     let skipped = 0;
 
-    // 🚀 LOAD DATA ONCE (FAST)
+    // 🚀 LOAD ALL DATA
     const allNodes = await Node.find({});
     const nodeMap = new Map(allNodes.map(n => [n.node_id, n]));
 
     const allLinks = await Link.find({});
     const linkMap = new Map(allLinks.map(l => [l.node_pair, l]));
 
+    // 🔥 RULE TRACKING
+    const odpToOcc = new Map();
+    const odpToHodpCount = new Map();
+    const hodpUsed = new Set();
+
+    // 🔗 EXISTING LINKS → RULE STATE
+    allLinks.forEach(l => {
+      const fromNode = allNodes.find(n => n._id.toString() === l.from_node.toString());
+      const toNode = allNodes.find(n => n._id.toString() === l.to_node.toString());
+
+      if (!fromNode || !toNode) return;
+
+      // OCC → ODP
+      if (fromNode.node_category === 'OCC' && toNode.node_category === 'ODP') {
+        odpToOcc.set(toNode._id.toString(), fromNode._id.toString());
+      }
+
+      // ODP → HODP
+      if (fromNode.node_category === 'ODP' && toNode.node_category === 'HODP') {
+        const count = odpToHodpCount.get(fromNode._id.toString()) || 0;
+        odpToHodpCount.set(fromNode._id.toString(), count + 1);
+        hodpUsed.add(toNode._id.toString());
+      }
+    });
+
     let bulkOps = [];
 
-    // 🔄 LOOP ROWS
+    /* =========================
+       🔄 PROCESS CSV
+    ========================= */
     for (let i = 1; i < rows.length; i++) {
+
       const values = rows[i].split(',');
 
-      // ✅ FIXED (removed TS syntax)
       const row = {};
       headers.forEach((h, idx) => {
         row[h] = values[idx]?.trim();
@@ -55,35 +82,98 @@ export async function POST(req) {
         const fromNode = nodeMap.get(row.from_node);
         const toNode = nodeMap.get(row.to_node);
 
-        // 🔥 CENTRAL ENGINE
-        const result = buildLink(fromNode, toNode, row);
-
-        let status = 'ok';
-        let error = null;
-
-        if (!result.valid) {
-          status = 'error';
-          error = result.error;
+        if (!fromNode || !toNode) {
+          throw new Error('Node not found');
         }
 
-        const node_pair = result.valid ? result.data.node_pair : null;
+        /* =========================
+           🚫 HARD RULES
+        ========================= */
 
-        // 🔄 detect update
-        if (result.valid && linkMap.has(node_pair)) {
+        // ❌ Same category blocked
+        if (fromNode.node_category === toNode.node_category) {
+          throw new Error('Same category link not allowed');
+        }
+
+        // ❌ Only allow correct direction
+        const validDirection =
+          (fromNode.node_category === 'OCC' && toNode.node_category === 'ODP') ||
+          (fromNode.node_category === 'ODP' && toNode.node_category === 'HODP');
+
+        if (!validDirection) {
+          throw new Error('Invalid direction (only OCC→ODP or ODP→HODP)');
+        }
+
+        /* =========================
+           🧠 CAPACITY RULES
+        ========================= */
+
+        // OCC → ODP
+        if (fromNode.node_category === 'OCC') {
+          if (odpToOcc.has(toNode._id.toString())) {
+            throw new Error('ODP already connected to an OCC');
+          }
+        }
+
+        // ODP → HODP
+        if (fromNode.node_category === 'ODP') {
+          const count = odpToHodpCount.get(fromNode._id.toString()) || 0;
+
+          if (count >= 24) {
+            throw new Error('ODP reached max HODP capacity (24)');
+          }
+
+          if (hodpUsed.has(toNode._id.toString())) {
+            throw new Error('HODP already connected to another ODP');
+          }
+        }
+
+        /* =========================
+           🔥 BUILD LINK
+        ========================= */
+        const result = buildLink(fromNode, toNode, row);
+
+        if (!result.valid) {
+          throw new Error(result.error);
+        }
+
+        const node_pair = result.data.node_pair;
+
+        let status = 'ok';
+
+        if (linkMap.has(node_pair)) {
           status = 'update';
         }
 
-        // 👀 PREVIEW
+        /* =========================
+           📊 PREVIEW
+        ========================= */
         preview.push({
           ...row,
-          fiber_type: result.valid ? result.data.fiber_type : null,
-          length: result.valid ? result.data.length : 0,
+          fiber_type: result.data.fiber_type,
+          length: result.data.length,
           status_check: status,
-          error
+          error: null
         });
 
-        // 🚀 IMPORT
-        if (mode === 'import' && result.valid) {
+        /* =========================
+           🔥 UPDATE RULE STATE
+        ========================= */
+        if (fromNode.node_category === 'OCC') {
+          odpToOcc.set(toNode._id.toString(), fromNode._id.toString());
+        }
+
+        if (fromNode.node_category === 'ODP') {
+          const count = odpToHodpCount.get(fromNode._id.toString()) || 0;
+          odpToHodpCount.set(fromNode._id.toString(), count + 1);
+
+          hodpUsed.add(toNode._id.toString());
+        }
+
+        /* =========================
+           🚀 IMPORT
+        ========================= */
+        if (mode === 'import') {
           bulkOps.push({
             updateOne: {
               filter: { node_pair },
@@ -93,8 +183,6 @@ export async function POST(req) {
           });
 
           success++;
-        } else if (!result.valid) {
-          skipped++;
         }
 
       } catch (err) {
@@ -108,9 +196,11 @@ export async function POST(req) {
       }
     }
 
-    // 🚀 BULK EXECUTE
+    /* =========================
+       🚀 BULK WRITE
+    ========================= */
     if (mode === 'import' && bulkOps.length > 0) {
-      await Link.bulkWrite(bulkOps);
+      await Link.bulkWrite(bulkOps, { ordered: false });
     }
 
     return Response.json({

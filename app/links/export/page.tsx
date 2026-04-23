@@ -1,58 +1,50 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
 export default function ExportLinksPage() {
 
-  // 🔽 Export existing links
-  const handleDownloadLinks = async () => {
+  const [loading, setLoading] = useState<string | null>(null);
+
+  /* =========================
+     📥 CSV DOWNLOAD (FIXED)
+  ========================= */
+  const downloadCSV = async (
+    url: string,
+    filename: string,
+    key: string
+  ): Promise<void> => {
     try {
-      const res = await fetch("/api/export-links");
+      setLoading(key);
+
+      const res = await fetch(url);
 
       if (!res.ok) {
         const text = await res.text();
         console.error(text);
-        alert("Export failed");
+        alert("Download failed");
         return;
       }
 
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
+      const text = await res.text();
 
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "links_export.csv";
-      a.click();
+      // ✅ UTF-8 BOM FIX
+      const blob = new Blob(
+        ["\uFEFF" + text],
+        { type: "text/csv;charset=utf-8;" }
+      );
 
-    } catch (err) {
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = filename;
+      link.click();
+
+    } catch (err: any) {
       console.error(err);
       alert("Download failed");
-    }
-  };
-
-  // 🔽 Export suggested links (NEW)
-  const handleDownloadSuggestions = async () => {
-    try {
-      const res = await fetch("/api/network/suggestions?download=1");
-
-      if (!res.ok) {
-        const text = await res.text();
-        console.error(text);
-        alert("Suggestion export failed");
-        return;
-      }
-
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "suggested_links.csv";
-      a.click();
-
-    } catch (err) {
-      console.error(err);
-      alert("Download failed");
+    } finally {
+      setLoading(null);
     }
   };
 
@@ -61,17 +53,55 @@ export default function ExportLinksPage() {
 
       <h1 className="text-xl font-bold">📥 Export Network Data</h1>
 
-      {/* 🔹 Existing Links */}
-      <Button onClick={handleDownloadLinks}>
-        ⬇️ Download Link CSV
+      <Button
+        disabled={loading === "links"}
+        onClick={() =>
+          downloadCSV("/api/export-links", "links.csv", "links")
+        }
+      >
+        ⬇️ Download Links
       </Button>
 
-      {/* 🔹 Suggested Links */}
       <Button
         variant="secondary"
-        onClick={handleDownloadSuggestions}
+        disabled={loading === "suggestions"}
+        onClick={() =>
+          downloadCSV(
+            "/api/network/suggestions?download=1",
+            "suggested_links.csv",
+            "suggestions"
+          )
+        }
       >
-        ⚡ Download Suggested Links CSV
+        ⚡ Suggested Links
+      </Button>
+
+      <Button
+        variant="outline"
+        disabled={loading === "nearest"}
+        onClick={() =>
+          downloadCSV(
+            "/api/network/nearest",
+            "nearest_mapping.csv",
+            "nearest"
+          )
+        }
+      >
+        📍 Nearest Mapping
+      </Button>
+
+      <Button
+        variant="destructive"
+        disabled={loading === "odp"}
+        onClick={() =>
+          downloadCSV(
+            "/api/network/unconnected-odp?download=1",
+            "unconnected_odp.csv",
+            "odp"
+          )
+        }
+      >
+        🔌 Unconnected ODP
       </Button>
 
     </div>

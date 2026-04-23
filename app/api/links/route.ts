@@ -5,12 +5,17 @@ import Link from '@/models/Link';
 import { buildLink } from '@/lib/gponRules';
 import { validateHODP } from '@/lib/linkUtils';
 
+import { Types } from "mongoose";
+
 /* =========================
    🔧 Load nodes helper
 ========================= */
-async function getNodesMap(ids) {
+async function getNodesMap(ids: (string | Types.ObjectId)[]) {
   const nodes = await Node.find({ _id: { $in: ids } });
-  return new Map(nodes.map(n => [n._id.toString(), n]));
+
+  return new Map<string, any>(
+    nodes.map(n => [n._id.toString(), n])
+  );
 }
 
 /* =========================
@@ -27,7 +32,7 @@ export async function GET() {
 
     return Response.json(links);
 
-  } catch (error) {
+  } catch (error: any) {
     return new Response(JSON.stringify({
       error: error.message
     }), { status: 500 });
@@ -37,7 +42,7 @@ export async function GET() {
 /* =========================
    ✅ CREATE / UPSERT LINK
 ========================= */
-export async function POST(req) {
+export async function POST(req: Request) {
   try {
     await connectDB();
     const body = await req.json();
@@ -62,7 +67,7 @@ export async function POST(req) {
       }), { status: 404 });
     }
 
-    // 🔥 DB VALIDATION (HODP rule)
+    // 🔥 DB VALIDATION
     await validateHODP(fromNode, toNode);
 
     // 🔥 GPON ENGINE
@@ -74,20 +79,24 @@ export async function POST(req) {
       }), { status: 400 });
     }
 
-    // 🚀 UPSERT (safe, no duplicates)
-    const link = await Link.findOneAndUpdate(
-      { node_pair: result.data.node_pair },
-      result.data,
-      {
-        upsert: true,
-        returnDocument: 'after',
-        runValidators: true
-      }
-    ).populate('from_node to_node');
+    // 🔒 Prevent duplicate
+    const existingLink = await Link.findOne({
+      node_pair: result.data.node_pair
+    });
+
+    if (existingLink) {
+      return new Response(JSON.stringify({
+        error: "Link already exists"
+      }), { status: 409 });
+    }
+
+    const link = new Link(result.data);
+    await link.save();
+    await link.populate('from_node to_node');
 
     return Response.json(link);
 
-  } catch (error) {
+  } catch (error: any) {
     return new Response(JSON.stringify({
       error: error.message
     }), { status: 500 });
@@ -97,7 +106,7 @@ export async function POST(req) {
 /* =========================
    ✅ UPDATE LINK
 ========================= */
-export async function PUT(req) {
+export async function PUT(req: Request) {
   try {
     await connectDB();
     const body = await req.json();
@@ -113,7 +122,6 @@ export async function PUT(req) {
     const from = body.from || link.from_node;
     const to = body.to || link.to_node;
 
-    // 🔧 Load nodes
     const nodeMap = await getNodesMap([from, to]);
 
     const fromNode = nodeMap.get(from.toString());
@@ -125,10 +133,10 @@ export async function PUT(req) {
       }), { status: 404 });
     }
 
-    // 🔥 HODP RULE (exclude current link)
+    // 🔥 HODP RULE
     await validateHODP(fromNode, toNode, link._id);
 
-    // 🔥 GPON ENGINE (rebuild)
+    // 🔥 GPON ENGINE
     const result = buildLink(fromNode, toNode, {
       fiber_core: body.fiber_core ?? link.fiber_core,
       used_core: body.used_core ?? link.used_core,
@@ -154,7 +162,7 @@ export async function PUT(req) {
 
     return Response.json(updated);
 
-  } catch (error) {
+  } catch (error: any) {
     return new Response(JSON.stringify({
       error: error.message
     }), { status: 500 });
@@ -164,7 +172,7 @@ export async function PUT(req) {
 /* =========================
    ✅ DELETE LINK
 ========================= */
-export async function DELETE(req) {
+export async function DELETE(req: Request) {
   try {
     await connectDB();
     const body = await req.json();
@@ -177,11 +185,9 @@ export async function DELETE(req) {
 
     await Link.findByIdAndDelete(body.id);
 
-    return Response.json({
-      success: true
-    });
+    return Response.json({ success: true });
 
-  } catch (error) {
+  } catch (error: any) {
     return new Response(JSON.stringify({
       error: error.message
     }), { status: 500 });

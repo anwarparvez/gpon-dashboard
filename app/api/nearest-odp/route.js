@@ -1,7 +1,7 @@
 import { connectDB } from '@/lib/mongodb';
 import Node from '@/models/Node';
 
-// 🌍 Haversine
+// 🌍 Haversine (KM)
 function distanceKm(lat1, lon1, lat2, lon2) {
   const R = 6371;
 
@@ -18,8 +18,6 @@ function distanceKm(lat1, lon1, lat2, lon2) {
 }
 
 export async function POST(req) {
-  console.log("📥 Request received");
-
   try {
     await connectDB();
 
@@ -30,64 +28,86 @@ export async function POST(req) {
       return Response.json({ error: "node_ids must be array" }, { status: 400 });
     }
 
-    const nodes = await Node.find({
-      node_id: { $in: nodeIds }
+    // 🎯 OCC nodes (input)
+    const occs = await Node.find({
+      node_id: { $in: nodeIds },
+      node_category: 'OCC'
     });
 
-    const odps = await Node.find({
-      node_category: 'ODP'
-    });
+    // 🔍 Reference nodes
+    const odps = await Node.find({ node_category: 'ODP' });
+    const hodps = await Node.find({ node_category: 'HODP' });
 
-    let results = [];
+    let csv = "occ,nearest_odp,odp_distance_km,nearest_hodp,hodp_distance_km\n";
 
-    // 🧾 CSV Header
-    let csv = "node,nearest_odp,distance_km\n";
+    for (const occ of occs) {
+      let nearestODP = null;
+      let minODP = Infinity;
 
-    for (const node of nodes) {
-      let nearest = null;
-      let minDist = Infinity;
-
+      // 🔎 OCC → ODP
       for (const odp of odps) {
         if (
-          node.latitude == null || node.longitude == null ||
+          occ.latitude == null || occ.longitude == null ||
           odp.latitude == null || odp.longitude == null
         ) continue;
 
         const dist = distanceKm(
-          node.latitude,
-          node.longitude,
+          occ.latitude,
+          occ.longitude,
           odp.latitude,
           odp.longitude
         );
 
-        if (dist < minDist) {
-          minDist = dist;
-          nearest = odp;
+        if (dist < minODP) {
+          minODP = dist;
+          nearestODP = odp;
         }
       }
 
-      const result = {
-        node: node.node_id,
-        nearest_odp: nearest?.node_id || '',
-        distance_km: minDist === Infinity ? '' : Number(minDist.toFixed(3))
+      // 🔎 ODP → HODP
+      let nearestHODP = null;
+      let minHODP = Infinity;
+
+      if (nearestODP) {
+        for (const hodp of hodps) {
+          if (
+            nearestODP.latitude == null || nearestODP.longitude == null ||
+            hodp.latitude == null || hodp.longitude == null
+          ) continue;
+
+          const dist = distanceKm(
+            nearestODP.latitude,
+            nearestODP.longitude,
+            hodp.latitude,
+            hodp.longitude
+          );
+
+          if (dist < minHODP) {
+            minHODP = dist;
+            nearestHODP = hodp;
+          }
+        }
+      }
+
+      const row = {
+        occ: occ.node_id,
+        nearest_odp: nearestODP?.node_id || '',
+        odp_distance_km: minODP === Infinity ? '' : Number(minODP.toFixed(3)),
+        nearest_hodp: nearestHODP?.node_id || '',
+        hodp_distance_km: minHODP === Infinity ? '' : Number(minHODP.toFixed(3))
       };
 
-      // 🔥 CSV LINE
-      const line = `${result.node},${result.nearest_odp},${result.distance_km}`;
+      const line = `${row.occ},${row.nearest_odp},${row.odp_distance_km},${row.nearest_hodp},${row.hodp_distance_km}`;
 
-      console.log(line); // 👉 CSV LOG
-
+      console.log(line);
       csv += line + "\n";
-      results.push(result);
     }
 
-    console.log("✅ CSV Output:\n" + csv);
-
-    // 👉 Return CSV (downloadable)
+    // 📥 CSV Download
     return new Response(csv, {
       headers: {
         "Content-Type": "text/csv",
-        "Content-Disposition": "attachment; filename=nearest_odp.csv"
+        "Content-Disposition": "attachment; filename=occ_odp_hodp_mapping.csv"
       }
     });
 
