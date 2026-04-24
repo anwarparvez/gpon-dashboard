@@ -1,6 +1,6 @@
 import { connectDB } from "@/lib/mongodb";
 import Node from "@/models/Node";
-import { Types } from "mongoose";
+import { AnyBulkWriteOperation } from "mongodb";
 
 /* =========================
    📌 CONFIG
@@ -14,9 +14,9 @@ function getDistance(
   lat1: number,
   lng1: number,
   lat2: number,
-  lng2: number
+  lng2: number,
 ): number {
-  const R = 6371000; // meters
+  const R = 6371000;
 
   const toRad = (v: number) => (v * Math.PI) / 180;
 
@@ -25,15 +25,13 @@ function getDistance(
 
   const a =
     Math.sin(dLat / 2) ** 2 +
-    Math.cos(toRad(lat1)) *
-      Math.cos(toRad(lat2)) *
-      Math.sin(dLng / 2) ** 2;
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
 
   return 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
 /* =========================
-   🧾 INPUT TYPE
+   🧾 TYPES
 ========================= */
 type NodeInput = {
   node_id: string;
@@ -48,12 +46,33 @@ type NodeInput = {
   address?: string;
 };
 
+type SkipNode = {
+  node_id?: string;
+  name?: string;
+  latitude?: number;
+  longitude?: number;
+  reason: string;
+  distance_m?: number;
+};
+
+type ExistingNode = {
+  location?: {
+    coordinates: [number, number];
+  };
+};
+
+type BatchNode = {
+  lat: number;
+  lng: number;
+};
+
 /* =========================
    🚀 POST BULK UPSERT
 ========================= */
 export async function POST(req: Request) {
   try {
     await connectDB();
+    console.log("✅ DB Connected");
 
     const { data }: { data: NodeInput[] } = await req.json();
 
@@ -61,56 +80,94 @@ export async function POST(req: Request) {
     let inserted = 0;
     let updated = 0;
 
-    const operations: any[] = [];
+    const skippedNodes: SkipNode[] = [];
+    const operations: AnyBulkWriteOperation<any>[] = [];
 
     /* =========================
        🔥 LOAD EXISTING NODES
     ========================= */
-    const existingNodes = await Node.find({}, { location: 1 });
+    const existingNodes: ExistingNode[] = await Node.find(
+      {},
+      { location: 1 },
+    ).lean();
 
     /* =========================
        🧠 TRACK BATCH DUPLICATES
     ========================= */
-    const acceptedBatch: { lat: number; lng: number }[] = [];
+    const acceptedBatch: BatchNode[] = [];
 
     /* =========================
        🔁 PROCESS INPUT
     ========================= */
     for (const item of data) {
+      const lat = parseFloat(String(item.latitude));
+      const lng = parseFloat(String(item.longitude));
 
-      if (
-        !item.node_id ||
-        !item.name ||
-        isNaN(Number(item.latitude)) ||
-        isNaN(Number(item.longitude))
-      ) {
+      /* =========================
+         ❌ INVALID DATA
+      ========================= */
+      if (!item.node_id || !item.name || isNaN(lat) || isNaN(lng)) {
         skipped++;
+
+        skippedNodes.push({
+          node_id: item.node_id,
+          name: item.name,
+          reason: "Invalid data",
+        });
+
         continue;
       }
 
-      const lat = Number(item.latitude);
-      const lng = Number(item.longitude);
+      let skipReason = "";
+      let skipDistance = 0;
 
       /* =========================
          🚫 CHECK AGAINST DB
       ========================= */
-      const tooCloseDB = existingNodes.some((n: any) => {
-        if (!n.location?.coordinates) return false;
+      for (const n of existingNodes) {
+        if (!n.location?.coordinates) continue;
 
         const [lng2, lat2] = n.location.coordinates;
 
-        return getDistance(lat, lng, lat2, lng2) < RADIUS;
-      });
+        const dist = getDistance(lat, lng, lat2, lng2);
+
+        if (dist < RADIUS) {
+          skipReason = "Too close to existing node (DB)";
+          skipDistance = dist;
+          break;
+        }
+      }
 
       /* =========================
          🚫 CHECK SAME BATCH
       ========================= */
-      const tooCloseBatch = acceptedBatch.some((n) => {
-        return getDistance(lat, lng, n.lat, n.lng) < RADIUS;
-      });
+      if (!skipReason) {
+        for (const n of acceptedBatch) {
+          const dist = getDistance(lat, lng, n.lat, n.lng);
 
-      if (tooCloseDB || tooCloseBatch) {
+          if (dist < RADIUS) {
+            skipReason = "Too close to another uploaded node";
+            skipDistance = dist;
+            break;
+          }
+        }
+      }
+
+      /* =========================
+         ❌ SKIP NODE
+      ========================= */
+      if (skipReason) {
         skipped++;
+
+        skippedNodes.push({
+          node_id: item.node_id,
+          name: item.name,
+          latitude: lat,
+          longitude: lng,
+          reason: skipReason,
+          distance_m: Number(skipDistance.toFixed(2)),
+        });
+
         continue;
       }
 
@@ -124,23 +181,20 @@ export async function POST(req: Request) {
           filter: { node_id: item.node_id },
           update: {
             $set: {
+              node_id: item.node_id,
               name: item.name,
               latitude: lat,
               longitude: lng,
-
-              // 🔥 GEOJSON (IMPORTANT)
               location: {
                 type: "Point",
                 coordinates: [lng, lat],
               },
-
               node_category: item.node_category,
               status: item.status,
               dgm: item.dgm,
               region: item.region,
               node_code: item.node_code,
               address: item.address,
-
               updatedAt: new Date(),
             },
           },
@@ -149,16 +203,25 @@ export async function POST(req: Request) {
       });
     }
 
+    console.log("📊 Debug:", {
+      totalInput: data.length,
+      operations: operations.length,
+      skipped,
+    });
+
     /* =========================
        🚀 EXECUTE BULK
     ========================= */
     if (operations.length > 0) {
-      const result = await Node.bulkWrite(operations, {
-        ordered: false,
-      });
+      const result = await Node.bulkWrite(
+        operations as AnyBulkWriteOperation<any>[],
+        { ordered: false },
+      );
 
-      inserted = result.upsertedCount;
-      updated = result.matchedCount - result.upsertedCount;
+      console.log("🔥 Bulk Result:", result);
+
+      inserted = result.upsertedCount ?? 0;
+      updated = result.modifiedCount ?? 0;
     }
 
     /* =========================
@@ -169,14 +232,16 @@ export async function POST(req: Request) {
       updated,
       skipped,
       radiusApplied: `${RADIUS} meters`,
+      skipped_nodes: skippedNodes,
     });
-
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("❌ BULK ERROR:", err);
 
     return new Response(
-      JSON.stringify({ error: err.message }),
-      { status: 500 }
+      JSON.stringify({
+        error: err instanceof Error ? err.message : "Unknown error",
+      }),
+      { status: 500 },
     );
   }
 }

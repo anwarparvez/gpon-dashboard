@@ -9,15 +9,42 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
+const RADIUS = 5;
+
+/* =========================
+   📏 DISTANCE FUNCTION
+========================= */
+const getDistance = (
+  lat1: number,
+  lng1: number,
+  lat2: number,
+  lng2: number
+) => {
+  const R = 6371000;
+  const toRad = (v: number) => (v * Math.PI) / 180;
+
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) *
+      Math.cos(toRad(lat2)) *
+      Math.sin(dLng / 2) ** 2;
+
+  return 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+};
+
 export default function ImportNodes() {
   const [preview, setPreview] = useState<any[]>([]);
-  const [logs, setLogs] = useState<any[]>([]);
   const [duplicates, setDuplicates] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [uploadedColumns, setUploadedColumns] = useState<string[]>([]);
 
-  // ✅ VALIDATION
+  /* =========================
+     ✅ VALIDATION
+  ========================= */
   const validateRow = (r: any) => {
     const errors: string[] = [];
 
@@ -38,7 +65,9 @@ export default function ImportNodes() {
     return errors;
   };
 
-  // 📂 FILE PARSE
+  /* =========================
+     📂 FILE PARSE
+  ========================= */
   const handleFile = (e: any) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -50,7 +79,6 @@ export default function ImportNodes() {
         const cols = results.meta.fields || [];
         setUploadedColumns(cols);
 
-        // 🔧 CLEAN + VALIDATE
         const rows = results.data.map((r: any) => {
           const row: any = {};
 
@@ -73,7 +101,9 @@ export default function ImportNodes() {
           };
         });
 
-        // 🔁 DUPLICATES
+        /* =========================
+           🔁 DUPLICATES
+        ========================= */
         const seen = new Set();
         const dup: string[] = [];
 
@@ -89,28 +119,94 @@ export default function ImportNodes() {
           return;
         }
 
-        // 🔍 FETCH DB
+        /* =========================
+           🔍 FETCH DB
+        ========================= */
         const res = await fetch("/api/nodes");
         const dbNodes = await res.json();
 
         const map: any = {};
         dbNodes.forEach((n: any) => (map[n.node_id] = n));
 
-        // 🔥 PREVIEW
+        const acceptedBatch: { lat: number; lng: number }[] = [];
+
+        /* =========================
+           🔥 PREVIEW (FIXED)
+        ========================= */
         const result = rows.map((r: any) => {
           if (!r.isValid) {
             return { ...r, type: "error", log: "INVALID DATA" };
           }
 
+          let tooCloseDB = false;
+          let tooCloseBatch = false;
+          let distance = 0;
+
+          // 🔍 DB CHECK
+          for (const n of dbNodes) {
+            if (!n.location?.coordinates) continue;
+
+            const [lng2, lat2] = n.location.coordinates;
+
+            const dist = getDistance(
+              r.latitude,
+              r.longitude,
+              lat2,
+              lng2
+            );
+
+            if (dist < RADIUS) {
+              tooCloseDB = true;
+              distance = dist;
+              break;
+            }
+          }
+
+          // 🔍 BATCH CHECK
+          if (!tooCloseDB) {
+            for (const b of acceptedBatch) {
+              const dist = getDistance(
+                r.latitude,
+                r.longitude,
+                b.lat,
+                b.lng
+              );
+
+              if (dist < RADIUS) {
+                tooCloseBatch = true;
+                distance = dist;
+                break;
+              }
+            }
+          }
+
+          // ❌ TOO CLOSE
+          if (tooCloseDB || tooCloseBatch) {
+            return {
+              ...r,
+              type: "error",
+              log: tooCloseDB
+                ? `Too close to existing node (DB) (${distance.toFixed(2)}m)`
+                : `Too close to another uploaded node (${distance.toFixed(2)}m)`
+            };
+          }
+
+          // ✅ ACCEPT
+          acceptedBatch.push({
+            lat: r.latitude,
+            lng: r.longitude,
+          });
+
           const existing = map[r.node_id];
 
+          // INSERT
           if (!existing) {
             return { ...r, type: "insert", log: "NEW NODE" };
           }
 
+          // UPDATE (ONLY UPLOADED COLUMNS)
           const changes: any = {};
 
-          // 🔥 ONLY CHECK UPLOADED COLUMNS
           uploadedColumns.forEach((key) => {
             if (
               r[key] !== undefined &&
@@ -132,21 +228,20 @@ export default function ImportNodes() {
         });
 
         setPreview(result);
-        setLogs(result);
       },
     });
   };
 
-  // 🚀 PARTIAL UPLOAD (ONLY CHANGED FIELDS)
+  /* =========================
+     🚀 UPLOAD
+  ========================= */
   const handleUpload = async () => {
     setLoading(true);
 
     const payload = preview
-      .filter((r) => r.isValid && r.type !== "skip")
+      .filter((r) => r.isValid && r.type !== "skip" && r.type !== "error")
       .map((r) => {
-        if (r.type === "insert") {
-          return r;
-        }
+        if (r.type === "insert") return r;
 
         const obj: any = { node_id: r.node_id };
 
@@ -173,84 +268,6 @@ export default function ImportNodes() {
     setLoading(false);
   };
 
-  // 📥 DOWNLOAD LOG
-  const downloadLog = () => {
-    const csv = Papa.unparse(
-      logs.map((l) => ({
-        node_id: l.node_id,
-        type: l.type,
-        log: l.log,
-        errors: l.errors?.join("; ") || "",
-        changes: l.changes ? JSON.stringify(l.changes) : "",
-      })),
-    );
-
-    const blob = new Blob([csv]);
-    const url = URL.createObjectURL(blob);
-
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "import-log.csv";
-    a.click();
-  };
-
-  // 📤 EXPORT
-  const handleExport = async () => {
-    setExporting(true);
-
-    try {
-      const res = await fetch("/api/nodes");
-      const dbNodes = await res.json();
-
-      if (!dbNodes.length) {
-        alert("⚠️ No data found");
-        setExporting(false);
-        return;
-      }
-
-      // ✅ REQUIRED COLUMN ORDER
-      const fields = [
-        "node_id",
-        "address",
-        "dgm",
-        "latitude",
-        "longitude",
-        "name",
-        "node_category",
-        "node_code",
-        "region",
-        "status",
-      ];
-
-      // ✅ MAP DATA (ENSURE ORDER + SAFE EMPTY)
-      const formatted = dbNodes.map((n: any) => {
-        const row: any = {};
-        fields.forEach((f) => {
-          row[f] = n[f] ?? "";
-        });
-        return row;
-      });
-
-      const csv = Papa.unparse({
-        fields,
-        data: formatted,
-      });
-
-      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-      const url = URL.createObjectURL(blob);
-
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `nodes-export-${Date.now()}.csv`;
-      a.click();
-    } catch (err) {
-      console.error(err);
-      alert("❌ Export failed");
-    }
-
-    setExporting(false);
-  };
-
   const summary = {
     insert: preview.filter((r) => r.type === "insert").length,
     update: preview.filter((r) => r.type === "update").length,
@@ -260,19 +277,14 @@ export default function ImportNodes() {
 
   return (
     <div className="p-6 space-y-4">
+
       <Card>
         <CardHeader>
-          <CardTitle>📂 Import / Export Nodes (Safe Update)</CardTitle>
+          <CardTitle>📂 Import Nodes (Correct Preview Logic)</CardTitle>
         </CardHeader>
 
         <CardContent className="space-y-3">
-          <div className="flex gap-3">
-            <input type="file" onChange={handleFile} />
-
-            <Button onClick={handleExport} variant="secondary">
-              {exporting ? "Exporting..." : "📤 Export"}
-            </Button>
-          </div>
+          <input type="file" onChange={handleFile} />
 
           {duplicates.length > 0 && (
             <Badge variant="destructive">
@@ -294,7 +306,7 @@ export default function ImportNodes() {
       {preview.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Preview (Only Uploaded Columns Compared)</CardTitle>
+            <CardTitle>Preview</CardTitle>
           </CardHeader>
 
           <CardContent>
@@ -304,7 +316,7 @@ export default function ImportNodes() {
                   <tr>
                     <th>ID</th>
                     <th>Status</th>
-                    <th>Errors</th>
+                    <th>Message</th>
                     <th>Changes</th>
                   </tr>
                 </thead>
@@ -320,26 +332,24 @@ export default function ImportNodes() {
                             row.type === "insert"
                               ? "default"
                               : row.type === "update"
-                                ? "secondary"
-                                : row.type === "skip"
-                                  ? "outline"
-                                  : "destructive"
+                              ? "secondary"
+                              : row.type === "skip"
+                              ? "outline"
+                              : "destructive"
                           }
                         >
                           {row.type}
                         </Badge>
                       </td>
 
-                      <td className="text-red-500">{row.errors?.join(", ")}</td>
+                      <td className="text-red-600">{row.log}</td>
 
                       <td>
-                        {Object.entries(row.changes || {}).map(
-                          ([k, v]: any) => (
-                            <div key={k}>
-                              <b>{k}</b>: {v.old} → {v.new}
-                            </div>
-                          ),
-                        )}
+                        {Object.entries(row.changes || {}).map(([k, v]: any) => (
+                          <div key={k}>
+                            <b>{k}</b>: {v.old} → {v.new}
+                          </div>
+                        ))}
                       </td>
                     </tr>
                   ))}
@@ -347,15 +357,12 @@ export default function ImportNodes() {
               </table>
             </ScrollArea>
 
-            <div className="flex gap-3 mt-4">
+            <div className="mt-4">
               <Button onClick={handleUpload}>
                 {loading ? "Processing..." : "🚀 Upload"}
               </Button>
-
-              <Button variant="outline" onClick={downloadLog}>
-                📥 Download Log
-              </Button>
             </div>
+
           </CardContent>
         </Card>
       )}

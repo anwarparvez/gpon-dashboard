@@ -4,7 +4,6 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
 export default function ExportLinksPage() {
-
   const [loading, setLoading] = useState<string | null>(null);
 
   /* =========================
@@ -13,7 +12,7 @@ export default function ExportLinksPage() {
   const downloadCSV = async (
     url: string,
     filename: string,
-    key: string
+    key: string,
   ): Promise<void> => {
     try {
       setLoading(key);
@@ -30,16 +29,14 @@ export default function ExportLinksPage() {
       const text = await res.text();
 
       // ✅ UTF-8 BOM FIX
-      const blob = new Blob(
-        ["\uFEFF" + text],
-        { type: "text/csv;charset=utf-8;" }
-      );
+      const blob = new Blob(["\uFEFF" + text], {
+        type: "text/csv;charset=utf-8;",
+      });
 
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
       link.download = filename;
       link.click();
-
     } catch (err: any) {
       console.error(err);
       alert("Download failed");
@@ -50,14 +47,11 @@ export default function ExportLinksPage() {
 
   return (
     <div className="p-6 space-y-4">
-
       <h1 className="text-xl font-bold">📥 Export Network Data</h1>
 
       <Button
         disabled={loading === "links"}
-        onClick={() =>
-          downloadCSV("/api/export-links", "links.csv", "links")
-        }
+        onClick={() => downloadCSV("/api/export-links", "links.csv", "links")}
       >
         ⬇️ Download Links
       </Button>
@@ -69,7 +63,7 @@ export default function ExportLinksPage() {
           downloadCSV(
             "/api/network/suggestions?download=1",
             "suggested_links.csv",
-            "suggestions"
+            "suggestions",
           )
         }
       >
@@ -80,11 +74,7 @@ export default function ExportLinksPage() {
         variant="outline"
         disabled={loading === "nearest"}
         onClick={() =>
-          downloadCSV(
-            "/api/network/nearest",
-            "nearest_mapping.csv",
-            "nearest"
-          )
+          downloadCSV("/api/network/nearest", "nearest_mapping.csv", "nearest")
         }
       >
         📍 Nearest Mapping
@@ -97,13 +87,26 @@ export default function ExportLinksPage() {
           downloadCSV(
             "/api/network/unconnected-odp?download=1",
             "unconnected_odp.csv",
-            "odp"
+            "odp",
           )
         }
       >
         🔌 Unconnected ODP
       </Button>
 
+      <Button
+        variant="default"
+        disabled={loading === "hodp"}
+        onClick={() =>
+          downloadCSV(
+            "/api/network/unconnected-hodp-nearest?download=1",
+            "unconnected_hodp_nearest_odp.csv",
+            "hodp",
+          )
+        }
+      >
+        🧩 HODP → Nearest ODP
+      </Button>
     </div>
   );
 }
