@@ -1,5 +1,3 @@
-// lib/nodeService.server.ts
-
 import Node from '@/models/Node';
 import Counter from '@/models/Counter';
 
@@ -19,7 +17,25 @@ export async function getNextSequences(category: string, count: number) {
 }
 
 /* ================================
+   🏷️ GET SHORT CATEGORY NAME
+================================ */
+export function getShortCategoryName(category: string): string {
+  const categoryMap: Record<string, string> = {
+    'HODP': 'HODP',
+    'FAT': 'FAT',
+    'PON': 'PON',
+    'OLT': 'OLT',
+    'ODP': 'ODP',
+    'SPL': 'SPL',
+    // Add more mappings as needed
+  };
+  
+  return categoryMap[category] || category.substring(0, 4).toUpperCase();
+}
+
+/* ================================
    📍 DUPLICATE CHECK (BATCH)
+   ⚠️ DEPRECATED: Use nodeDistance.server.ts instead
 ================================ */
 export async function getDuplicateCoords(items: any[]) {
   const coords = items.map(i => ({
@@ -50,4 +66,26 @@ export function normalizeNode(item: any) {
     node_code: item.node_code || '',
     address: item.address || ''
   };
+}
+
+/* ================================
+   🔍 VALIDATE NODE DATA
+================================ */
+export function isValidNodeData(nodeData: any): boolean {
+  return !!(nodeData.name && 
+    !isNaN(nodeData.latitude) && 
+    !isNaN(nodeData.longitude) &&
+    nodeData.latitude >= -90 && 
+    nodeData.latitude <= 90 &&
+    nodeData.longitude >= -180 && 
+    nodeData.longitude <= 180);
+}
+
+/* ================================
+   📦 CREATE NODE ID
+================================ */
+export function createNodeId(category: string, sequence: number): string {
+  const shortName = getShortCategoryName(category);
+  const paddedSeq = String(sequence).padStart(5, '0');
+  return `${shortName}-${paddedSeq}`;
 }

@@ -1,170 +1,105 @@
 import { connectDB } from "@/lib/mongodb";
 import Node from "@/models/Node";
-
-import { getShortCategoryName } from "@/lib/nodeUtils";
+import { getShortCategoryName, getNextSequences, normalizeNode } from "@/lib/nodeService.server";
 import {
-  getNextSequences,
-  normalizeNode,
-} from "@/lib/nodeService.server";
+  getDistance,
+  isTooClose,
+  createLocationObject,
+  preserveExistingLocation,
+  buildBaseUpdateData,
+  sanitizeUpdateData,
+  getRadiusResponse
+} from "@/lib/nodeDistance.server";
 
-/* =========================
-   📌 CONFIG
-========================= */
-const RADIUS = 5; // meters
+const RADIUS = getRadiusResponse().radiusMeters;
 
-/* =========================
-   📏 DISTANCE FUNCTION
-========================= */
-function getDistance(
-  lat1: number,
-  lng1: number,
-  lat2: number,
-  lng2: number
-): number {
-  const R = 6371000;
-  const toRad = (v: number) => (v * Math.PI) / 180;
-
-  const dLat = toRad(lat2 - lat1);
-  const dLng = toRad(lng2 - lng1);
-
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(toRad(lat1)) *
-      Math.cos(toRad(lat2)) *
-      Math.sin(dLng / 2) ** 2;
-
-  return 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-}
-
-/* =========================
-   🧾 TYPES
-========================= */
-type NodeInput = {
-  node_id?: string;
-  name: string;
-  latitude: number | string;
-  longitude: number | string;
-  node_category: string;
-  status?: string;
-  dgm?: string;
-  region?: string;
-  node_code?: string;
-  address?: string;
-};
-
-type SkipNode = {
-  node_id?: string;
-  name?: string;
-  latitude?: number;
-  longitude?: number;
-  reason: string;
-  distance_m?: number;
-};
-
-/* =========================
-   🔍 CHECK CLOSE NODE
-========================= */
-function findTooClose(
-  lat: number,
-  lng: number,
-  nodes: any[]
-): { found: boolean; distance: number } {
-  for (const n of nodes) {
-    if (!n.location?.coordinates) continue;
-
-    const [lng2, lat2] = n.location.coordinates;
-
-    const dist = getDistance(lat, lng, lat2, lng2);
-
-    if (dist < RADIUS) {
-      return { found: true, distance: dist };
-    }
-  }
-  return { found: false, distance: 0 };
-}
-
-/* =========================
-   ✅ GET: Fetch Nodes
-========================= */
+/* ================================
+   ✅ GET: Fetch all nodes
+================================ */
 export async function GET() {
   try {
     await connectDB();
-
     const nodes = await Node.find().sort({ createdAt: -1 });
-
     return Response.json(nodes);
-  } catch (error: unknown) {
-    return Response.json(
-      { error: error instanceof Error ? error.message : "Error" },
-      { status: 500 }
-    );
+  } catch (error: any) {
+    return Response.json({ error: error.message }, { status: 500 });
   }
 }
 
-/* =========================
-   🚀 POST: Insert / Bulk
-========================= */
+/* ================================
+   ✅ POST: Insert / Bulk
+================================ */
 export async function POST(req: Request) {
   try {
     await connectDB();
-
     const body = await req.json();
 
-    /* =========================
+    /* ============================
        🚀 BULK INSERT
-    ========================= */
+    ============================ */
     if (body.bulk) {
-
-      const validItems: NodeInput[] = body.data
+      const validItems = body.data
         .map(normalizeNode)
         .filter(
-          (i: NodeInput) =>
-            i.name &&
-            !isNaN(Number(i.latitude)) &&
-            !isNaN(Number(i.longitude))
+          (i: any) => i.name && !isNaN(i.latitude) && !isNaN(i.longitude)
         );
 
-      const existingNodes = await Node.find({}, { location: 1 }).lean();
-
+      // Load existing nodes
+      const existingNodes = await Node.find({}, { location: 1, _id: 1 });
       const acceptedBatch: { lat: number; lng: number }[] = [];
-      const filtered: NodeInput[] = [];
-      const skippedNodes: SkipNode[] = [];
+      const filtered: any[] = [];
+      const skippedNodes: any[] = []; // Track skipped nodes with reasons
 
       for (const item of validItems) {
         const lat = Number(item.latitude);
         const lng = Number(item.longitude);
 
-        /* ===== DB CHECK ===== */
-        const dbCheck = findTooClose(lat, lng, existingNodes);
-
-        /* ===== BATCH CHECK ===== */
-        let batchTooClose = false;
-        let batchDistance = 0;
-
-        if (!dbCheck.found) {
-          for (const b of acceptedBatch) {
-            const dist = getDistance(lat, lng, b.lat, b.lng);
-            if (dist < RADIUS) {
-              batchTooClose = true;
-              batchDistance = dist;
-              break;
+        const tooCloseDB = isTooClose(lat, lng, existingNodes, undefined, RADIUS);
+        
+        if (tooCloseDB) {
+          // Find the actual distance for reporting
+          let distance = 0;
+          for (const n of existingNodes) {
+            if (n.location?.coordinates) {
+              const [lng2, lat2] = n.location.coordinates;
+              const dist = getDistance(lat, lng, lat2, lng2);
+              if (dist < RADIUS) {
+                distance = dist;
+                break;
+              }
             }
           }
-        }
-
-        /* ===== SKIP ===== */
-        if (dbCheck.found || batchTooClose) {
           skippedNodes.push({
             node_id: item.node_id,
             name: item.name,
             latitude: lat,
             longitude: lng,
-            reason: dbCheck.found
-              ? "Too close to existing node (DB)"
-              : "Too close to another uploaded node",
-            distance_m: Number(
-              (dbCheck.found ? dbCheck.distance : batchDistance).toFixed(2)
-            ),
+            reason: "Too close to existing node (DB)",
+            distance_m: Number(distance.toFixed(2)),
+          });
+          continue;
+        }
+
+        // Check against same batch
+        let batchTooClose = false;
+        let batchDistance = 0;
+        for (const b of acceptedBatch) {
+          const dist = getDistance(lat, lng, b.lat, b.lng);
+          if (dist < RADIUS) {
+            batchTooClose = true;
+            batchDistance = dist;
+            break;
+          }
+        }
+
+        if (batchTooClose) {
+          skippedNodes.push({
+            node_id: item.node_id,
+            name: item.name,
+            latitude: lat,
+            longitude: lng,
+            reason: "Too close to another uploaded node",
+            distance_m: Number(batchDistance.toFixed(2)),
           });
           continue;
         }
@@ -173,15 +108,10 @@ export async function POST(req: Request) {
         filtered.push(item);
       }
 
-      /* =========================
-         🔢 GROUP + GENERATE ID
-      ========================= */
-      const grouped: Record<string, NodeInput[]> = {};
-
-      filtered.forEach((i) => {
-        if (!grouped[i.node_category]) {
-          grouped[i.node_category] = [];
-        }
+      // Group by category
+      const grouped: Record<string, any[]> = {};
+      filtered.forEach((i: any) => {
+        if (!grouped[i.node_category]) grouped[i.node_category] = [];
         grouped[i.node_category].push(i);
       });
 
@@ -191,7 +121,7 @@ export async function POST(req: Request) {
         const items = grouped[category];
         const seqs = await getNextSequences(category, items.length);
 
-        items.forEach((item, idx) => {
+        items.forEach((item: any, idx: number) => {
           const lat = Number(item.latitude);
           const lng = Number(item.longitude);
 
@@ -199,10 +129,7 @@ export async function POST(req: Request) {
             ...item,
             latitude: lat,
             longitude: lng,
-            location: {
-              type: "Point",
-              coordinates: [lng, lat],
-            },
+            location: createLocationObject(lat, lng),
             node_id: `${getShortCategoryName(category)}-${String(seqs[idx]).padStart(5, "0")}`,
           });
         });
@@ -214,97 +141,124 @@ export async function POST(req: Request) {
         inserted: result.length,
         skipped: skippedNodes.length,
         radiusApplied: `${RADIUS}m`,
-        skipped_nodes: skippedNodes,
+        skipped_nodes: skippedNodes, // Include detailed skip information
       });
     }
 
-    /* =========================
+    /* ============================
        ➕ SINGLE INSERT
-    ========================= */
-    const nodeData: NodeInput = normalizeNode(body);
-
-    const lat = Number(nodeData.latitude);
-    const lng = Number(nodeData.longitude);
-
-    if (!nodeData.name || isNaN(lat) || isNaN(lng)) {
+    ============================ */
+    const nodeData = normalizeNode(body);
+    if (!nodeData.name || isNaN(nodeData.latitude) || isNaN(nodeData.longitude)) {
       return Response.json({ error: "Invalid data" }, { status: 400 });
     }
 
-    const existingNodes = await Node.find({}, { location: 1 }).lean();
+    const lat = Number(nodeData.latitude);
+    const lng = Number(nodeData.longitude);
+    const existingNodes = await Node.find({}, { location: 1 });
 
-    const check = findTooClose(lat, lng, existingNodes);
-
-    if (check.found) {
+    if (isTooClose(lat, lng, existingNodes, undefined, RADIUS)) {
+      // Find the actual distance
+      let distance = 0;
+      for (const n of existingNodes) {
+        if (n.location?.coordinates) {
+          const [lng2, lat2] = n.location.coordinates;
+          const dist = getDistance(lat, lng, lat2, lng2);
+          if (dist < RADIUS) {
+            distance = dist;
+            break;
+          }
+        }
+      }
+      
       return Response.json(
-        {
-          error: "Too close to existing node",
-          distance_m: Number(check.distance.toFixed(2)),
+        { 
+          error: `Another node exists within ${RADIUS} meters`,
+          distance_m: Number(distance.toFixed(2))
         },
         { status: 400 }
       );
     }
 
     const [seq] = await getNextSequences(nodeData.node_category, 1);
-
     const node = await Node.create({
       ...nodeData,
       latitude: lat,
       longitude: lng,
-      location: {
-        type: "Point",
-        coordinates: [lng, lat],
-      },
+      location: createLocationObject(lat, lng),
       node_id: `${getShortCategoryName(nodeData.node_category)}-${String(seq).padStart(5, "0")}`,
     });
 
     return Response.json(node);
-  } catch (error: unknown) {
-    return Response.json(
-      { error: error instanceof Error ? error.message : "Error" },
-      { status: 500 }
-    );
+  } catch (error: any) {
+    return Response.json({ error: error.message }, { status: 500 });
   }
 }
 
-/* =========================
-   🔄 PUT
-========================= */
+/* ================================
+   🔄 PUT: Update Node (with location protection)
+================================ */
 export async function PUT(req: Request) {
   try {
     await connectDB();
-
     const body = await req.json();
+
+    if (!body._id) {
+      return Response.json({ error: "Missing _id" }, { status: 400 });
+    }
+
+    const existingNode = await Node.findById(body._id);
+    if (!existingNode) {
+      return Response.json({ error: "Node not found" }, { status: 404 });
+    }
+
+    const updateData = buildBaseUpdateData(body);
+    const isLocationUpdating = body.latitude !== undefined && body.longitude !== undefined;
+
+    if (isLocationUpdating) {
+      const newLat = Number(body.latitude);
+      const newLng = Number(body.longitude);
+
+      if (isNaN(newLat) || isNaN(newLng)) {
+        return Response.json({ error: "Invalid coordinates" }, { status: 400 });
+      }
+
+      const otherNodes = await Node.find(
+        { _id: { $ne: body._id } },
+        { location: 1, _id: 1 }
+      );
+
+      const tooCloseToOtherNode = isTooClose(newLat, newLng, otherNodes, body._id, RADIUS);
+
+      if (tooCloseToOtherNode) {
+        preserveExistingLocation(existingNode, updateData);
+        console.log(`📍 Location update blocked for node ${existingNode.node_id} - within ${RADIUS}m of existing node`);
+      } else {
+        updateData.latitude = newLat;
+        updateData.longitude = newLng;
+        updateData.location = createLocationObject(newLat, newLng);
+      }
+    }
 
     const updated = await Node.findByIdAndUpdate(
       body._id,
-      {
-        name: body.name,
-        node_category: body.node_category,
-        status: body.status,
-        dgm: body.dgm,
-        region: body.region,
-        node_code: body.node_code,
-        address: body.address,
-      },
-      { new: true, runValidators: true }
+      { $set: sanitizeUpdateData(updateData) },
+      { returnDocument: "after", runValidators: true }
     );
 
     return Response.json(updated);
-  } catch (error: unknown) {
-    return Response.json(
-      { error: error instanceof Error ? error.message : "Error" },
-      { status: 500 }
-    );
+  } catch (error: any) {
+    console.error("PUT Error:", error);
+    return Response.json({ error: error.message }, { status: 500 });
   }
 }
 
-/* =========================
-   ❌ DELETE
-========================= */
+/* ================================
+   ❌ DELETE: Remove Node
+================================ */
 export async function DELETE(req: Request) {
   try {
     await connectDB();
-
     const body = await req.json();
 
     if (!body.id) {
@@ -312,12 +266,8 @@ export async function DELETE(req: Request) {
     }
 
     await Node.findByIdAndDelete(body.id);
-
     return Response.json({ success: true });
-  } catch (error: unknown) {
-    return Response.json(
-      { error: error instanceof Error ? error.message : "Error" },
-      { status: 500 }
-    );
+  } catch (error: any) {
+    return Response.json({ error: error.message }, { status: 500 });
   }
 }
