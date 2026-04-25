@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "install:force": "npm install --legacy-peer-deps",
-    "build:force": "npm install --legacy-peer-deps && next build"
+    "build:force": "npm install --legacy-peer-deps && next build",
+    "vercel-build": "npm install --legacy-peer-deps && next build"
   },
   "dependencies": {
     "@auth/mongodb-adapter": "^3.11.2",
