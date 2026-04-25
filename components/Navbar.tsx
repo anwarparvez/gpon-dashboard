@@ -58,7 +58,7 @@ export default function Navbar() {
           <Separator orientation="vertical" className="h-6" />
 
           <div className="flex items-center gap-1 flex-wrap">
-            <NavLink href="/" icon={Home} label="Home" />
+            <NavLink href="/home" icon={Home} label="Home" />
             <NavLink href="/map" icon={Map} label="Map" />
             <NavLink href="/nodes" icon={Table} label="Nodes" />
             <NavLink href="/links" icon={LinkIcon} label="Links" />

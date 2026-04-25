@@ -18,6 +18,8 @@ interface ValidationError {
   error: string;
 }
 
+type NodeCategory = 'OLT' | 'OCC' | 'ODP' | 'HODP' | 'Branch Point';
+
 export default function ImportNodes() {
   const [preview, setPreview] = useState<any[]>([]);
   const [logs, setLogs] = useState<any[]>([]);
@@ -30,6 +32,15 @@ export default function ImportNodes() {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [fileName, setFileName] = useState<string>("");
   const [radiusMeters, setRadiusMeters] = useState<number>(5);
+
+  // Category order for sorting
+  const categoryOrder: Record<NodeCategory, number> = {
+    'OLT': 1,
+    'OCC': 2,
+    'ODP': 3,
+    'HODP': 4,
+    'Branch Point': 5
+  };
 
   // Fetch radius configuration from API
   useEffect(() => {
@@ -333,7 +344,7 @@ export default function ImportNodes() {
     URL.revokeObjectURL(url);
   };
 
-  // 📤 EXPORT
+  // 📤 EXPORT - ORDERED BY CATEGORY: OLT, OCC, ODP, HODP
   const handleExport = async () => {
     setExporting(true);
 
@@ -341,13 +352,26 @@ export default function ImportNodes() {
       const res = await fetch("/api/nodes");
       if (!res.ok) throw new Error("Failed to fetch nodes");
       
-      const dbNodes = await res.json();
+      let dbNodes = await res.json();
 
       if (!dbNodes.length) {
         alert("⚠️ No data found");
         setExporting(false);
         return;
       }
+
+      // Sort nodes by category order: OLT -> OCC -> ODP -> HODP -> Branch Point
+      dbNodes = dbNodes.sort((a: any, b: any) => {
+        const orderA = categoryOrder[a.node_category as NodeCategory] || 999;
+        const orderB = categoryOrder[b.node_category as NodeCategory] || 999;
+        
+        if (orderA !== orderB) {
+          return orderA - orderB;
+        }
+        
+        // If same category, sort by node_id
+        return a.node_id.localeCompare(b.node_id);
+      });
 
       const fields = [
         "node_id",
@@ -380,11 +404,22 @@ export default function ImportNodes() {
 
       const a = document.createElement("a");
       a.href = url;
-      a.download = `nodes-export-${Date.now()}.csv`;
+      a.download = `nodes-export-${new Date().toISOString().split('T')[0]}.csv`;
       a.click();
       URL.revokeObjectURL(url);
       
-      alert(`✅ Export completed successfully!\n📊 Total nodes: ${dbNodes.length}`);
+      // Show category breakdown in success message
+      const categoryBreakdown = dbNodes.reduce((acc: any, node: any) => {
+        const cat = node.node_category;
+        acc[cat] = (acc[cat] || 0) + 1;
+        return acc;
+      }, {});
+      
+      const breakdownMessage = Object.entries(categoryBreakdown)
+        .map(([cat, count]) => `${cat}: ${count}`)
+        .join(", ");
+      
+      alert(`✅ Export completed successfully!\n📊 Total nodes: ${dbNodes.length}\n📋 ${breakdownMessage}`);
     } catch (err) {
       console.error(err);
       alert("❌ Export failed");
@@ -421,6 +456,9 @@ export default function ImportNodes() {
             Upload CSV files to bulk insert or update nodes. Location updates within{' '}
             <span className="font-semibold text-primary">{radiusMeters} meters</span> of existing nodes are automatically blocked.
           </p>
+          <p className="text-xs text-muted-foreground">
+            Export orders nodes by: OLT → OCC → ODP → HODP → Branch Point
+          </p>
         </CardHeader>
 
         <CardContent className="space-y-3">
@@ -446,7 +484,7 @@ export default function ImportNodes() {
             </div>
 
             <Button onClick={handleExport} variant="secondary" disabled={exporting}>
-              {exporting ? "Exporting..." : "📤 Export"}
+              {exporting ? "Exporting..." : "📤 Export (Ordered)"}
             </Button>
 
             {preview.length > 0 && (
@@ -553,6 +591,7 @@ export default function ImportNodes() {
                       <tr className="border-b">
                         <th className="text-left p-2 w-32">ID</th>
                         <th className="text-left p-2">Name</th>
+                        <th className="text-left p-2 w-24">Category</th>
                         <th className="text-left p-2 w-24">Status</th>
                         <th className="text-left p-2 w-32">Errors</th>
                         <th className="text-left p-2">Changes</th>
@@ -563,6 +602,11 @@ export default function ImportNodes() {
                         <tr key={i} className="border-b hover:bg-muted/50">
                           <td className="p-2 font-mono text-xs">{row.node_id}</td>
                           <td className="p-2">{row.name}</td>
+                          <td className="p-2">
+                            <Badge variant="outline" className="text-xs">
+                              {row.node_category || '—'}
+                            </Badge>
+                          </td>
                           <td className="p-2">
                             <Badge
                               variant={
@@ -581,10 +625,10 @@ export default function ImportNodes() {
                               {row.type === "skip" && "⏭️ SKIP"}
                               {row.type === "error" && "❌ ERROR"}
                             </Badge>
-                          </td>
+                           </td>
                           <td className="p-2 text-red-500 text-xs">
                             {row.errors?.join(", ")}
-                          </td>
+                           </td>
                           <td className="p-2 text-xs">
                             {Object.entries(row.changes || {}).map(
                               ([k, v]: any) => (
@@ -596,7 +640,7 @@ export default function ImportNodes() {
                                 </div>
                               ),
                             )}
-                          </td>
+                           </td>
                         </tr>
                       ))}
                     </tbody>
