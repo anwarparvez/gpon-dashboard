@@ -6,6 +6,7 @@ import { Geist } from "next/font/google";
 import { cn } from "@/lib/utils";
 import { Toaster } from 'sonner';
 import ConditionalNavbar from '@/components/ConditionalNavbar';
+import SessionProvider from '@/components/SessionProvider';
 
 const geist = Geist({ subsets: ['latin'], variable: '--font-sans' });
 
@@ -18,11 +19,11 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className={cn("font-sans", geist.variable)}>
       <body suppressHydrationWarning style={{ margin: 0 }}>
-        {/* Global Navbar – hidden on landing & auth pages */}
-        <ConditionalNavbar />
-
-        <div style={{ padding: '10px' }}>{children}</div>
-        <Toaster richColors position="top-right" />
+        <SessionProvider>
+          <ConditionalNavbar />
+          <div style={{ padding: '10px' }}>{children}</div>
+          <Toaster richColors position="top-right" />
+        </SessionProvider>
       </body>
     </html>
   );

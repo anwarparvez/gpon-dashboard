@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
+import { useEffect, useState } from "react";
+import Link from "next/link";
 
 /* ✅ shadcn */
 import { Button } from "@/components/ui/button";
@@ -11,14 +11,9 @@ import {
   TableHead,
   TableRow,
   TableBody,
-  TableCell
+  TableCell,
 } from "@/components/ui/table";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -45,14 +40,9 @@ import { Checkbox } from "@/components/ui/checkbox";
    🔒 TYPES
 ========================= */
 
-type NodeCategory =
-  | 'OLT'
-  | 'OCC'
-  | 'ODP'
-  | 'HODP'
-  | 'Branch Point';
+type NodeCategory = "OLT" | "OCC" | "ODP" | "HODP" | "Branch Point";
 
-type NodeStatus = 'existing' | 'proposed';
+type NodeStatus = "existing" | "proposed";
 
 type NodeType = {
   _id: string;
@@ -102,7 +92,12 @@ type LinkSummaryType = {
    📏 Distance Calculation
 ========================= */
 
-function getDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
+function getDistance(
+  lat1: number,
+  lng1: number,
+  lat2: number,
+  lng2: number,
+): number {
   const R = 6371000;
   const toRad = (v: number) => (v * Math.PI) / 180;
 
@@ -123,31 +118,31 @@ function getDistance(lat1: number, lng1: number, lat2: number, lng2: number): nu
 export default function Home() {
   const [nodes, setNodes] = useState<NodeType[]>([]);
   const [links, setLinks] = useState<LinkType[]>([]);
-  const [filter, setFilter] = useState<'all' | 'existing' | 'proposed'>('all');
+  const [filter, setFilter] = useState<"all" | "existing" | "proposed">("all");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [selectedOcc, setSelectedOcc] = useState<string>('');
-  const [selectedOdp, setSelectedOdp] = useState<string>('');
-  const [selectedOlt, setSelectedOlt] = useState<string>('');
+  const [selectedOcc, setSelectedOcc] = useState<string>("");
+  const [selectedOdp, setSelectedOdp] = useState<string>("");
+  const [selectedOlt, setSelectedOlt] = useState<string>("");
   const [hodpsToDelete, setHodpsToDelete] = useState<NodeType[]>([]);
   const [selectedHodps, setSelectedHodps] = useState<Set<string>>(new Set());
   const [deleting, setDeleting] = useState(false);
-  const [deleteMode, setDeleteMode] = useState<'occ' | 'olt'>('occ');
+  const [deleteMode, setDeleteMode] = useState<"occ" | "olt">("occ");
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       setError(null);
-      
+
       try {
         const [nodesRes, linksRes] = await Promise.all([
-          fetch('/api/nodes'),
-          fetch('/api/links')
+          fetch("/api/nodes"),
+          fetch("/api/links"),
         ]);
 
-        if (!nodesRes.ok) throw new Error('Failed to fetch nodes');
-        if (!linksRes.ok) throw new Error('Failed to fetch links');
+        if (!nodesRes.ok) throw new Error("Failed to fetch nodes");
+        if (!linksRes.ok) throw new Error("Failed to fetch links");
 
         const nodesData = await nodesRes.json();
         const linksData = await linksRes.json();
@@ -155,8 +150,8 @@ export default function Home() {
         setNodes(nodesData);
         setLinks(linksData);
       } catch (err) {
-        console.error('Error fetching data:', err);
-        setError(err instanceof Error ? err.message : 'Failed to load data');
+        console.error("Error fetching data:", err);
+        setError(err instanceof Error ? err.message : "Failed to load data");
       } finally {
         setLoading(false);
       }
@@ -171,8 +166,8 @@ export default function Home() {
 
   const totalNodes = nodes.length;
   const totalLinks = links.length;
-  const existingNodes = nodes.filter(n => n.status === 'existing').length;
-  const proposedNodes = nodes.filter(n => n.status === 'proposed').length;
+  const existingNodes = nodes.filter((n) => n.status === "existing").length;
+  const proposedNodes = nodes.filter((n) => n.status === "proposed").length;
 
   /* =========================
      📊 CATEGORY STATS
@@ -183,13 +178,13 @@ export default function Home() {
     OCC: { existing: 0, proposed: 0, total: 0 },
     ODP: { existing: 0, proposed: 0, total: 0 },
     HODP: { existing: 0, proposed: 0, total: 0 },
-    'Branch Point': { existing: 0, proposed: 0, total: 0 }
+    "Branch Point": { existing: 0, proposed: 0, total: 0 },
   };
 
-  nodes.forEach(node => {
+  nodes.forEach((node) => {
     if (categoryStats[node.node_category]) {
       categoryStats[node.node_category].total++;
-      if (node.status === 'existing') {
+      if (node.status === "existing") {
         categoryStats[node.node_category].existing++;
       } else {
         categoryStats[node.node_category].proposed++;
@@ -201,25 +196,25 @@ export default function Home() {
      🔗 OCC SUMMARY
   ========================= */
 
-  const nodeMap = new Map(nodes.map(n => [n._id, n]));
+  const nodeMap = new Map(nodes.map((n) => [n._id, n]));
   const odpToOcc: Record<string, string> = {};
 
-  links.forEach(link => {
+  links.forEach((link) => {
     const from = nodeMap.get(link.from_node?._id || link.from_node);
     const to = nodeMap.get(link.to_node?._id || link.to_node);
     if (!from || !to) return;
 
-    if (from.node_category === 'OCC' && to.node_category === 'ODP') {
+    if (from.node_category === "OCC" && to.node_category === "ODP") {
       odpToOcc[to.node_id] = from.node_id;
     }
-    if (to.node_category === 'OCC' && from.node_category === 'ODP') {
+    if (to.node_category === "OCC" && from.node_category === "ODP") {
       odpToOcc[from.node_id] = to.node_id;
     }
   });
 
   const occSummary: Record<string, OccSummaryType> = {};
 
-  links.forEach(link => {
+  links.forEach((link) => {
     const from = nodeMap.get(link.from_node?._id || link.from_node);
     const to = nodeMap.get(link.to_node?._id || link.to_node);
     if (!from || !to) return;
@@ -227,10 +222,10 @@ export default function Home() {
     let odp: any = null;
     let other: any = null;
 
-    if (from.node_category === 'ODP') {
+    if (from.node_category === "ODP") {
       odp = from;
       other = to;
-    } else if (to.node_category === 'ODP') {
+    } else if (to.node_category === "ODP") {
       odp = to;
       other = from;
     }
@@ -247,9 +242,9 @@ export default function Home() {
     occSummary[occ].odp.add(odp.node_id);
     occSummary[occ].total++;
 
-    if (other.node_category === 'HODP') {
+    if (other.node_category === "HODP") {
       occSummary[occ].hodp++;
-    } else if (other.node_category === 'Branch Point') {
+    } else if (other.node_category === "Branch Point") {
       occSummary[occ].branch++;
     }
   });
@@ -258,22 +253,33 @@ export default function Home() {
      📊 LINK SUMMARY TABLE
   ========================= */
 
-  const nodeIdMap = new Map(nodes.map(n => [n.node_id, n]));
+  const nodeIdMap = new Map(nodes.map((n) => [n.node_id, n]));
   const linkSummary: Record<string, LinkSummaryType> = {};
   const odpToOccMap: Record<string, string> = {};
 
-  links.forEach(link => {
+  links.forEach((link) => {
     const from = nodeMap.get(link.from_node?._id || link.from_node);
     const to = nodeMap.get(link.to_node?._id || link.to_node);
     if (!from || !to) return;
-    
-    if (from.node_category === 'OCC' && to.node_category === 'ODP') {
+
+    if (from.node_category === "OCC" && to.node_category === "ODP") {
       odpToOccMap[to.node_id] = from.node_id;
       let length = link.fiber_length || 0;
-      if (length === 0 && from.latitude && from.longitude && to.latitude && to.longitude) {
-        length = getDistance(from.latitude, from.longitude, to.latitude, to.longitude);
+      if (
+        length === 0 &&
+        from.latitude &&
+        from.longitude &&
+        to.latitude &&
+        to.longitude
+      ) {
+        length = getDistance(
+          from.latitude,
+          from.longitude,
+          to.latitude,
+          to.longitude,
+        );
       }
-      
+
       if (!linkSummary[from.node_id]) {
         linkSummary[from.node_id] = {
           occToOdpLength: 0,
@@ -282,20 +288,31 @@ export default function Home() {
           odpCount: 0,
           hodpCount: 0,
           avgOdpDistance: 0,
-          avgHodpDistance: 0
+          avgHodpDistance: 0,
         };
       }
-      
+
       linkSummary[from.node_id].occToOdpLength += length;
       linkSummary[from.node_id].odpCount++;
     }
-    
-    if (from.node_category === 'ODP' && to.node_category === 'HODP') {
+
+    if (from.node_category === "ODP" && to.node_category === "HODP") {
       const occ = odpToOccMap[from.node_id];
       if (occ && linkSummary[occ]) {
         let length = link.fiber_length || 0;
-        if (length === 0 && from.latitude && from.longitude && to.latitude && to.longitude) {
-          length = getDistance(from.latitude, from.longitude, to.latitude, to.longitude);
+        if (
+          length === 0 &&
+          from.latitude &&
+          from.longitude &&
+          to.latitude &&
+          to.longitude
+        ) {
+          length = getDistance(
+            from.latitude,
+            from.longitude,
+            to.latitude,
+            to.longitude,
+          );
         }
         linkSummary[occ].odpToHodpLength += length;
         linkSummary[occ].hodpCount++;
@@ -303,11 +320,13 @@ export default function Home() {
     }
   });
 
-  Object.keys(linkSummary).forEach(occ => {
+  Object.keys(linkSummary).forEach((occ) => {
     const summary = linkSummary[occ];
     summary.totalLength = summary.occToOdpLength + summary.odpToHodpLength;
-    summary.avgOdpDistance = summary.odpCount > 0 ? summary.occToOdpLength / summary.odpCount : 0;
-    summary.avgHodpDistance = summary.hodpCount > 0 ? summary.odpToHodpLength / summary.hodpCount : 0;
+    summary.avgOdpDistance =
+      summary.odpCount > 0 ? summary.occToOdpLength / summary.odpCount : 0;
+    summary.avgHodpDistance =
+      summary.hodpCount > 0 ? summary.odpToHodpLength / summary.hodpCount : 0;
   });
 
   const linkSummaryArray = Object.entries(linkSummary)
@@ -322,14 +341,16 @@ export default function Home() {
   ========================= */
 
   const connectedSet = new Set<string>();
-  links.forEach(link => {
+  links.forEach((link) => {
     connectedSet.add(String(link.from_node?._id || link.from_node));
     connectedSet.add(String(link.to_node?._id || link.to_node));
   });
 
-  const unconnectedNodes = nodes.filter(n => !connectedSet.has(String(n._id)));
-  const filteredUnconnectedNodes = unconnectedNodes.filter(n => {
-    if (filter === 'all') return true;
+  const unconnectedNodes = nodes.filter(
+    (n) => !connectedSet.has(String(n._id)),
+  );
+  const filteredUnconnectedNodes = unconnectedNodes.filter((n) => {
+    if (filter === "all") return true;
     return n.status === filter;
   });
 
@@ -337,11 +358,13 @@ export default function Home() {
      📊 REGION STATS
   ========================= */
 
-  const regionStats: Record<string, { existing: number; proposed: number }> = {};
-  nodes.forEach(node => {
-    const region = node.region || 'Unknown';
-    if (!regionStats[region]) regionStats[region] = { existing: 0, proposed: 0 };
-    if (node.status === 'existing') {
+  const regionStats: Record<string, { existing: number; proposed: number }> =
+    {};
+  nodes.forEach((node) => {
+    const region = node.region || "Unknown";
+    if (!regionStats[region])
+      regionStats[region] = { existing: 0, proposed: 0 };
+    if (node.status === "existing") {
       regionStats[region].existing++;
     } else {
       regionStats[region].proposed++;
@@ -353,16 +376,15 @@ export default function Home() {
   ========================= */
 
   // Get all OLTs
-  const olts = nodes.filter(n => n.node_category === 'OLT');
-  
+  const olts = nodes.filter((n) => n.node_category === "OLT");
+
   // Get all OCCs
-  const occs = nodes.filter(n => n.node_category === 'OCC');
-  
+  const occs = nodes.filter((n) => n.node_category === "OCC");
+
   // Get ODPs for selected OCC
   const getOdpsForOcc = (occId: string) => {
-    return nodes.filter(n => 
-      n.node_category === 'ODP' && 
-      odpToOccMap[n.node_id] === occId
+    return nodes.filter(
+      (n) => n.node_category === "ODP" && odpToOccMap[n.node_id] === occId,
     );
   };
 
@@ -376,41 +398,57 @@ export default function Home() {
   // Get HODPs under a specific ODP
   const getHodpsUnderOdp = (odpId: string) => {
     const hodpIds = new Set<string>();
-    links.forEach(link => {
+    links.forEach((link) => {
       const from = nodeMap.get(link.from_node?._id || link.from_node);
       const to = nodeMap.get(link.to_node?._id || link.to_node);
       if (!from || !to) return;
-      
-      if (from.node_category === 'ODP' && from.node_id === odpId && to.node_category === 'HODP') {
+
+      if (
+        from.node_category === "ODP" &&
+        from.node_id === odpId &&
+        to.node_category === "HODP"
+      ) {
         hodpIds.add(to.node_id);
       }
-      if (to.node_category === 'ODP' && to.node_id === odpId && from.node_category === 'HODP') {
+      if (
+        to.node_category === "ODP" &&
+        to.node_id === odpId &&
+        from.node_category === "HODP"
+      ) {
         hodpIds.add(from.node_id);
       }
     });
-    
-    return nodes.filter(n => hodpIds.has(n.node_id));
+
+    return nodes.filter((n) => hodpIds.has(n.node_id));
   };
 
   // Get all HODPs under selected OCC
   const getHodpsUnderOcc = (occId: string) => {
-    const odpIds = getOdpsForOcc(occId).map(odp => odp.node_id);
+    const odpIds = getOdpsForOcc(occId).map((odp) => odp.node_id);
     const hodpIds = new Set<string>();
-    
-    links.forEach(link => {
+
+    links.forEach((link) => {
       const from = nodeMap.get(link.from_node?._id || link.from_node);
       const to = nodeMap.get(link.to_node?._id || link.to_node);
       if (!from || !to) return;
-      
-      if (from.node_category === 'ODP' && odpIds.includes(from.node_id) && to.node_category === 'HODP') {
+
+      if (
+        from.node_category === "ODP" &&
+        odpIds.includes(from.node_id) &&
+        to.node_category === "HODP"
+      ) {
         hodpIds.add(to.node_id);
       }
-      if (to.node_category === 'ODP' && odpIds.includes(to.node_id) && from.node_category === 'HODP') {
+      if (
+        to.node_category === "ODP" &&
+        odpIds.includes(to.node_id) &&
+        from.node_category === "HODP"
+      ) {
         hodpIds.add(from.node_id);
       }
     });
-    
-    return nodes.filter(n => hodpIds.has(n.node_id));
+
+    return nodes.filter((n) => hodpIds.has(n.node_id));
   };
 
   // Get all HODPs under selected OLT
@@ -419,50 +457,58 @@ export default function Home() {
     const occsUnderOlt = getOccsUnderOlt(oltId);
     const odpIds = new Set<string>();
     const hodpIds = new Set<string>();
-    
-    occsUnderOlt.forEach(occ => {
+
+    occsUnderOlt.forEach((occ) => {
       const odps = getOdpsForOcc(occ.node_id);
-      odps.forEach(odp => odpIds.add(odp.node_id));
+      odps.forEach((odp) => odpIds.add(odp.node_id));
     });
-    
-    links.forEach(link => {
+
+    links.forEach((link) => {
       const from = nodeMap.get(link.from_node?._id || link.from_node);
       const to = nodeMap.get(link.to_node?._id || link.to_node);
       if (!from || !to) return;
-      
-      if (from.node_category === 'ODP' && odpIds.has(from.node_id) && to.node_category === 'HODP') {
+
+      if (
+        from.node_category === "ODP" &&
+        odpIds.has(from.node_id) &&
+        to.node_category === "HODP"
+      ) {
         hodpIds.add(to.node_id);
       }
-      if (to.node_category === 'ODP' && odpIds.has(to.node_id) && from.node_category === 'HODP') {
+      if (
+        to.node_category === "ODP" &&
+        odpIds.has(to.node_id) &&
+        from.node_category === "HODP"
+      ) {
         hodpIds.add(from.node_id);
       }
     });
-    
-    return nodes.filter(n => hodpIds.has(n.node_id));
+
+    return nodes.filter((n) => hodpIds.has(n.node_id));
   };
 
   const loadHodpsToDelete = () => {
     let hodps: NodeType[] = [];
-    
-    if (deleteMode === 'olt' && selectedOlt) {
+
+    if (deleteMode === "olt" && selectedOlt) {
       hodps = getHodpsUnderOlt(selectedOlt);
-    } else if (deleteMode === 'occ') {
-      if (selectedOcc && selectedOdp && selectedOdp !== 'all') {
+    } else if (deleteMode === "occ") {
+      if (selectedOcc && selectedOdp && selectedOdp !== "all") {
         hodps = getHodpsUnderOdp(selectedOdp);
       } else if (selectedOcc) {
         hodps = getHodpsUnderOcc(selectedOcc);
       }
     }
-    
+
     setHodpsToDelete(hodps);
-    setSelectedHodps(new Set(hodps.map(h => h._id)));
+    setSelectedHodps(new Set(hodps.map((h) => h._id)));
   };
 
   const toggleSelectAll = () => {
     if (selectedHodps.size === hodpsToDelete.length) {
       setSelectedHodps(new Set());
     } else {
-      setSelectedHodps(new Set(hodpsToDelete.map(h => h._id)));
+      setSelectedHodps(new Set(hodpsToDelete.map((h) => h._id)));
     }
   };
 
@@ -477,63 +523,67 @@ export default function Home() {
   };
 
   const handleBulkDelete = async () => {
-    const hodpsToActuallyDelete = hodpsToDelete.filter(h => selectedHodps.has(h._id));
-    
+    const hodpsToActuallyDelete = hodpsToDelete.filter((h) =>
+      selectedHodps.has(h._id),
+    );
+
     if (hodpsToActuallyDelete.length === 0) {
-      alert('Please select at least one HODP to delete');
+      alert("Please select at least one HODP to delete");
       return;
     }
-    
+
     setDeleting(true);
-    
+
     try {
       // Collect all IDs for bulk deletion
-      const nodeIds = hodpsToActuallyDelete.map(h => h._id);
+      const nodeIds = hodpsToActuallyDelete.map((h) => h._id);
       const linkIds: string[] = [];
-      
+
       // Find all links connected to these HODPs
-      hodpsToActuallyDelete.forEach(hodp => {
-        const relatedLinks = links.filter(link => {
+      hodpsToActuallyDelete.forEach((hodp) => {
+        const relatedLinks = links.filter((link) => {
           const fromId = link.from_node?._id || link.from_node;
           const toId = link.to_node?._id || link.to_node;
           return fromId === hodp._id || toId === hodp._id;
         });
-        relatedLinks.forEach(link => linkIds.push(link._id));
+        relatedLinks.forEach((link) => linkIds.push(link._id));
       });
-      
+
       // Call bulk delete API
-      const response = await fetch('/api/nodes/bulk-delete', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nodeIds, linkIds: [...new Set(linkIds)] })
+      const response = await fetch("/api/nodes/bulk-delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nodeIds, linkIds: [...new Set(linkIds)] }),
       });
-      
+
       const result = await response.json();
-      
+
       if (response.ok) {
-        alert(`✅ Successfully deleted ${result.results?.deletedNodes || hodpsToActuallyDelete.length} HODP(s) and ${result.results?.deletedLinks || linkIds.length} links`);
-        
+        alert(
+          `✅ Successfully deleted ${result.results?.deletedNodes || hodpsToActuallyDelete.length} HODP(s) and ${result.results?.deletedLinks || linkIds.length} links`,
+        );
+
         // Refresh data
         const [nodesRes, linksRes] = await Promise.all([
-          fetch('/api/nodes'),
-          fetch('/api/links')
+          fetch("/api/nodes"),
+          fetch("/api/links"),
         ]);
-        
+
         if (nodesRes.ok) setNodes(await nodesRes.json());
         if (linksRes.ok) setLinks(await linksRes.json());
-        
+
         setDeleteDialogOpen(false);
-        setSelectedOcc('');
-        setSelectedOdp('');
-        setSelectedOlt('');
+        setSelectedOcc("");
+        setSelectedOdp("");
+        setSelectedOlt("");
         setHodpsToDelete([]);
         setSelectedHodps(new Set());
       } else {
         alert(`❌ Bulk delete failed: ${result.error}`);
       }
     } catch (error) {
-      console.error('Delete error:', error);
-      alert('❌ Failed to delete HODPs');
+      console.error("Delete error:", error);
+      alert("❌ Failed to delete HODPs");
     } finally {
       setDeleting(false);
     }
@@ -546,12 +596,18 @@ export default function Home() {
   if (loading) {
     return (
       <div className="p-6 space-y-6">
-        <h1 className="text-2xl font-bold text-center">GPON Planning Dashboard</h1>
+        <h1 className="text-2xl font-bold text-center">
+          GPON Planning Dashboard
+        </h1>
         <div className="grid md:grid-cols-3 gap-4">
-          {[1, 2, 3].map(i => (
+          {[1, 2, 3].map((i) => (
             <Card key={i}>
-              <CardHeader><Skeleton className="h-6 w-32" /></CardHeader>
-              <CardContent><Skeleton className="h-10 w-16" /></CardContent>
+              <CardHeader>
+                <Skeleton className="h-6 w-32" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-10 w-16" />
+              </CardContent>
             </Card>
           ))}
         </div>
@@ -592,17 +648,24 @@ export default function Home() {
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Total Nodes</CardTitle>
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  Total Nodes
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold">{totalNodes}</div>
-                <p className="text-xs text-muted-foreground mt-1">{Math.round((existingNodes / totalNodes) * 100) || 0}% Existing</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {Math.round((existingNodes / totalNodes) * 100) || 0}%
+                  Existing
+                </p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Total Links</CardTitle>
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  Total Links
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold">{totalLinks}</div>
@@ -611,23 +674,38 @@ export default function Home() {
 
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Unconnected Nodes</CardTitle>
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  Unconnected Nodes
+                </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-red-500">{unconnectedNodes.length}</div>
-                <p className="text-xs text-muted-foreground mt-1">{Math.round((unconnectedNodes.length / totalNodes) * 100) || 0}% of total</p>
+                <div className="text-3xl font-bold text-red-500">
+                  {unconnectedNodes.length}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {Math.round((unconnectedNodes.length / totalNodes) * 100) ||
+                    0}
+                  % of total
+                </p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Network Coverage</CardTitle>
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  Network Coverage
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold text-green-600">
-                  {Math.round(((totalNodes - unconnectedNodes.length) / totalNodes) * 100) || 0}%
+                  {Math.round(
+                    ((totalNodes - unconnectedNodes.length) / totalNodes) * 100,
+                  ) || 0}
+                  %
                 </div>
-                <p className="text-xs text-muted-foreground mt-1">Connected nodes</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Connected nodes
+                </p>
               </CardContent>
             </Card>
           </div>
@@ -638,15 +716,25 @@ export default function Home() {
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
                   Existing Network
-                  <Badge variant="default" className="bg-green-600">LIVE</Badge>
+                  <Badge variant="default" className="bg-green-600">
+                    LIVE
+                  </Badge>
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-4xl font-bold text-green-600">{existingNodes}</div>
-                <div className="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden">
-                  <div className="h-full bg-green-600 rounded-full" style={{ width: `${(existingNodes / totalNodes) * 100}%` }} />
+                <div className="text-4xl font-bold text-green-600">
+                  {existingNodes}
                 </div>
-                <p className="text-xs text-muted-foreground mt-2">{Math.round((existingNodes / totalNodes) * 100)}% of total nodes</p>
+                <div className="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-green-600 rounded-full"
+                    style={{ width: `${(existingNodes / totalNodes) * 100}%` }}
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground mt-2">
+                  {Math.round((existingNodes / totalNodes) * 100)}% of total
+                  nodes
+                </p>
               </CardContent>
             </Card>
 
@@ -654,22 +742,37 @@ export default function Home() {
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
                   Proposed Network
-                  <Badge variant="outline" className="border-orange-500 text-orange-500">PLANNED</Badge>
+                  <Badge
+                    variant="outline"
+                    className="border-orange-500 text-orange-500"
+                  >
+                    PLANNED
+                  </Badge>
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-4xl font-bold text-orange-500">{proposedNodes}</div>
-                <div className="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden">
-                  <div className="h-full bg-orange-500 rounded-full" style={{ width: `${(proposedNodes / totalNodes) * 100}%` }} />
+                <div className="text-4xl font-bold text-orange-500">
+                  {proposedNodes}
                 </div>
-                <p className="text-xs text-muted-foreground mt-2">{Math.round((proposedNodes / totalNodes) * 100)}% of total nodes</p>
+                <div className="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-orange-500 rounded-full"
+                    style={{ width: `${(proposedNodes / totalNodes) * 100}%` }}
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground mt-2">
+                  {Math.round((proposedNodes / totalNodes) * 100)}% of total
+                  nodes
+                </p>
               </CardContent>
             </Card>
           </div>
 
           {/* Category Table */}
           <Card>
-            <CardHeader><CardTitle>📊 Category-wise Status</CardTitle></CardHeader>
+            <CardHeader>
+              <CardTitle>📊 Category-wise Status</CardTitle>
+            </CardHeader>
             <CardContent>
               <Table>
                 <TableHeader>
@@ -682,13 +785,28 @@ export default function Home() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {(Object.keys(categoryStats) as NodeCategory[]).map(cat => (
+                  {(Object.keys(categoryStats) as NodeCategory[]).map((cat) => (
                     <TableRow key={cat}>
                       <TableCell className="font-medium">{cat}</TableCell>
-                      <TableCell className="text-center"><Badge variant="secondary">{categoryStats[cat].existing}</Badge></TableCell>
-                      <TableCell className="text-center"><Badge variant="outline">{categoryStats[cat].proposed}</Badge></TableCell>
-                      <TableCell className="text-center font-bold">{categoryStats[cat].total}</TableCell>
-                      <TableCell className="text-center">{Math.round((categoryStats[cat].total / totalNodes) * 100) || 0}%</TableCell>
+                      <TableCell className="text-center">
+                        <Badge variant="secondary">
+                          {categoryStats[cat].existing}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Badge variant="outline">
+                          {categoryStats[cat].proposed}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-center font-bold">
+                        {categoryStats[cat].total}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {Math.round(
+                          (categoryStats[cat].total / totalNodes) * 100,
+                        ) || 0}
+                        %
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -699,7 +817,9 @@ export default function Home() {
           {/* Region Stats */}
           {Object.keys(regionStats).length > 0 && (
             <Card>
-              <CardHeader><CardTitle>📍 Regional Distribution</CardTitle></CardHeader>
+              <CardHeader>
+                <CardTitle>📍 Regional Distribution</CardTitle>
+              </CardHeader>
               <CardContent>
                 <Table>
                   <TableHeader>
@@ -712,13 +832,26 @@ export default function Home() {
                   </TableHeader>
                   <TableBody>
                     {Object.entries(regionStats)
-                      .sort((a, b) => (b[1].existing + b[1].proposed) - (a[1].existing + a[1].proposed))
+                      .sort(
+                        (a, b) =>
+                          b[1].existing +
+                          b[1].proposed -
+                          (a[1].existing + a[1].proposed),
+                      )
                       .map(([region, stats]) => (
                         <TableRow key={region}>
-                          <TableCell className="font-medium">{region}</TableCell>
-                          <TableCell className="text-center"><Badge variant="secondary">{stats.existing}</Badge></TableCell>
-                          <TableCell className="text-center"><Badge variant="outline">{stats.proposed}</Badge></TableCell>
-                          <TableCell className="text-center font-bold">{stats.existing + stats.proposed}</TableCell>
+                          <TableCell className="font-medium">
+                            {region}
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <Badge variant="secondary">{stats.existing}</Badge>
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <Badge variant="outline">{stats.proposed}</Badge>
+                          </TableCell>
+                          <TableCell className="text-center font-bold">
+                            {stats.existing + stats.proposed}
+                          </TableCell>
                         </TableRow>
                       ))}
                   </TableBody>
@@ -732,7 +865,10 @@ export default function Home() {
           <Card>
             <CardHeader>
               <CardTitle>🔗 Fiber Length Summary by OCC</CardTitle>
-              <p className="text-sm text-muted-foreground">Total fiber lengths for OCC→ODP and ODP→HODP connections (in meters)</p>
+              <p className="text-sm text-muted-foreground">
+                Total fiber lengths for OCC→ODP and ODP→HODP connections (in
+                meters)
+              </p>
             </CardHeader>
             <CardContent>
               <div className="overflow-x-auto">
@@ -743,19 +879,35 @@ export default function Home() {
                       <TableHead className="text-center">ODPs</TableHead>
                       <TableHead className="text-center">HODPs</TableHead>
                       <TableHead className="text-center">OCC→ODP (m)</TableHead>
-                      <TableHead className="text-center">ODP→HODP (m)</TableHead>
-                      <TableHead className="text-center">Total Fiber (m)</TableHead>
+                      <TableHead className="text-center">
+                        ODP→HODP (m)
+                      </TableHead>
+                      <TableHead className="text-center">
+                        Total Fiber (m)
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {linkSummaryArray.map((item) => (
                       <TableRow key={item.occId}>
-                        <TableCell className="font-mono text-xs font-bold">{item.occName}</TableCell>
-                        <TableCell className="text-center"><Badge variant="secondary">{item.odpCount}</Badge></TableCell>
-                        <TableCell className="text-center"><Badge variant="secondary">{item.hodpCount}</Badge></TableCell>
-                        <TableCell className="text-center font-mono">{Math.round(item.occToOdpLength).toLocaleString()}</TableCell>
-                        <TableCell className="text-center font-mono">{Math.round(item.odpToHodpLength).toLocaleString()}</TableCell>
-                        <TableCell className="text-center font-bold font-mono text-blue-600">{Math.round(item.totalLength).toLocaleString()}</TableCell>
+                        <TableCell className="font-mono text-xs font-bold">
+                          {item.occName}
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <Badge variant="secondary">{item.odpCount}</Badge>
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <Badge variant="secondary">{item.hodpCount}</Badge>
+                        </TableCell>
+                        <TableCell className="text-center font-mono">
+                          {Math.round(item.occToOdpLength).toLocaleString()}
+                        </TableCell>
+                        <TableCell className="text-center font-mono">
+                          {Math.round(item.odpToHodpLength).toLocaleString()}
+                        </TableCell>
+                        <TableCell className="text-center font-bold font-mono text-blue-600">
+                          {Math.round(item.totalLength).toLocaleString()}
+                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -764,20 +916,52 @@ export default function Home() {
               <div className="mt-4 p-4 bg-muted rounded-lg">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div>
-                    <p className="text-xs text-muted-foreground">Total Fiber Length</p>
-                    <p className="text-lg font-bold">{Math.round(linkSummaryArray.reduce((sum, item) => sum + item.totalLength, 0)).toLocaleString()} m</p>
+                    <p className="text-xs text-muted-foreground">
+                      Total Fiber Length
+                    </p>
+                    <p className="text-lg font-bold">
+                      {Math.round(
+                        linkSummaryArray.reduce(
+                          (sum, item) => sum + item.totalLength,
+                          0,
+                        ),
+                      ).toLocaleString()}{" "}
+                      m
+                    </p>
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground">Total OCC→ODP Fiber</p>
-                    <p className="text-lg font-bold text-blue-600">{Math.round(linkSummaryArray.reduce((sum, item) => sum + item.occToOdpLength, 0)).toLocaleString()} m</p>
+                    <p className="text-xs text-muted-foreground">
+                      Total OCC→ODP Fiber
+                    </p>
+                    <p className="text-lg font-bold text-blue-600">
+                      {Math.round(
+                        linkSummaryArray.reduce(
+                          (sum, item) => sum + item.occToOdpLength,
+                          0,
+                        ),
+                      ).toLocaleString()}{" "}
+                      m
+                    </p>
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground">Total ODP→HODP Fiber</p>
-                    <p className="text-lg font-bold text-green-600">{Math.round(linkSummaryArray.reduce((sum, item) => sum + item.odpToHodpLength, 0)).toLocaleString()} m</p>
+                    <p className="text-xs text-muted-foreground">
+                      Total ODP→HODP Fiber
+                    </p>
+                    <p className="text-lg font-bold text-green-600">
+                      {Math.round(
+                        linkSummaryArray.reduce(
+                          (sum, item) => sum + item.odpToHodpLength,
+                          0,
+                        ),
+                      ).toLocaleString()}{" "}
+                      m
+                    </p>
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Total OCCs</p>
-                    <p className="text-lg font-bold">{linkSummaryArray.length}</p>
+                    <p className="text-lg font-bold">
+                      {linkSummaryArray.length}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -789,7 +973,9 @@ export default function Home() {
           <Card>
             <CardHeader>
               <CardTitle>📊 OCC Details Summary</CardTitle>
-              <p className="text-sm text-muted-foreground">Each OCC with its connected ODPs and downstream nodes</p>
+              <p className="text-sm text-muted-foreground">
+                Each OCC with its connected ODPs and downstream nodes
+              </p>
             </CardHeader>
             <CardContent>
               <Table>
@@ -799,17 +985,31 @@ export default function Home() {
                     <TableHead className="text-center">Unique ODPs</TableHead>
                     <TableHead className="text-center">HODPs</TableHead>
                     <TableHead className="text-center">Branch Points</TableHead>
-                    <TableHead className="text-center">Total Connections</TableHead>
+                    <TableHead className="text-center">
+                      Total Connections
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {Object.entries(occSummary).map(([occ, data]) => (
                     <TableRow key={occ}>
-                      <TableCell className="font-bold font-mono text-xs">{occ}</TableCell>
-                      <TableCell className="text-center"><Badge variant="default" className="bg-blue-500">{data.odp.size}</Badge></TableCell>
-                      <TableCell className="text-center"><Badge variant="secondary">{data.hodp}</Badge></TableCell>
-                      <TableCell className="text-center"><Badge variant="outline">{data.branch}</Badge></TableCell>
-                      <TableCell className="text-center font-bold">{data.total}</TableCell>
+                      <TableCell className="font-bold font-mono text-xs">
+                        {occ}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Badge variant="default" className="bg-blue-500">
+                          {data.odp.size}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Badge variant="secondary">{data.hodp}</Badge>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Badge variant="outline">{data.branch}</Badge>
+                      </TableCell>
+                      <TableCell className="text-center font-bold">
+                        {data.total}
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -823,29 +1023,30 @@ export default function Home() {
             <CardHeader>
               <CardTitle>🗑️ Delete HODPs</CardTitle>
               <p className="text-sm text-muted-foreground">
-                Select HODPs by OLT, OCC, or ODP to bulk delete. Use checkboxes to select specific HODPs.
+                Select HODPs by OLT, OCC, or ODP to bulk delete. Use checkboxes
+                to select specific HODPs.
               </p>
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Delete Mode Selection */}
               <div className="flex gap-4">
                 <Button
-                  variant={deleteMode === 'occ' ? 'default' : 'outline'}
+                  variant={deleteMode === "occ" ? "default" : "outline"}
                   onClick={() => {
-                    setDeleteMode('occ');
-                    setSelectedOlt('');
-                    setSelectedOcc('');
-                    setSelectedOdp('');
+                    setDeleteMode("occ");
+                    setSelectedOlt("");
+                    setSelectedOcc("");
+                    setSelectedOdp("");
                   }}
                 >
                   By OCC/ODP
                 </Button>
                 <Button
-                  variant={deleteMode === 'olt' ? 'default' : 'outline'}
+                  variant={deleteMode === "olt" ? "default" : "outline"}
                   onClick={() => {
-                    setDeleteMode('olt');
-                    setSelectedOcc('');
-                    setSelectedOdp('');
+                    setDeleteMode("olt");
+                    setSelectedOcc("");
+                    setSelectedOdp("");
                   }}
                 >
                   By OLT
@@ -853,15 +1054,17 @@ export default function Home() {
               </div>
 
               {/* OLT Selection */}
-              {deleteMode === 'olt' && (
+              {deleteMode === "olt" && (
                 <div>
-                  <label className="text-sm font-medium mb-2 block">Select OLT</label>
+                  <label className="text-sm font-medium mb-2 block">
+                    Select OLT
+                  </label>
                   <Select value={selectedOlt} onValueChange={setSelectedOlt}>
                     <SelectTrigger>
                       <SelectValue placeholder="Choose an OLT" />
                     </SelectTrigger>
                     <SelectContent>
-                      {olts.map(olt => (
+                      {olts.map((olt) => (
                         <SelectItem key={olt._id} value={olt.node_id}>
                           {olt.node_id} - {olt.name}
                         </SelectItem>
@@ -872,19 +1075,24 @@ export default function Home() {
               )}
 
               {/* OCC/ODP Selection */}
-              {deleteMode === 'occ' && (
+              {deleteMode === "occ" && (
                 <>
                   <div>
-                    <label className="text-sm font-medium mb-2 block">Select OCC</label>
-                    <Select value={selectedOcc} onValueChange={(value) => {
-                      setSelectedOcc(value);
-                      setSelectedOdp('');
-                    }}>
+                    <label className="text-sm font-medium mb-2 block">
+                      Select OCC
+                    </label>
+                    <Select
+                      value={selectedOcc}
+                      onValueChange={(value) => {
+                        setSelectedOcc(value);
+                        setSelectedOdp("");
+                      }}
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Choose an OCC" />
                       </SelectTrigger>
                       <SelectContent>
-                        {occs.map(occ => (
+                        {occs.map((occ) => (
                           <SelectItem key={occ._id} value={occ.node_id}>
                             {occ.node_id} - {occ.name}
                           </SelectItem>
@@ -894,14 +1102,26 @@ export default function Home() {
                   </div>
 
                   <div>
-                    <label className="text-sm font-medium mb-2 block">Select ODP (Optional)</label>
-                    <Select value={selectedOdp} onValueChange={setSelectedOdp} disabled={!selectedOcc}>
+                    <label className="text-sm font-medium mb-2 block">
+                      Select ODP (Optional)
+                    </label>
+                    <Select
+                      value={selectedOdp}
+                      onValueChange={setSelectedOdp}
+                      disabled={!selectedOcc}
+                    >
                       <SelectTrigger>
-                        <SelectValue placeholder={selectedOcc ? "Choose an ODP" : "Select OCC first"} />
+                        <SelectValue
+                          placeholder={
+                            selectedOcc ? "Choose an ODP" : "Select OCC first"
+                          }
+                        />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">All ODPs under {selectedOcc}</SelectItem>
-                        {getOdpsForOcc(selectedOcc).map(odp => (
+                        <SelectItem value="all">
+                          All ODPs under {selectedOcc}
+                        </SelectItem>
+                        {getOdpsForOcc(selectedOcc).map((odp) => (
                           <SelectItem key={odp._id} value={odp.node_id}>
                             {odp.node_id} - {odp.name}
                           </SelectItem>
@@ -912,9 +1132,12 @@ export default function Home() {
                 </>
               )}
 
-              <Button 
-                onClick={loadHodpsToDelete} 
-                disabled={(deleteMode === 'occ' && !selectedOcc) || (deleteMode === 'olt' && !selectedOlt)} 
+              <Button
+                onClick={loadHodpsToDelete}
+                disabled={
+                  (deleteMode === "occ" && !selectedOcc) ||
+                  (deleteMode === "olt" && !selectedOlt)
+                }
                 variant="secondary"
               >
                 🔍 Find HODPs to Delete
@@ -926,7 +1149,10 @@ export default function Home() {
                     <div className="flex items-center space-x-2">
                       <Checkbox
                         id="select-all"
-                        checked={selectedHodps.size === hodpsToDelete.length && hodpsToDelete.length > 0}
+                        checked={
+                          selectedHodps.size === hodpsToDelete.length &&
+                          hodpsToDelete.length > 0
+                        }
                         onCheckedChange={toggleSelectAll}
                       />
                       <label
@@ -941,9 +1167,11 @@ export default function Home() {
                     </Badge>
                   </div>
 
-                  <Alert variant={selectedHodps.size > 0 ? "destructive" : "default"}>
+                  <Alert
+                    variant={selectedHodps.size > 0 ? "destructive" : "default"}
+                  >
                     <AlertDescription>
-                      {selectedHodps.size > 0 
+                      {selectedHodps.size > 0
                         ? `⚠️ You have selected ${selectedHodps.size} HODP(s) to delete. This action cannot be undone.`
                         : `ℹ️ Found ${hodpsToDelete.length} HODP(s). Select the ones you want to delete.`}
                     </AlertDescription>
@@ -962,20 +1190,34 @@ export default function Home() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {hodpsToDelete.map(hodp => (
+                        {hodpsToDelete.map((hodp) => (
                           <TableRow key={hodp._id}>
                             <TableCell>
                               <Checkbox
                                 checked={selectedHodps.has(hodp._id)}
-                                onCheckedChange={() => toggleSelectHodp(hodp._id)}
+                                onCheckedChange={() =>
+                                  toggleSelectHodp(hodp._id)
+                                }
                               />
                             </TableCell>
-                            <TableCell className="font-mono text-xs">{hodp.node_id}</TableCell>
+                            <TableCell className="font-mono text-xs">
+                              {hodp.node_id}
+                            </TableCell>
                             <TableCell>{hodp.name}</TableCell>
-                            <TableCell><Badge variant="secondary">{hodp.node_category}</Badge></TableCell>
-                            <TableCell>{hodp.region || '—'}</TableCell>
                             <TableCell>
-                              <Badge variant={hodp.status === 'existing' ? 'default' : 'outline'}>
+                              <Badge variant="secondary">
+                                {hodp.node_category}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>{hodp.region || "—"}</TableCell>
+                            <TableCell>
+                              <Badge
+                                variant={
+                                  hodp.status === "existing"
+                                    ? "default"
+                                    : "outline"
+                                }
+                              >
                                 {hodp.status}
                               </Badge>
                             </TableCell>
@@ -985,9 +1227,16 @@ export default function Home() {
                     </Table>
                   </div>
 
-                  <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+                  <Dialog
+                    open={deleteDialogOpen}
+                    onOpenChange={setDeleteDialogOpen}
+                  >
                     <DialogTrigger asChild>
-                      <Button variant="destructive" size="lg" disabled={selectedHodps.size === 0}>
+                      <Button
+                        variant="destructive"
+                        size="lg"
+                        disabled={selectedHodps.size === 0}
+                      >
                         🗑️ Bulk Delete Selected ({selectedHodps.size}) HODP(s)
                       </Button>
                     </DialogTrigger>
@@ -995,13 +1244,23 @@ export default function Home() {
                       <DialogHeader>
                         <DialogTitle>Confirm Bulk Deletion</DialogTitle>
                         <DialogDescription>
-                          Are you sure you want to delete {selectedHodps.size} HODP(s) and all their related links?
-                          This action cannot be undone and will affect the network topology.
+                          Are you sure you want to delete {selectedHodps.size}{" "}
+                          HODP(s) and all their related links? This action
+                          cannot be undone and will affect the network topology.
                         </DialogDescription>
                       </DialogHeader>
                       <DialogFooter>
-                        <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
-                        <Button variant="destructive" onClick={handleBulkDelete} disabled={deleting}>
+                        <Button
+                          variant="outline"
+                          onClick={() => setDeleteDialogOpen(false)}
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          onClick={handleBulkDelete}
+                          disabled={deleting}
+                        >
                           {deleting ? "Deleting..." : "Yes, Bulk Delete"}
                         </Button>
                       </DialogFooter>
@@ -1010,13 +1269,21 @@ export default function Home() {
                 </div>
               )}
 
-              {((deleteMode === 'occ' && selectedOcc) || (deleteMode === 'olt' && selectedOlt)) && hodpsToDelete.length === 0 && (
-                <Alert>
-                  <AlertDescription>
-                    ℹ️ No HODPs found under the selected {deleteMode === 'olt' ? 'OLT' : (selectedOdp && selectedOdp !== 'all' ? 'ODP' : 'OCC')}.
-                  </AlertDescription>
-                </Alert>
-              )}
+              {((deleteMode === "occ" && selectedOcc) ||
+                (deleteMode === "olt" && selectedOlt)) &&
+                hodpsToDelete.length === 0 && (
+                  <Alert>
+                    <AlertDescription>
+                      ℹ️ No HODPs found under the selected{" "}
+                      {deleteMode === "olt"
+                        ? "OLT"
+                        : selectedOdp && selectedOdp !== "all"
+                          ? "ODP"
+                          : "OCC"}
+                      .
+                    </AlertDescription>
+                  </Alert>
+                )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -1026,23 +1293,49 @@ export default function Home() {
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 <span>⚠️ Unconnected Nodes</span>
-                <Badge variant="destructive">{filteredUnconnectedNodes.length}</Badge>
+                <Badge variant="destructive">
+                  {filteredUnconnectedNodes.length}
+                </Badge>
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex gap-2 mb-4 flex-wrap">
-                <Button variant={filter === 'all' ? 'default' : 'outline'} onClick={() => setFilter('all')} size="sm">
+                <Button
+                  variant={filter === "all" ? "default" : "outline"}
+                  onClick={() => setFilter("all")}
+                  size="sm"
+                >
                   All ({unconnectedNodes.length})
                 </Button>
-                <Button variant={filter === 'existing' ? 'default' : 'outline'} onClick={() => setFilter('existing')} size="sm">
-                  Existing ({unconnectedNodes.filter(n => n.status === 'existing').length})
+                <Button
+                  variant={filter === "existing" ? "default" : "outline"}
+                  onClick={() => setFilter("existing")}
+                  size="sm"
+                >
+                  Existing (
+                  {
+                    unconnectedNodes.filter((n) => n.status === "existing")
+                      .length
+                  }
+                  )
                 </Button>
-                <Button variant={filter === 'proposed' ? 'default' : 'outline'} onClick={() => setFilter('proposed')} size="sm">
-                  Proposed ({unconnectedNodes.filter(n => n.status === 'proposed').length})
+                <Button
+                  variant={filter === "proposed" ? "default" : "outline"}
+                  onClick={() => setFilter("proposed")}
+                  size="sm"
+                >
+                  Proposed (
+                  {
+                    unconnectedNodes.filter((n) => n.status === "proposed")
+                      .length
+                  }
+                  )
                 </Button>
               </div>
               {filteredUnconnectedNodes.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">🎉 All nodes are connected!</div>
+                <div className="text-center py-8 text-muted-foreground">
+                  🎉 All nodes are connected!
+                </div>
               ) : (
                 <Table>
                   <TableHeader>
@@ -1055,13 +1348,27 @@ export default function Home() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredUnconnectedNodes.map(node => (
+                    {filteredUnconnectedNodes.map((node) => (
                       <TableRow key={node._id}>
-                        <TableCell className="font-mono text-xs">{node.node_id}</TableCell>
+                        <TableCell className="font-mono text-xs">
+                          {node.node_id}
+                        </TableCell>
                         <TableCell>{node.name}</TableCell>
-                        <TableCell><Badge variant="secondary">{node.node_category}</Badge></TableCell>
-                        <TableCell>{node.region || '—'}</TableCell>
-                        <TableCell><Badge variant={node.status === 'existing' ? 'default' : 'outline'}>{node.status}</Badge></TableCell>
+                        <TableCell>
+                          <Badge variant="secondary">
+                            {node.node_category}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>{node.region || "—"}</TableCell>
+                        <TableCell>
+                          <Badge
+                            variant={
+                              node.status === "existing" ? "default" : "outline"
+                            }
+                          >
+                            {node.status}
+                          </Badge>
+                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -1078,10 +1385,14 @@ export default function Home() {
           <Button size="lg">🗺 Open Map</Button>
         </Link>
         <Link href="/import">
-          <Button variant="outline" size="lg">📥 Import Nodes</Button>
+          <Button variant="outline" size="lg">
+            📥 Import Nodes
+          </Button>
         </Link>
         <Link href="/nodes">
-          <Button variant="outline" size="lg">📋 Node Table</Button>
+          <Button variant="outline" size="lg">
+            📋 Node Table
+          </Button>
         </Link>
       </div>
     </div>
