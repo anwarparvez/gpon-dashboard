@@ -1,27 +1,36 @@
-version: '3.8'
+version: "3.8"
 
 services:
   mongodb:
     image: mongo:7
-    container_name: gpon-mongo
+    container_name: gpon-db-server   # ✅ renamed (consistent)
     restart: always
     ports:
-      - "27017:27017"
+      - "27018:27017"   # ✅ run Mongo on different host port
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASS}
     volumes:
-      - mongodb_data:/data/db
+      - gpon_mongodb_data:/data/db   # ✅ cleaner, explicit name
+    networks:
+      - gpon-net
 
   nextjs:
     build: .
-    container_name: gpon-next
+    container_name: gpon-dashboard
+    restart: always
     ports:
       - "3000:3000"
     environment:
-      MONGODB_URI: ${MONGODB_URI}
+      # ✅ use service name (mongodb), not localhost
+      MONGODB_URI: mongodb://${MONGO_USER}:${MONGO_PASS}@mongodb:27017/gpon?authSource=admin
     depends_on:
       - mongodb
+    networks:
+      - gpon-net
 
 volumes:
-  mongodb_data:
+  gpon_mongodb_data:   # ✅ renamed volume
+
+networks:
+  gpon-net:
