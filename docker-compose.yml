@@ -8,8 +8,10 @@ services:
     ports:
       - "27018:27017"
     environment:
+
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASS}
+      
     volumes:
       - gpon_mongodb_data:/data/db
     networks:
@@ -22,7 +24,10 @@ services:
     ports:
       - "3000:3000"
     environment:
-      MONGODB_URI: mongodb://${MONGO_USER}:${MONGO_PASS}@mongodb:27017/gpon?authSource=admin
+      NEXTAUTH_URL: ${NEXTAUTH_URL}
+      AUTH_SECRET: $AUTH_SECRET}
+      MONGODB_DB_NAME: ${MONGODB_DB_NAME}
+      MONGODB_URI: mongodb://${MONGO_USER}:${MONGO_PASS}@mongodb:27017/{MMONGODB_DB_NAME}?authSource=admin
     depends_on:
       - mongodb
     networks:
