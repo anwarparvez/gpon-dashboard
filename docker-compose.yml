@@ -3,17 +3,17 @@ version: "3.8"
 services:
   mongodb:
     image: mongo:7
-    container_name: gpon-db-server   # ✅ renamed (consistent)
+    container_name: gpon-db-server
     restart: always
     ports:
-      - "27018:27017"   # ✅ run Mongo on different host port
+      - "27018:27017"
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASS}
     volumes:
-      - gpon_mongodb_data:/data/db   # ✅ cleaner, explicit name
+      - gpon_mongodb_data:/data/db
     networks:
-      - gpon-net
+      - internal-net   # ✅ only internal
 
   nextjs:
     build: .
@@ -22,15 +22,20 @@ services:
     ports:
       - "3000:3000"
     environment:
-      # ✅ use service name (mongodb), not localhost
       MONGODB_URI: mongodb://${MONGO_USER}:${MONGO_PASS}@mongodb:27017/gpon?authSource=admin
     depends_on:
       - mongodb
     networks:
-      - gpon-net
+      - internal-net
+      - npm-net        # ✅ connect to NPM
 
 volumes:
-  gpon_mongodb_data:   # ✅ renamed volume
+  gpon_mongodb_data:
 
 networks:
-  gpon-net:
+  internal-net:
+    driver: bridge
+
+  npm-net:
+    external: true
+    name: nginx-pm_default   # ✅ existing NPM network
