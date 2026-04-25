@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "install:force": "npm install --legacy-peer-deps",
+    "build:force": "npm install --legacy-peer-deps && next build"
   },
   "dependencies": {
     "@auth/mongodb-adapter": "^3.11.2",
