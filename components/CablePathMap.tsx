@@ -21,6 +21,15 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/input';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from '@/components/ui/dialog';
 
 type NodeType = {
   _id: string;
@@ -42,27 +51,77 @@ type CablePath = {
   polyline: [number, number][];
   fiber_type: string;
   cable_type: string;
+  fiber_core: number;
   length_km: number;
   status: string;
   color: string;
   line_width: number;
   opacity: number;
   notes?: string;
+  is_hdd?: boolean;
+  hdd_details?: {
+    way_count: number;
+    duct_size_mm: number;
+    duct_type: string;
+    fiber_core: number;
+    entry_pit_depth: number;
+    exit_pit_depth: number;
+  };
+};
+
+type HDDDuct = {
+  _id: string;
+  name: string;
+  path_points: number[][];
+  polyline: [number, number][];
+  length_km: number;
+  way_count: number;
+  duct_size_mm: number;
+  duct_type: string;
+  fiber_core: number;
+  entry_pit_depth_m: number;
+  exit_pit_depth_m: number;
+  color: string;
+  line_width: number;
+  opacity: number;
+  status: string;
+  area?: string;
+  road_name?: string;
+  notes?: string;
+  createdAt?: string;
 };
 
 const NODE_CATEGORIES = ['OLT', 'OCC', 'ODP', 'HODP', 'Branch Point', 'Hand Hole', 'Joint Closure'];
+
+// Fiber core options
+const FIBER_CORE_OPTIONS = [2, 4, 6, 8, 12, 24, 48, 96, 144];
 
 export default function CablePathMap() {
   const [mounted, setMounted] = useState(false);
   const [leafletLoaded, setLeafletLoaded] = useState(false);
   const [nodes, setNodes] = useState<NodeType[]>([]);
   const [cablePaths, setCablePaths] = useState<CablePath[]>([]);
+  const [hddDucts, setHddDucts] = useState<HDDDuct[]>([]);
   const [selectedFromNode, setSelectedFromNode] = useState<string>('');
   const [selectedToNode, setSelectedToNode] = useState<string>('');
-  const [drawingMode, setDrawingMode] = useState<'view' | 'draw'>('view');
+  const [drawingMode, setDrawingMode] = useState<'view' | 'draw' | 'hdd'>('view');
   const [pathPoints, setPathPoints] = useState<number[][]>([]);
   const [selectedPath, setSelectedPath] = useState<CablePath | null>(null);
+  const [selectedHDDDuct, setSelectedHDDDuct] = useState<HDDDuct | null>(null);
   const [message, setMessage] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null);
+  
+  // HDD Dialog state
+  const [showHDDDialog, setShowHDDDialog] = useState(false);
+  const [hddConfig, setHddConfig] = useState({
+    way_count: 1,
+    duct_size_mm: 40,
+    duct_type: 'HDPE',
+    fiber_core: 24,
+    entry_pit_depth: 1.5,
+    exit_pit_depth: 1.5,
+    area: '',
+    road_name: '',
+  });
   
   const [categoryFilters, setCategoryFilters] = useState<Record<string, boolean>>({
     'OLT': true,
@@ -98,6 +157,7 @@ export default function CablePathMap() {
     if (mounted) {
       fetchNodes();
       fetchCablePaths();
+      fetchHDDDucts();
     }
   }, [mounted]);
 
@@ -127,14 +187,113 @@ export default function CablePathMap() {
     }
   };
 
+  const fetchHDDDucts = async () => {
+    try {
+      const res = await fetch('/api/hdd-ducts');
+      if (!res.ok) {
+        console.error('Failed to fetch HDD ducts:', res.status);
+        setHddDucts([]);
+        return;
+      }
+      const text = await res.text();
+      if (!text) {
+        setHddDucts([]);
+        return;
+      }
+      const data = JSON.parse(text);
+      setHddDucts(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error('Failed to fetch HDD ducts:', error);
+      setHddDucts([]);
+    }
+  };
+
+  const calculateLength = (points: number[][]): number => {
+    let total = 0;
+    for (let i = 1; i < points.length; i++) {
+      const [lng1, lat1] = points[i - 1];
+      const [lng2, lat2] = points[i];
+      total += haversineDistance(lat1, lng1, lat2, lng2);
+    }
+    return total;
+  };
+
+  const haversineDistance = (lat1: number, lng1: number, lat2: number, lng2: number): number => {
+    const R = 6371;
+    const toRad = (v: number) => (v * Math.PI) / 180;
+    const dLat = toRad(lat2 - lat1);
+    const dLng = toRad(lng2 - lng1);
+    const a = Math.sin(dLat / 2) ** 2 +
+              Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  };
+
   const handleDrawCreated = (e: any) => {
     const layer = e.layer;
     if (layer && layer.getLatLngs) {
       const latlngs = layer.getLatLngs();
       const points = latlngs.map((ll: any) => [ll.lng, ll.lat]);
       setPathPoints(points);
-      setMessage({ type: 'success', text: 'Path drawn! Click "Save Cable Path" to store it.' });
+      
+      if (drawingMode === 'hdd') {
+        setShowHDDDialog(true);
+      } else {
+        setMessage({ type: 'success', text: 'Path drawn! Click "Save Cable Path" to store it.' });
+      }
       setDrawingMode('view');
+    }
+  };
+
+  const saveHDDCablePath = async () => {
+    if (pathPoints.length < 2) {
+      setMessage({ type: 'error', text: 'Please draw a path on the map using the draw tool' });
+      return;
+    }
+    
+    const lengthKm = calculateLength(pathPoints);
+    
+    const hddColors: Record<number, string> = {
+      1: '#4caf50',
+      2: '#2196f3',
+      3: '#ff9800',
+      4: '#f44336',
+    };
+    
+    try {
+      const res = await fetch('/api/hdd-ducts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: `HDD-${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}`,
+          path_points: pathPoints,
+          polyline: pathPoints.map(p => [p[1], p[0]]),
+          length_km: lengthKm,
+          way_count: hddConfig.way_count,
+          duct_size_mm: hddConfig.duct_size_mm,
+          duct_type: hddConfig.duct_type,
+          fiber_core: hddConfig.fiber_core,
+          entry_pit_depth_m: hddConfig.entry_pit_depth,
+          exit_pit_depth_m: hddConfig.exit_pit_depth,
+          area: hddConfig.area,
+          road_name: hddConfig.road_name,
+          color: hddColors[hddConfig.way_count] || '#ff9800',
+          line_width: hddConfig.way_count + 2,
+          status: 'planned',
+          notes: `${hddConfig.way_count}-Way ${hddConfig.duct_size_mm}mm ${hddConfig.duct_type} HDD Duct, ${hddConfig.fiber_core} fibers`,
+        }),
+      });
+      
+      if (res.ok) {
+        setMessage({ type: 'success', text: `HDD Duct saved! Length: ${lengthKm.toFixed(3)} km, ${hddConfig.way_count}-Way, ${hddConfig.fiber_core} fibers` });
+        fetchHDDDucts();
+        resetForm();
+        setShowHDDDialog(false);
+      } else {
+        const error = await res.json();
+        setMessage({ type: 'error', text: error.error || 'Failed to save HDD duct' });
+      }
+    } catch (error) {
+      setMessage({ type: 'error', text: 'Error saving HDD duct' });
     }
   };
 
@@ -149,6 +308,8 @@ export default function CablePathMap() {
       return;
     }
     
+    const lengthKm = calculateLength(pathPoints);
+    
     try {
       const res = await fetch('/api/cable-paths', {
         method: 'POST',
@@ -157,15 +318,20 @@ export default function CablePathMap() {
           from_node_id: selectedFromNode,
           to_node_id: selectedToNode,
           path_points: pathPoints,
+          polyline: pathPoints.map(p => [p[1], p[0]]),
           cable_type: 'underground',
           fiber_type: 'SMF',
           fiber_core: 24,
+          length_km: lengthKm,
           status: 'proposed',
+          is_hdd: false,
+          color: '#2196f3',
+          line_width: 3,
         }),
       });
       
       if (res.ok) {
-        setMessage({ type: 'success', text: 'Cable path saved successfully!' });
+        setMessage({ type: 'success', text: `Cable path saved! Length: ${lengthKm.toFixed(3)} km` });
         fetchCablePaths();
         resetForm();
       } else {
@@ -189,6 +355,21 @@ export default function CablePathMap() {
       }
     } catch (error) {
       setMessage({ type: 'error', text: 'Failed to delete cable path' });
+    }
+  };
+
+  const deleteHDDDuct = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this HDD duct?')) return;
+    
+    try {
+      const res = await fetch(`/api/hdd-ducts?id=${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        setMessage({ type: 'success', text: 'HDD duct deleted' });
+        fetchHDDDucts();
+        if (selectedHDDDuct?._id === id) setSelectedHDDDuct(null);
+      }
+    } catch (error) {
+      setMessage({ type: 'error', text: 'Failed to delete HDD duct' });
     }
   };
 
@@ -236,6 +417,39 @@ export default function CablePathMap() {
     return colors[category] || '#6b7280';
   };
 
+  const getPathStyle = (path: CablePath) => {
+    if (path.is_hdd) {
+      const wayCount = path.hdd_details?.way_count || 1;
+      const hddColors: Record<number, string> = { 1: '#4caf50', 2: '#2196f3', 3: '#ff9800', 4: '#f44336' };
+      return {
+        color: path.color || hddColors[wayCount] || '#ff9800',
+        weight: path.line_width || wayCount + 2,
+        opacity: path.opacity || 0.9,
+        dashArray: '8, 4',
+      };
+    }
+    return {
+      color: path.color || '#2196f3',
+      weight: path.line_width || 3,
+      opacity: path.opacity || 0.8,
+    };
+  };
+
+  const getHDDStyle = (duct: HDDDuct) => {
+    const hddColors: Record<number, string> = {
+      1: '#4caf50',
+      2: '#2196f3',
+      3: '#ff9800',
+      4: '#f44336',
+    };
+    return {
+      color: duct.color || hddColors[duct.way_count] || '#ff9800',
+      weight: duct.line_width || duct.way_count + 2,
+      opacity: duct.opacity || 0.9,
+      dashArray: '8, 4',
+    };
+  };
+
   if (!mounted || !leafletLoaded) {
     return (
       <div className="flex h-screen items-center justify-center">
@@ -252,8 +466,8 @@ export default function CablePathMap() {
       {/* Left Panel */}
       <div className="w-96 bg-background border-r overflow-y-auto p-4 space-y-6">
         <div>
-          <h2 className="text-xl font-bold mb-2">Cable Path Designer</h2>
-          <p className="text-sm text-muted-foreground">Draw fiber cable paths between OLTs and OCCs</p>
+          <h2 className="text-xl font-bold mb-2">Cable & Duct Designer</h2>
+          <p className="text-sm text-muted-foreground">Draw fiber cables (OLT→OCC) or HDD ducts</p>
         </div>
 
         {message && (
@@ -298,10 +512,10 @@ export default function CablePathMap() {
           </CardContent>
         </Card>
 
-        {/* Node Selection */}
+        {/* Node Selection (Only for Cable) */}
         <Card>
           <CardHeader>
-            <CardTitle>1. Select Nodes</CardTitle>
+            <CardTitle>1. Select Nodes (For Cable)</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
@@ -335,26 +549,33 @@ export default function CablePathMap() {
           <CardContent className="space-y-4">
             <div className="flex gap-2">
               <Button variant={drawingMode === 'view' ? 'default' : 'outline'} onClick={() => setDrawingMode('view')} className="flex-1">👁️ View</Button>
-              <Button variant={drawingMode === 'draw' ? 'default' : 'outline'} onClick={() => setDrawingMode('draw')} className="flex-1" disabled={!selectedFromNode || !selectedToNode}>✏️ Draw Path</Button>
+              <Button variant={drawingMode === 'draw' ? 'default' : 'outline'} onClick={() => setDrawingMode('draw')} className="flex-1" disabled={!selectedFromNode || !selectedToNode}>✏️ Draw Cable</Button>
+              <Button variant={drawingMode === 'hdd' ? 'destructive' : 'outline'} onClick={() => setDrawingMode('hdd')} className="flex-1">🛠️ HDD Duct</Button>
             </div>
-            {drawingMode === 'draw' && (<div className="text-sm text-muted-foreground bg-muted p-2 rounded">💡 Click on the map to add path points. Click the last point to finish drawing.</div>)}
-            {pathPoints.length > 0 && (<div className="text-xs text-muted-foreground">Path points: {pathPoints.length}</div>)}
+            {drawingMode === 'draw' && (<div className="text-sm text-muted-foreground bg-muted p-2 rounded">💡 Select OLT and OCC first, then draw cable path. Double-click to finish.</div>)}
+            {drawingMode === 'hdd' && (<div className="text-sm text-muted-foreground bg-orange-100 dark:bg-orange-950 p-2 rounded">🛠️ HDD Mode: Draw duct path anywhere. Double-click to finish.</div>)}
+            {pathPoints.length > 0 && (<div className="text-xs text-muted-foreground">Path points: {pathPoints.length} | Length: {calculateLength(pathPoints).toFixed(3)} km</div>)}
           </CardContent>
         </Card>
 
-        {(selectedFromNode && selectedToNode && pathPoints.length > 0) && (<Button onClick={saveCablePath} className="w-full">💾 Save Cable Path</Button>)}
+        {/* Save Buttons */}
+        {(pathPoints.length > 0 && drawingMode === 'draw' && selectedFromNode && selectedToNode) && (<Button onClick={saveCablePath} className="w-full">💾 Save Cable Path</Button>)}
+        {(pathPoints.length > 0 && drawingMode === 'hdd') && (<Button onClick={() => setShowHDDDialog(true)} className="w-full bg-orange-600 hover:bg-orange-700">🛠️ Configure & Save HDD Duct</Button>)}
 
-        {/* Existing Paths */}
+        {/* Existing Cable Paths */}
         {cablePaths.length > 0 && (
           <Card>
-            <CardHeader><CardTitle>3. Existing Paths</CardTitle></CardHeader>
-            <CardContent className="space-y-2 max-h-96 overflow-y-auto">
+            <CardHeader><CardTitle>3. Existing Cable Paths</CardTitle></CardHeader>
+            <CardContent className="space-y-2 max-h-64 overflow-y-auto">
               {cablePaths.filter(p => p.from_node_category === 'OLT' && p.to_node_category === 'OCC').map(path => (
                 <div key={path._id} className={`p-3 border rounded-lg cursor-pointer transition-colors ${selectedPath?._id === path._id ? 'border-primary bg-primary/5' : 'hover:bg-muted'}`} onClick={() => setSelectedPath(path)}>
                   <div className="flex justify-between items-start">
                     <div>
-                      <p className="font-mono text-xs font-bold">{path.from_node_id} → {path.to_node_id}</p>
-                      <p className="text-xs text-muted-foreground">{path.length_km.toFixed(2)} km</p>
+                      <div className="flex items-center gap-2">
+                        <p className="font-mono text-xs font-bold">{path.from_node_id} → {path.to_node_id}</p>
+                        {path.is_hdd && <Badge className="bg-orange-500 text-xs">HDD</Badge>}
+                      </div>
+                      <p className="text-xs text-muted-foreground">{path.length_km.toFixed(3)} km</p>
                       <div className="flex gap-1 mt-1">
                         <Badge variant="outline" className="text-xs">{path.fiber_type}</Badge>
                         <Badge variant="outline" className="text-xs">{path.cable_type}</Badge>
@@ -362,6 +583,35 @@ export default function CablePathMap() {
                       </div>
                     </div>
                     <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700" onClick={(e) => { e.stopPropagation(); deleteCablePath(path._id); }}>🗑️</Button>
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Existing HDD Ducts */}
+        {hddDucts.length > 0 && (
+          <Card>
+            <CardHeader><CardTitle>4. Existing HDD Ducts</CardTitle></CardHeader>
+            <CardContent className="space-y-2 max-h-64 overflow-y-auto">
+              {hddDucts.map(duct => (
+                <div key={duct._id} className={`p-3 border rounded-lg cursor-pointer transition-colors ${selectedHDDDuct?._id === duct._id ? 'border-primary bg-primary/5' : 'hover:bg-muted'}`} onClick={() => setSelectedHDDDuct(duct)}>
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <p className="font-mono text-xs font-bold">{duct.name}</p>
+                        <Badge className="bg-orange-500 text-xs">{duct.way_count}-Way</Badge>
+                      </div>
+                      <p className="text-xs text-muted-foreground">{duct.length_km.toFixed(3)} km</p>
+                      <div className="flex gap-1 mt-1">
+                        <Badge variant="outline" className="text-xs">{duct.duct_size_mm}mm</Badge>
+                        <Badge variant="outline" className="text-xs">{duct.duct_type}</Badge>
+                        <Badge variant="secondary" className="text-xs">{duct.fiber_core} fibers</Badge>
+                        <Badge className="text-xs">{duct.status}</Badge>
+                      </div>
+                    </div>
+                    <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700" onClick={(e) => { e.stopPropagation(); deleteHDDDuct(duct._id); }}>🗑️</Button>
                   </div>
                 </div>
               ))}
@@ -376,8 +626,25 @@ export default function CablePathMap() {
           <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
           
           <FeatureGroup ref={featureGroupRef}>
-            {drawingMode === 'draw' && (
-              <EditControl position="topleft" onCreated={handleDrawCreated} draw={{ rectangle: false, circle: false, circlemarker: false, marker: false, polygon: false, polyline: { shapeOptions: { color: '#ff9800', weight: 4, opacity: 0.8 } } }} />
+            {(drawingMode === 'draw' || drawingMode === 'hdd') && (
+              <EditControl 
+                position="topleft" 
+                onCreated={handleDrawCreated} 
+                draw={{ 
+                  rectangle: false, 
+                  circle: false, 
+                  circlemarker: false, 
+                  marker: false, 
+                  polygon: false, 
+                  polyline: { 
+                    shapeOptions: { 
+                      color: drawingMode === 'hdd' ? '#ff9800' : '#2196f3', 
+                      weight: drawingMode === 'hdd' ? 5 : 4, 
+                      opacity: 0.8 
+                    } 
+                  } 
+                }} 
+              />
             )}
           </FeatureGroup>
           
@@ -386,7 +653,16 @@ export default function CablePathMap() {
             const coordinates = path.polyline || path.path_points;
             if (!coordinates || !Array.isArray(coordinates) || coordinates.length < 2) return null;
             const positions = coordinates.map(coord => [coord[1], coord[0]]);
-            return (<Polyline key={path._id} positions={positions} pathOptions={{ color: path.color || '#2196f3', weight: path.line_width || 4, opacity: path.opacity || 0.8 }} eventHandlers={{ click: () => setSelectedPath(path) }} />);
+            const style = getPathStyle(path);
+            return (<Polyline key={path._id} positions={positions} pathOptions={style} eventHandlers={{ click: () => setSelectedPath(path) }} />);
+          })}
+          
+          {/* Render HDD ducts */}
+          {hddDucts && hddDucts.length > 0 && hddDucts.map(duct => {
+            const positions = duct.polyline;
+            if (!positions || positions.length < 2) return null;
+            const style = getHDDStyle(duct);
+            return (<Polyline key={duct._id} positions={positions} pathOptions={style} eventHandlers={{ click: () => setSelectedHDDDuct(duct) }} />);
           })}
           
           {/* Render filtered nodes */}
@@ -397,21 +673,160 @@ export default function CablePathMap() {
           ))}
         </MapContainer>
         
-        {/* Path Details Panel */}
+        {/* Path Details Panel for Cable */}
         {selectedPath && (
           <Card className="absolute bottom-4 right-4 w-80 shadow-lg">
-            <CardHeader className="pb-2"><div className="flex justify-between items-center"><CardTitle className="text-sm">Path Details</CardTitle><Button variant="ghost" size="sm" onClick={() => setSelectedPath(null)}>✕</Button></div></CardHeader>
+            <CardHeader className="pb-2"><div className="flex justify-between items-center"><CardTitle className="text-sm">Cable Details</CardTitle><Button variant="ghost" size="sm" onClick={() => setSelectedPath(null)}>✕</Button></div></CardHeader>
             <CardContent className="space-y-2 text-sm">
               <p><strong>From:</strong> {selectedPath.from_node_id}</p>
               <p><strong>To:</strong> {selectedPath.to_node_id}</p>
-              <p><strong>Length:</strong> {selectedPath.length_km.toFixed(2)} km</p>
+              <p><strong>Length:</strong> {selectedPath.length_km.toFixed(3)} km</p>
               <p><strong>Fiber Type:</strong> {selectedPath.fiber_type}</p>
               <p><strong>Cable Type:</strong> {selectedPath.cable_type}</p>
               <p><strong>Status:</strong> <Badge>{selectedPath.status}</Badge></p>
             </CardContent>
           </Card>
         )}
+        
+        {/* Path Details Panel for HDD Duct */}
+        {selectedHDDDuct && (
+          <Card className="absolute bottom-4 right-4 w-80 shadow-lg">
+            <CardHeader className="pb-2"><div className="flex justify-between items-center"><CardTitle className="text-sm">HDD Duct Details</CardTitle><Button variant="ghost" size="sm" onClick={() => setSelectedHDDDuct(null)}>✕</Button></div></CardHeader>
+            <CardContent className="space-y-2 text-sm">
+              <p><strong>Name:</strong> {selectedHDDDuct.name}</p>
+              <p><strong>Length:</strong> {selectedHDDDuct.length_km.toFixed(3)} km</p>
+              <p><strong>Ways:</strong> {selectedHDDDuct.way_count}-Way</p>
+              <p><strong>Duct Size:</strong> {selectedHDDDuct.duct_size_mm}mm</p>
+              <p><strong>Duct Type:</strong> {selectedHDDDuct.duct_type}</p>
+              <p><strong>Fiber Core:</strong> {selectedHDDDuct.fiber_core} fibers</p>
+              <p><strong>Entry Pit:</strong> {selectedHDDDuct.entry_pit_depth_m}m</p>
+              <p><strong>Exit Pit:</strong> {selectedHDDDuct.exit_pit_depth_m}m</p>
+              {selectedHDDDuct.area && <p><strong>Area:</strong> {selectedHDDDuct.area}</p>}
+              {selectedHDDDuct.road_name && <p><strong>Road:</strong> {selectedHDDDuct.road_name}</p>}
+              <p><strong>Status:</strong> <Badge>{selectedHDDDuct.status}</Badge></p>
+            </CardContent>
+          </Card>
+        )}
       </div>
+
+      {/* HDD Configuration Dialog */}
+      <Dialog open={showHDDDialog} onOpenChange={setShowHDDDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>🛠️ HDD Duct Configuration</DialogTitle>
+            <DialogDescription>
+              Configure the horizontal directional drilling duct parameters including fiber core count.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Number of Ways</Label>
+                <Select value={hddConfig.way_count.toString()} onValueChange={(v) => setHddConfig({...hddConfig, way_count: parseInt(v)})}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">1-Way</SelectItem>
+                    <SelectItem value="2">2-Way</SelectItem>
+                    <SelectItem value="3">3-Way</SelectItem>
+                    <SelectItem value="4">4-Way</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Duct Size (mm)</Label>
+                <Select value={hddConfig.duct_size_mm.toString()} onValueChange={(v) => setHddConfig({...hddConfig, duct_size_mm: parseInt(v)})}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="32">32mm</SelectItem>
+                    <SelectItem value="40">40mm</SelectItem>
+                    <SelectItem value="50">50mm</SelectItem>
+                    <SelectItem value="63">63mm</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Duct Type</Label>
+                <Select value={hddConfig.duct_type} onValueChange={(v) => setHddConfig({...hddConfig, duct_type: v})}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="HDPE">HDPE</SelectItem>
+                    <SelectItem value="PVC">PVC</SelectItem>
+                    <SelectItem value="Steel">Steel</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Fiber Core Count</Label>
+                <Select value={hddConfig.fiber_core.toString()} onValueChange={(v) => setHddConfig({...hddConfig, fiber_core: parseInt(v)})}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {FIBER_CORE_OPTIONS.map(core => (
+                      <SelectItem key={core} value={core.toString()}>{core} fibers</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Entry Pit Depth (m)</Label>
+                <Input type="number" step="0.1" value={hddConfig.entry_pit_depth} onChange={(e) => setHddConfig({...hddConfig, entry_pit_depth: parseFloat(e.target.value)})} />
+              </div>
+              <div>
+                <Label>Exit Pit Depth (m)</Label>
+                <Input type="number" step="0.1" value={hddConfig.exit_pit_depth} onChange={(e) => setHddConfig({...hddConfig, exit_pit_depth: parseFloat(e.target.value)})} />
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Area/Location (Optional)</Label>
+                <Input placeholder="e.g., Downtown" value={hddConfig.area} onChange={(e) => setHddConfig({...hddConfig, area: e.target.value})} />
+              </div>
+              <div>
+                <Label>Road Name (Optional)</Label>
+                <Input placeholder="e.g., Main Street" value={hddConfig.road_name} onChange={(e) => setHddConfig({...hddConfig, road_name: e.target.value})} />
+              </div>
+            </div>
+            
+            <div className="bg-muted p-3 rounded-lg">
+              <div className="flex justify-between text-sm">
+                <span>Path Length:</span>
+                <span className="font-bold">{calculateLength(pathPoints).toFixed(3)} km</span>
+              </div>
+              <div className="flex justify-between text-sm mt-1">
+                <span>Total Fibers:</span>
+                <span className="font-bold">{hddConfig.fiber_core} cores</span>
+              </div>
+              <div className="flex justify-between text-sm mt-1">
+                <span>Est. Capacity:</span>
+                <span>{hddConfig.fiber_core} Gbps (theoretical)</span>
+              </div>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {
+              setShowHDDDialog(false);
+              resetForm();
+            }}>Cancel</Button>
+            <Button onClick={saveHDDCablePath}>Save HDD Duct</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

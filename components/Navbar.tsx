@@ -31,6 +31,8 @@ import {
   User,
   Settings,
   ChevronDown,
+  Cable,
+  HardDrive,
 } from 'lucide-react';
 
 export default function Navbar() {
@@ -101,6 +103,13 @@ export default function Navbar() {
             <NavLink href="/map" icon={Map} label="Map" />
             <NavLink href="/nodes" icon={Table} label="Nodes" />
             <NavLink href="/links" icon={LinkIcon} label="Links" />
+            
+            {/* Cable Paths Link */}
+            <NavLink href="/cable-paths" icon={Cable} label="Cable Paths" />
+            
+            {/* HDD Ducts Link */}
+            <NavLink href="/hdd-ducts" icon={HardDrive} label="HDD Ducts" />
+            
             <NavLink href="/zones" icon={Layers} label="Zones" />
             <NavLink href="/import" icon={Upload} label="Import" />
             <NavLink href="/tools/nearest-odp" icon={Wrench} label="Tools" />

@@ -12,6 +12,7 @@ import { getShortCategoryName } from '@/lib/nodeUtils';
 const MapContainer = dynamic(() => import('react-leaflet').then(m => m.MapContainer), { ssr: false });
 const TileLayer = dynamic(() => import('react-leaflet').then(m => m.TileLayer), { ssr: false });
 const Marker = dynamic(() => import('react-leaflet').then(m => m.Marker), { ssr: false });
+const Polyline = dynamic(() => import('react-leaflet').then(m => m.Polyline), { ssr: false });
 
 import MapClickHandler from './MapClickHandler';
 import NodeSidebar from './NodeSidebar';
@@ -40,23 +41,51 @@ type LinkType = {
   _id: string; 
   from_node: NodeType; 
   to_node: NodeType; 
-  fiber_type: FiberType;  // Use the specific type
+  fiber_type: FiberType;
   status: LinkStatus 
+};
+
+type HDDDuct = {
+  _id: string;
+  name: string;
+  polyline: [number, number][];
+  length_km: number;
+  way_count: number;
+  duct_size_mm: number;
+  duct_type: string;
+  fiber_core: number;
+  color: string;
+  line_width: number;
+  opacity: number;
+  status: string;
 };
 
 const CATEGORY_LIST: NodeCategory[] = ['OLT', 'OCC', 'ODP', 'HODP', 'Branch Point', 'Hand Hole', 'Joint Closure'];
 const FIBER_TYPES: FiberType[] = ['GPON', 'SMF', 'UG', 'OH'];
+
+// HDD Duct colors based on way count
+const HDD_COLORS: Record<number, string> = {
+  1: '#4caf50',  // Green for 1-way
+  2: '#2196f3',  // Blue for 2-way
+  3: '#ff9800',  // Orange for 3-way
+  4: '#f44336',  // Red for 4-way
+  6: '#9c27b0',  // Purple for 6-way
+  8: '#00bcd4',  // Cyan for 8-way
+  12: '#795548', // Brown for 12-way
+};
 
 export default function MapViewClient() {
   const [mounted, setMounted] = useState(false);
   const [leafletLoaded, setLeafletLoaded] = useState(false);
   const [nodes, setNodes] = useState<NodeType[]>([]);
   const [links, setLinks] = useState<LinkType[]>([]);
+  const [hddDucts, setHddDucts] = useState<HDDDuct[]>([]);
   const [draftNode, setDraftNode] = useState<any>(null);
   const [selectedNode, setSelectedNode] = useState<NodeType | null>(null);
   const [selectedNodes, setSelectedNodes] = useState<NodeType[]>([]);
   const [mode, setMode] = useState('add-node');
   const [sidebarWidth, setSidebarWidth] = useState(220);
+  const [showHddDucts, setShowHddDucts] = useState(true);
 
   const [filters, setFilters] = useState({
     status: { existing: true, proposed: true },
@@ -84,9 +113,28 @@ export default function MapViewClient() {
 
   useEffect(() => {
     setMounted(true);
-    fetch('/api/nodes').then(r => r.json()).then(setNodes);
-    fetch('/api/links').then(r => r.json()).then(setLinks);
+    fetchData();
   }, []);
+
+  const fetchData = async () => {
+    try {
+      const [nodesRes, linksRes, hddRes] = await Promise.all([
+        fetch('/api/nodes'),
+        fetch('/api/links'),
+        fetch('/api/hdd-ducts')
+      ]);
+      
+      const nodesData = await nodesRes.json();
+      const linksData = await linksRes.json();
+      const hddData = await hddRes.json();
+      
+      setNodes(Array.isArray(nodesData) ? nodesData : []);
+      setLinks(Array.isArray(linksData) ? linksData : []);
+      setHddDucts(Array.isArray(hddData) ? hddData : []);
+    } catch (error) {
+      console.error('Failed to fetch data:', error);
+    }
+  };
 
   const filteredNodes = useMemo(() => 
     nodes.filter(node => 
@@ -102,7 +150,7 @@ export default function MapViewClient() {
       return filters.status[from.status] && 
              filters.status[to.status] &&
              filters.link.status[link.status] && 
-             filters.link.fiber_type[link.fiber_type]; // Now TypeScript knows link.fiber_type is a valid key
+             filters.link.fiber_type[link.fiber_type];
     }), [links, filters]);
 
   if (!mounted || !leafletLoaded) return <div className="flex h-screen items-center justify-center">Loading map…</div>;
@@ -263,6 +311,25 @@ export default function MapViewClient() {
                 ))}
               </div>
             </div>
+
+            {/* HDD DUCTS TOGGLE */}
+            <div className="mt-3 pt-2 border-t">
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="show-hdd-ducts"
+                  checked={showHddDucts}
+                  onCheckedChange={() => setShowHddDucts(!showHddDucts)}
+                />
+                <label htmlFor="show-hdd-ducts" className="cursor-pointer font-medium">
+                  🛠️ Show HDD Ducts
+                </label>
+              </div>
+              {hddDucts.length > 0 && (
+                <p className="text-xs text-muted-foreground ml-6 mt-1">
+                  {hddDucts.length} ducts, {(hddDucts.reduce((sum, d) => sum + d.length_km, 0)).toFixed(2)} km total
+                </p>
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -310,8 +377,78 @@ export default function MapViewClient() {
           {filteredLinks.map(link => (
             <LinkLine key={link._id} link={link} setLinks={setLinks} />
           ))}
+
+          {/* HDD Ducts */}
+          {showHddDucts && hddDucts.map(duct => {
+            const positions = duct.polyline;
+            if (!positions || positions.length < 2) return null;
+            
+            const color = duct.color || HDD_COLORS[duct.way_count] || '#ff9800';
+            const weight = duct.line_width || Math.min(duct.way_count + 2, 8);
+            
+            return (
+              <Polyline
+                key={duct._id}
+                positions={positions}
+                pathOptions={{
+                  color: color,
+                  weight: weight,
+                  opacity: duct.opacity || 0.9,
+                  dashArray: '8, 4', // Dashed line for HDD ducts
+                  lineCap: 'round',
+                  lineJoin: 'round',
+                }}
+                eventHandlers={{
+                  click: () => {
+                    // Optional: Show duct details
+                    console.log('HDD Duct clicked:', duct.name);
+                  },
+                }}
+              />
+            );
+          })}
         </MapContainer>
       </div>
+
+      {/* HDD Ducts Legend */}
+      {showHddDucts && hddDucts.length > 0 && (
+        <Card className="absolute bottom-4 right-4 z-[1000] w-56 shadow-lg bg-white/95 dark:bg-gray-900/95 backdrop-blur">
+          <CardContent className="p-3">
+            <h4 className="text-sm font-semibold mb-2">HDD Duct Legend</h4>
+            <div className="space-y-1.5">
+              {Object.entries(HDD_COLORS).map(([ways, color]) => {
+                const count = hddDucts.filter(d => d.way_count === parseInt(ways)).length;
+                if (count === 0) return null;
+                return (
+                  <div key={ways} className="flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-2">
+                      <div 
+                        className="w-4 h-0.5 rounded-full" 
+                        style={{ 
+                          backgroundColor: color,
+                          height: `${Math.min(parseInt(ways) + 2, 6)}px`
+                        }} 
+                      />
+                      <span>{ways}-Way Duct</span>
+                    </div>
+                    <span className="text-muted-foreground">{count} ducts</span>
+                  </div>
+                );
+              })}
+              <div className="pt-1 border-t mt-1">
+                <div className="flex items-center justify-between text-xs">
+                  <span>Total Length:</span>
+                  <span className="font-mono">{hddDucts.reduce((sum, d) => sum + d.length_km, 0).toFixed(2)} km</span>
+                </div>
+                <div className="flex items-center justify-between text-xs">
+                  <span>Total Fibers:</span>
+                  <span className="font-mono">{hddDucts.reduce((sum, d) => sum + (d.length_km * d.fiber_core), 0).toFixed(0)} km</span>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </>
   );
 }
