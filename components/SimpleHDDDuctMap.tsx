@@ -6,6 +6,9 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw/dist/leaflet.draw.css';
 
+// Import useMapEvents from react-leaflet
+import { useMapEvents } from 'react-leaflet';
+
 const MapContainer = dynamic(() => import('react-leaflet').then(m => m.MapContainer), { ssr: false });
 const TileLayer = dynamic(() => import('react-leaflet').then(m => m.TileLayer), { ssr: false });
 const FeatureGroup = dynamic(() => import('react-leaflet').then(m => m.FeatureGroup), { ssr: false });
@@ -60,7 +63,7 @@ export default function SimpleHDDDuctMap() {
   const [leafletLoaded, setLeafletLoaded] = useState(false);
   const [ducts, setDucts] = useState<HDDDuct[]>([]);
   const [drawingMode, setDrawingMode] = useState<'off' | 'drawing'>('off');
-  const [pathPoints, setPathPoints] = useState<number[][]>([]);
+  const [pathPoints, setPathPoints] = useState<[number, number][]>([]);
   const [tempLine, setTempLine] = useState<L.Polyline | null>(null);
   const [markers, setMarkers] = useState<L.Marker[]>([]);
   const [selectedDuct, setSelectedDuct] = useState<HDDDuct | null>(null);
@@ -81,6 +84,7 @@ export default function SimpleHDDDuctMap() {
   });
 
   const featureGroupRef = useRef<any>(null);
+  const mapRef = useRef<any>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -136,6 +140,7 @@ export default function SimpleHDDDuctMap() {
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   };
 
+  // Map event handlers
   const handleMapClick = (e: L.LeafletMouseEvent) => {
     if (drawingMode !== 'drawing') return;
     
@@ -151,19 +156,19 @@ export default function SimpleHDDDuctMap() {
         html: `<div class="w-3 h-3 bg-orange-500 rounded-full border-2 border-white shadow"></div>`,
         iconSize: [12, 12],
       }),
-    }).addTo(map);
+    }).addTo(mapRef.current);
     
     setMarkers(prev => [...prev, marker]);
     
     // Update temporary line
-    if (tempLine) map.removeLayer(tempLine);
+    if (tempLine && mapRef.current) mapRef.current.removeLayer(tempLine);
     
     const newTempLine = L.polyline(newPoints, {
       color: '#ff9800',
       weight: 4,
       opacity: 0.8,
       dashArray: '8, 4',
-    }).addTo(map);
+    }).addTo(mapRef.current);
     
     setTempLine(newTempLine);
   };
@@ -172,16 +177,27 @@ export default function SimpleHDDDuctMap() {
     if (drawingMode !== 'drawing' || pathPoints.length < 2) return;
     
     // Clean up temp line and markers
-    if (tempLine) {
-      const map = tempLine._map;
-      if (map) map.removeLayer(tempLine);
-    }
+    if (tempLine && mapRef.current) mapRef.current.removeLayer(tempLine);
     markers.forEach(marker => {
-      const map = marker._map;
-      if (map) map.removeLayer(marker);
+      if (marker && mapRef.current) mapRef.current.removeLayer(marker);
     });
     
     setShowHDDDialog(true);
+  };
+
+  // MapEvents component using useMapEvents
+  const MapEvents = () => {
+    const map = useMapEvents({
+      click: handleMapClick,
+      dblclick: handleDoubleClick,
+    });
+    
+    // Store map reference
+    useEffect(() => {
+      mapRef.current = map;
+    }, [map]);
+    
+    return null;
   };
 
   const saveHDDDuct = async () => {
@@ -285,15 +301,6 @@ export default function SimpleHDDDuctMap() {
     };
   };
 
-  // Add map event handlers
-  const MapEvents = () => {
-    const map = useMapEvents({
-      click: handleMapClick,
-      dblclick: handleDoubleClick,
-    });
-    return null;
-  };
-
   if (!mounted || !leafletLoaded) {
     return (
       <div className="flex h-full items-center justify-center">
@@ -347,7 +354,7 @@ export default function SimpleHDDDuctMap() {
                   <li>Click on map to add points</li>
                   <li>Double-click to finish drawing</li>
                   <li>{pathPoints.length} points placed</li>
-                  <li>Current length: {calculateLength(pathPoints as [number, number][]).toFixed(3)} km</li>
+                  <li>Current length: {calculateLength(pathPoints).toFixed(3)} km</li>
                 </ul>
               </div>
             )}
@@ -432,9 +439,7 @@ export default function SimpleHDDDuctMap() {
           zoom={13}
           className="h-full w-full"
           style={{ background: '#f0f0f0' }}
-          whenReady={() => {
-            // Map is ready
-          }}
+          ref={mapRef}
         >
           <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
           
@@ -596,7 +601,7 @@ export default function SimpleHDDDuctMap() {
             <div className="bg-muted p-3 rounded-lg">
               <div className="flex justify-between text-sm">
                 <span>Path Length:</span>
-                <span className="font-bold">{calculateLength(pathPoints as [number, number][]).toFixed(3)} km</span>
+                <span className="font-bold">{calculateLength(pathPoints).toFixed(3)} km</span>
               </div>
               <div className="flex justify-between text-sm mt-1">
                 <span>Total Fibers:</span>
@@ -604,7 +609,7 @@ export default function SimpleHDDDuctMap() {
               </div>
               <div className="flex justify-between text-sm mt-1">
                 <span>Fiber Capacity:</span>
-                <span>{(calculateLength(pathPoints as [number, number][]) * hddConfig.fiber_core).toFixed(0)} fiber-km</span>
+                <span>{(calculateLength(pathPoints) * hddConfig.fiber_core).toFixed(0)} fiber-km</span>
               </div>
             </div>
           </div>

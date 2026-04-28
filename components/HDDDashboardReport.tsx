@@ -55,6 +55,18 @@ interface HDDDashboardReportProps {
 // Colors for charts
 const COLORS = ['#4caf50', '#2196f3', '#ff9800', '#f44336', '#9c27b0', '#00bcd4'];
 
+// Helper function for safe tooltip formatting
+const formatTooltipValue = (value: any, suffix: string = ''): string => {
+  if (value === undefined || value === null) return `0${suffix}`;
+  if (typeof value === 'number') return `${value.toLocaleString()}${suffix}`;
+  return `${value}${suffix}`;
+};
+
+// Helper function for pie chart label
+const renderPieLabel = (entry: any): string => {
+  return `${entry.fiber_label}: ${entry.length_km}km`;
+};
+
 export default function HDDDashboardReport({ ducts, onExport }: HDDDashboardReportProps) {
   const [stats, setStats] = useState<any>(null);
   const [wayWiseData, setWayWiseData] = useState<any[]>([]);
@@ -332,7 +344,7 @@ export default function HDDDashboardReport({ ducts, onExport }: HDDDashboardRepo
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="way" />
                     <YAxis label={{ value: 'Length (meters)', angle: -90, position: 'insideLeft' }} />
-                    <Tooltip formatter={(value) => `${value.toLocaleString()} m`} />
+                    <Tooltip formatter={(value) => formatTooltipValue(value, ' m')} />
                     <Legend />
                     <Bar dataKey="length_meters" name="Length (m)" fill="#4caf50" />
                   </BarChart>
@@ -376,7 +388,7 @@ export default function HDDDashboardReport({ ducts, onExport }: HDDDashboardRepo
           </Card>
         </TabsContent>
 
-        {/* Fiber Core Analysis */}
+        {/* Fiber Core Analysis - FIXED PIE CHART LABEL */}
         <TabsContent value="fiber-wise" className="space-y-4">
           <Card>
             <CardHeader>
@@ -391,7 +403,7 @@ export default function HDDDashboardReport({ ducts, onExport }: HDDDashboardRepo
                       cx="50%"
                       cy="50%"
                       labelLine={false}
-                      label={(entry) => `${entry.fiber_label}: ${entry.length_km}km`}
+                      label={renderPieLabel}
                       outerRadius={120}
                       fill="#8884d8"
                       dataKey="length_km"
@@ -401,7 +413,7 @@ export default function HDDDashboardReport({ ducts, onExport }: HDDDashboardRepo
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
-                    <Tooltip formatter={(value) => `${value} km`} />
+                    <Tooltip formatter={(value) => formatTooltipValue(value, ' km')} />
                     <Legend />
                   </PieChart>
                 </ResponsiveContainer>
@@ -449,7 +461,7 @@ export default function HDDDashboardReport({ ducts, onExport }: HDDDashboardRepo
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="status" />
                     <YAxis label={{ value: 'Length (meters)', angle: -90, position: 'insideLeft' }} />
-                    <Tooltip formatter={(value) => `${value.toLocaleString()} m`} />
+                    <Tooltip formatter={(value) => formatTooltipValue(value, ' m')} />
                     <Legend />
                     <Bar dataKey="length_meters" name="Length (m)" fill="#ff9800" />
                   </BarChart>
@@ -498,7 +510,7 @@ export default function HDDDashboardReport({ ducts, onExport }: HDDDashboardRepo
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis type="number" label={{ value: 'Length (meters)', position: 'insideBottom' }} />
                     <YAxis type="category" dataKey="area" width={120} />
-                    <Tooltip formatter={(value) => `${value.toLocaleString()} m`} />
+                    <Tooltip formatter={(value) => formatTooltipValue(value, ' m')} />
                     <Legend />
                     <Bar dataKey="length_meters" name="Length (m)" fill="#9c27b0" />
                   </BarChart>

@@ -96,6 +96,19 @@ const NODE_CATEGORIES = ['OLT', 'OCC', 'ODP', 'HODP', 'Branch Point', 'Hand Hole
 // Fiber core options
 const FIBER_CORE_OPTIONS = [2, 4, 6, 8, 12, 24, 48, 96, 144];
 
+// Helper function to safely convert coordinates to Leaflet format
+const toLeafletPositions = (coords: number[][] | undefined): [number, number][] => {
+  if (!coords || !Array.isArray(coords) || coords.length < 2) {
+    return [];
+  }
+  return coords.map(coord => {
+    if (coord.length >= 2) {
+      return [coord[1], coord[0]] as [number, number];
+    }
+    return [0, 0] as [number, number];
+  });
+};
+
 export default function CablePathMap() {
   const [mounted, setMounted] = useState(false);
   const [leafletLoaded, setLeafletLoaded] = useState(false);
@@ -648,19 +661,18 @@ export default function CablePathMap() {
             )}
           </FeatureGroup>
           
-          {/* Render existing cable paths */}
+          {/* Render existing cable paths - FIXED with type assertion */}
           {cablePaths && cablePaths.length > 0 && cablePaths.map(path => {
-            const coordinates = path.polyline || path.path_points;
-            if (!coordinates || !Array.isArray(coordinates) || coordinates.length < 2) return null;
-            const positions = coordinates.map(coord => [coord[1], coord[0]]);
+            const positions = toLeafletPositions(path.polyline || path.path_points);
+            if (positions.length < 2) return null;
             const style = getPathStyle(path);
             return (<Polyline key={path._id} positions={positions} pathOptions={style} eventHandlers={{ click: () => setSelectedPath(path) }} />);
           })}
           
-          {/* Render HDD ducts */}
+          {/* Render HDD ducts - FIXED with type assertion */}
           {hddDucts && hddDucts.length > 0 && hddDucts.map(duct => {
-            const positions = duct.polyline;
-            if (!positions || positions.length < 2) return null;
+            const positions = toLeafletPositions(duct.polyline);
+            if (positions.length < 2) return null;
             const style = getHDDStyle(duct);
             return (<Polyline key={duct._id} positions={positions} pathOptions={style} eventHandlers={{ click: () => setSelectedHDDDuct(duct) }} />);
           })}
@@ -732,6 +744,9 @@ export default function CablePathMap() {
                     <SelectItem value="2">2-Way</SelectItem>
                     <SelectItem value="3">3-Way</SelectItem>
                     <SelectItem value="4">4-Way</SelectItem>
+                    <SelectItem value="6">6-Way</SelectItem>
+                    <SelectItem value="8">8-Way</SelectItem>
+                    <SelectItem value="12">12-Way</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -746,6 +761,9 @@ export default function CablePathMap() {
                     <SelectItem value="40">40mm</SelectItem>
                     <SelectItem value="50">50mm</SelectItem>
                     <SelectItem value="63">63mm</SelectItem>
+                    <SelectItem value="75">75mm</SelectItem>
+                    <SelectItem value="90">90mm</SelectItem>
+                    <SelectItem value="110">110mm</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -762,6 +780,7 @@ export default function CablePathMap() {
                     <SelectItem value="HDPE">HDPE</SelectItem>
                     <SelectItem value="PVC">PVC</SelectItem>
                     <SelectItem value="Steel">Steel</SelectItem>
+                    <SelectItem value="Fiberglass">Fiberglass</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
