@@ -73,7 +73,7 @@ type CategoryStat = {
 
 type OccSummaryType = {
   odp: Set<string>;
-  hodp: number;
+  hodp: Set<string>;
   branch: number;
   total: number;
 };
@@ -193,25 +193,29 @@ export default function Home() {
   });
 
   /* =========================
-     🔗 OCC SUMMARY
+     🔗 OCC SUMMARY (FIXED - HODPs are Sets)
   ========================= */
 
   const nodeMap = new Map(nodes.map((n) => [n._id, n]));
   const odpToOcc: Record<string, string> = {};
 
+  // Step 1: Map ODPs to their parent OCC
   links.forEach((link) => {
     const from = nodeMap.get(link.from_node?._id || link.from_node);
     const to = nodeMap.get(link.to_node?._id || link.to_node);
     if (!from || !to) return;
 
+    // OCC → ODP connection
     if (from.node_category === "OCC" && to.node_category === "ODP") {
       odpToOcc[to.node_id] = from.node_id;
     }
+    // ODP → OCC connection (reverse direction)
     if (to.node_category === "OCC" && from.node_category === "ODP") {
       odpToOcc[from.node_id] = to.node_id;
     }
   });
 
+  // Step 2: Build OCC summary with unique ODPs and HODPs
   const occSummary: Record<string, OccSummaryType> = {};
 
   links.forEach((link) => {
@@ -219,6 +223,7 @@ export default function Home() {
     const to = nodeMap.get(link.to_node?._id || link.to_node);
     if (!from || !to) return;
 
+    // Find ODP in the connection
     let odp: any = null;
     let other: any = null;
 
@@ -232,110 +237,182 @@ export default function Home() {
 
     if (!odp || !other) return;
 
+    // Find which OCC this ODP belongs to
     const occ = odpToOcc[odp.node_id];
     if (!occ) return;
 
+    // Initialize OCC entry if not exists
     if (!occSummary[occ]) {
-      occSummary[occ] = { odp: new Set(), hodp: 0, branch: 0, total: 0 };
+      occSummary[occ] = {
+        odp: new Set(),
+        hodp: new Set(),
+        branch: 0,
+        total: 0,
+      };
     }
 
+    // Add ODP to the Set (automatically handles duplicates)
     occSummary[occ].odp.add(odp.node_id);
+
+    // Increment total connections
     occSummary[occ].total++;
 
+    // Count downstream nodes
     if (other.node_category === "HODP") {
-      occSummary[occ].hodp++;
+      occSummary[occ].hodp.add(other.node_id);
     } else if (other.node_category === "Branch Point") {
       occSummary[occ].branch++;
     }
   });
 
-  /* =========================
-     📊 LINK SUMMARY TABLE
-  ========================= */
+  // Convert to array for display
+  const occSummaryArray = Object.entries(occSummary).map(([occ, data]) => ({
+    occId: occ,
+    odpCount: data.odp.size,
+    hodpCount: data.hodp.size,
+    branchCount: data.branch,
+    totalConnections: data.total,
+  }));
 
-  const nodeIdMap = new Map(nodes.map((n) => [n.node_id, n]));
-  const linkSummary: Record<string, LinkSummaryType> = {};
-  const odpToOccMap: Record<string, string> = {};
+  occSummaryArray.sort((a, b) => a.occId.localeCompare(b.occId));
 
-  links.forEach((link) => {
-    const from = nodeMap.get(link.from_node?._id || link.from_node);
-    const to = nodeMap.get(link.to_node?._id || link.to_node);
-    if (!from || !to) return;
+ /* =========================
+   📊 LINK SUMMARY TABLE (FIXED)
+   Properly calculate OCC→ODP and ODP→HODP lengths
+========================= */
 
-    if (from.node_category === "OCC" && to.node_category === "ODP") {
-      odpToOccMap[to.node_id] = from.node_id;
+const nodeIdMap = new Map(nodes.map((n) => [n.node_id, n]));
+const linkSummary: Record<string, LinkSummaryType> = {};
+const odpToOccMap: Record<string, string> = {};
+
+// Step 1: First, map all ODPs to their parent OCC
+links.forEach((link) => {
+  const from = nodeMap.get(link.from_node?._id || link.from_node);
+  const to = nodeMap.get(link.to_node?._id || link.to_node);
+  if (!from || !to) return;
+
+  // OCC → ODP connection (store the parent OCC for this ODP)
+  if (from.node_category === "OCC" && to.node_category === "ODP") {
+    odpToOccMap[to.node_id] = from.node_id;
+  }
+  // ODP → OCC connection (reverse direction)
+  if (to.node_category === "OCC" && from.node_category === "ODP") {
+    odpToOccMap[from.node_id] = to.node_id;
+  }
+});
+
+// Step 2: Calculate OCC → ODP lengths
+links.forEach((link) => {
+  const from = nodeMap.get(link.from_node?._id || link.from_node);
+  const to = nodeMap.get(link.to_node?._id || link.to_node);
+  if (!from || !to) return;
+
+  // OCC → ODP
+  if (from.node_category === "OCC" && to.node_category === "ODP") {
+    let length = link.fiber_length || 0;
+    if (length === 0 && from.latitude && from.longitude && to.latitude && to.longitude) {
+      length = getDistance(from.latitude, from.longitude, to.latitude, to.longitude);
+    }
+
+    if (!linkSummary[from.node_id]) {
+      linkSummary[from.node_id] = {
+        occToOdpLength: 0,
+        odpToHodpLength: 0,
+        totalLength: 0,
+        odpCount: 0,
+        hodpCount: 0,
+        avgOdpDistance: 0,
+        avgHodpDistance: 0,
+      };
+    }
+
+    linkSummary[from.node_id].occToOdpLength += length;
+    linkSummary[from.node_id].odpCount++;
+  }
+  
+  // ODP → OCC (reverse direction - ODP connected to OCC)
+  if (from.node_category === "ODP" && to.node_category === "OCC") {
+    let length = link.fiber_length || 0;
+    if (length === 0 && from.latitude && from.longitude && to.latitude && to.longitude) {
+      length = getDistance(from.latitude, from.longitude, to.latitude, to.longitude);
+    }
+
+    if (!linkSummary[to.node_id]) {
+      linkSummary[to.node_id] = {
+        occToOdpLength: 0,
+        odpToHodpLength: 0,
+        totalLength: 0,
+        odpCount: 0,
+        hodpCount: 0,
+        avgOdpDistance: 0,
+        avgHodpDistance: 0,
+      };
+    }
+
+    linkSummary[to.node_id].occToOdpLength += length;
+    linkSummary[to.node_id].odpCount++;
+  }
+});
+
+// Step 3: Calculate ODP → HODP lengths and map to parent OCC
+links.forEach((link) => {
+  const from = nodeMap.get(link.from_node?._id || link.from_node);
+  const to = nodeMap.get(link.to_node?._id || link.to_node);
+  if (!from || !to) return;
+
+  // ODP → HODP
+  if (from.node_category === "ODP" && to.node_category === "HODP") {
+    const parentOcc = odpToOccMap[from.node_id];
+    if (parentOcc && linkSummary[parentOcc]) {
       let length = link.fiber_length || 0;
-      if (
-        length === 0 &&
-        from.latitude &&
-        from.longitude &&
-        to.latitude &&
-        to.longitude
-      ) {
-        length = getDistance(
-          from.latitude,
-          from.longitude,
-          to.latitude,
-          to.longitude,
-        );
+      if (length === 0 && from.latitude && from.longitude && to.latitude && to.longitude) {
+        length = getDistance(from.latitude, from.longitude, to.latitude, to.longitude);
       }
-
-      if (!linkSummary[from.node_id]) {
-        linkSummary[from.node_id] = {
-          occToOdpLength: 0,
-          odpToHodpLength: 0,
-          totalLength: 0,
-          odpCount: 0,
-          hodpCount: 0,
-          avgOdpDistance: 0,
-          avgHodpDistance: 0,
-        };
-      }
-
-      linkSummary[from.node_id].occToOdpLength += length;
-      linkSummary[from.node_id].odpCount++;
+      linkSummary[parentOcc].odpToHodpLength += length;
+      linkSummary[parentOcc].hodpCount++;
     }
-
-    if (from.node_category === "ODP" && to.node_category === "HODP") {
-      const occ = odpToOccMap[from.node_id];
-      if (occ && linkSummary[occ]) {
-        let length = link.fiber_length || 0;
-        if (
-          length === 0 &&
-          from.latitude &&
-          from.longitude &&
-          to.latitude &&
-          to.longitude
-        ) {
-          length = getDistance(
-            from.latitude,
-            from.longitude,
-            to.latitude,
-            to.longitude,
-          );
-        }
-        linkSummary[occ].odpToHodpLength += length;
-        linkSummary[occ].hodpCount++;
+  }
+  
+  // HODP → ODP (reverse direction)
+  if (from.node_category === "HODP" && to.node_category === "ODP") {
+    const parentOcc = odpToOccMap[to.node_id];
+    if (parentOcc && linkSummary[parentOcc]) {
+      let length = link.fiber_length || 0;
+      if (length === 0 && from.latitude && from.longitude && to.latitude && to.longitude) {
+        length = getDistance(from.latitude, from.longitude, to.latitude, to.longitude);
       }
+      linkSummary[parentOcc].odpToHodpLength += length;
+      linkSummary[parentOcc].hodpCount++;
     }
-  });
+  }
+});
 
-  Object.keys(linkSummary).forEach((occ) => {
-    const summary = linkSummary[occ];
-    summary.totalLength = summary.occToOdpLength + summary.odpToHodpLength;
-    summary.avgOdpDistance =
-      summary.odpCount > 0 ? summary.occToOdpLength / summary.odpCount : 0;
-    summary.avgHodpDistance =
-      summary.hodpCount > 0 ? summary.odpToHodpLength / summary.hodpCount : 0;
-  });
+// Step 4: Calculate totals and averages
+Object.keys(linkSummary).forEach((occ) => {
+  const summary = linkSummary[occ];
+  summary.totalLength = summary.occToOdpLength + summary.odpToHodpLength;
+  summary.avgOdpDistance = summary.odpCount > 0 ? summary.occToOdpLength / summary.odpCount : 0;
+  summary.avgHodpDistance = summary.hodpCount > 0 ? summary.odpToHodpLength / summary.hodpCount : 0;
+});
 
-  const linkSummaryArray = Object.entries(linkSummary)
-    .map(([occId, data]) => {
-      const occNode = nodeIdMap.get(occId);
-      return { occId: occId, occName: occNode?.name || occId, ...data };
-    })
-    .sort((a, b) => b.totalLength - a.totalLength);
-
+// Step 5: Convert to array for display
+const linkSummaryArray = Object.entries(linkSummary)
+  .map(([occId, data]) => {
+    const occNode = nodeIdMap.get(occId);
+    const occName = occNode?.name || occId;
+    return {
+      occId,
+      occName,
+      occToOdpLength: data.occToOdpLength,
+      odpToHodpLength: data.odpToHodpLength,
+      totalLength: data.totalLength,
+      odpCount: data.odpCount,
+      hodpCount: data.hodpCount,
+      avgOdpDistance: data.avgOdpDistance,
+      avgHodpDistance: data.avgHodpDistance,
+    };
+  })
+  .sort((a, b) => b.totalLength - a.totalLength);
   /* =========================
      🚫 UNCONNECTED
   ========================= */
@@ -974,7 +1051,7 @@ export default function Home() {
             <CardHeader>
               <CardTitle>📊 OCC Details Summary</CardTitle>
               <p className="text-sm text-muted-foreground">
-                Each OCC with its connected ODPs and downstream nodes
+                Each OCC with its connected ODPs and HODPs (HODPs are connected via ODPs)
               </p>
             </CardHeader>
             <CardContent>
@@ -982,33 +1059,35 @@ export default function Home() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>OCC Node ID</TableHead>
-                    <TableHead className="text-center">Unique ODPs</TableHead>
-                    <TableHead className="text-center">HODPs</TableHead>
+                    <TableHead className="text-center">Connected ODPs</TableHead>
+                    <TableHead className="text-center">Connected HODPs</TableHead>
                     <TableHead className="text-center">Branch Points</TableHead>
-                    <TableHead className="text-center">
-                      Total Connections
-                    </TableHead>
+                    <TableHead className="text-center">Total Connections</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {Object.entries(occSummary).map(([occ, data]) => (
-                    <TableRow key={occ}>
+                  {occSummaryArray.map((item) => (
+                    <TableRow key={item.occId}>
                       <TableCell className="font-bold font-mono text-xs">
-                        {occ}
+                        {item.occId}
                       </TableCell>
                       <TableCell className="text-center">
                         <Badge variant="default" className="bg-blue-500">
-                          {data.odp.size}
+                          {item.odpCount}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-center">
-                        <Badge variant="secondary">{data.hodp}</Badge>
+                        <Badge variant="secondary">
+                          {item.hodpCount}
+                        </Badge>
                       </TableCell>
                       <TableCell className="text-center">
-                        <Badge variant="outline">{data.branch}</Badge>
+                        <Badge variant="outline">
+                          {item.branchCount}
+                        </Badge>
                       </TableCell>
                       <TableCell className="text-center font-bold">
-                        {data.total}
+                        {item.totalConnections}
                       </TableCell>
                     </TableRow>
                   ))}

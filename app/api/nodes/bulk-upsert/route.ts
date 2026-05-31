@@ -1,13 +1,14 @@
 import { connectDB } from "@/lib/mongodb";
 import Node from "@/models/Node";
-import { AnyBulkWriteOperation } from "mongodb";
+import { AnyBulkWriteOperation } from "mongoose";
 import {
   getDistance,
   createLocationObject,
-  getRadiusResponse
+  getRadiusResponse,
 } from "@/lib/nodeDistance.server";
 
-const { radiusMeters: RADIUS, radiusApplied: RADIUS_APPLIED } = getRadiusResponse();
+const { radiusMeters: RADIUS, radiusApplied: RADIUS_APPLIED } =
+  getRadiusResponse();
 
 /* =========================
    🧾 TYPES
@@ -40,14 +41,6 @@ type BatchNode = {
   node_id?: string;
 };
 
-type BulkUpdateOperation = {
-  updateOne: {
-    filter: { node_id: string };
-    update: any;
-    upsert: boolean;
-  };
-};
-
 /* =========================
    🚀 POST BULK UPSERT
 ========================= */
@@ -61,7 +54,7 @@ export async function POST(req: Request) {
     if (!data || !Array.isArray(data)) {
       return Response.json(
         { error: "Invalid request: data array required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -71,15 +64,18 @@ export async function POST(req: Request) {
     let locationSkipped = 0;
 
     const skippedNodes: SkipNode[] = [];
-    const operations: BulkUpdateOperation[] = [];
+    const operations: AnyBulkWriteOperation<any>[] = [];
 
     /* =========================
        🔥 LOAD EXISTING NODES
     ========================= */
     const existingNodes = await Node.find(
       {},
-      { location: 1, node_id: 1, _id: 1, latitude: 1, longitude: 1 }
+      { location: 1, node_id: 1, latitude: 1, longitude: 1 },
     ).lean();
+
+    // ✅ Optimized lookup
+    const existingMap = new Map(existingNodes.map((n: any) => [n.node_id, n]));
 
     /* =========================
        🧠 TRACK BATCH DUPLICATES
@@ -90,7 +86,6 @@ export async function POST(req: Request) {
        🔁 PROCESS INPUT
     ========================= */
     for (const item of data) {
-      // Basic validation
       if (
         !item.node_id ||
         !item.name ||
@@ -108,25 +103,19 @@ export async function POST(req: Request) {
 
       const newLat = Number(item.latitude);
       const newLng = Number(item.longitude);
-      
-      // Find existing node by node_id
-      const existingNode = existingNodes.find(
-        (n: any) => n.node_id === item.node_id
-      );
+
+      const existingNode = existingMap.get(item.node_id);
 
       let skipReason = "";
       let skipDistance = 0;
 
       /* =========================
-         🚫 CHECK AGAINST DB (excluding self)
+         🚫 CHECK AGAINST DB
       ========================= */
       for (const n of existingNodes) {
         if (!n.location?.coordinates) continue;
-        
-        // Skip checking against itself
-        if (existingNode && n.node_id === existingNode.node_id) {
-          continue;
-        }
+
+        if (existingNode && n.node_id === existingNode.node_id) continue;
 
         const [lng2, lat2] = n.location.coordinates;
         const dist = getDistance(newLat, newLng, lat2, lng2);
@@ -139,15 +128,12 @@ export async function POST(req: Request) {
       }
 
       /* =========================
-         🚫 CHECK SAME BATCH (excluding self)
+         🚫 CHECK BATCH
       ========================= */
       if (!skipReason) {
         for (const n of acceptedBatch) {
-          // Skip checking against itself in batch
-          if (existingNode && n.node_id === existingNode.node_id) {
-            continue;
-          }
-          
+          if (existingNode && n.node_id === existingNode.node_id) continue;
+
           const dist = getDistance(newLat, newLng, n.lat, n.lng);
 
           if (dist < RADIUS) {
@@ -159,12 +145,12 @@ export async function POST(req: Request) {
       }
 
       /* =========================
-         ❌ SKIP NODE (too close)
+         ❌ SKIP
       ========================= */
       if (skipReason) {
         skipped++;
         locationSkipped++;
-        
+
         skippedNodes.push({
           node_id: item.node_id,
           name: item.name,
@@ -173,61 +159,40 @@ export async function POST(req: Request) {
           reason: skipReason,
           distance_m: Number(skipDistance.toFixed(2)),
         });
-        
+
         continue;
       }
 
       /* =========================
-         ✅ BUILD UPDATE DATA
+         ✅ BUILD UPDATE
       ========================= */
       const updateData: any = {
         name: item.name,
         updatedAt: new Date(),
+        latitude: newLat,
+        longitude: newLng,
+        location: createLocationObject(newLat, newLng),
       };
 
-      // Add optional fields if they exist
-      if (item.node_category !== undefined && item.node_category !== "") {
-        updateData.node_category = item.node_category;
-      }
-      if (item.status !== undefined && item.status !== "") {
-        updateData.status = item.status;
-      }
-      if (item.dgm !== undefined && item.dgm !== "") {
-        updateData.dgm = item.dgm;
-      }
-      if (item.region !== undefined && item.region !== "") {
-        updateData.region = item.region;
-      }
-      if (item.node_code !== undefined && item.node_code !== "") {
-        updateData.node_code = item.node_code;
-      }
-      if (item.address !== undefined && item.address !== "") {
-        updateData.address = item.address;
-      }
+      if (item.node_category) updateData.node_category = item.node_category;
+      if (item.status) updateData.status = item.status;
+      if (item.dgm) updateData.dgm = item.dgm;
+      if (item.region) updateData.region = item.region;
+      if (item.node_code) updateData.node_code = item.node_code;
+      if (item.address) updateData.address = item.address;
 
-      // Always update location if we passed the checks
-      updateData.latitude = newLat;
-      updateData.longitude = newLng;
-      updateData.location = createLocationObject(newLat, newLng);
-
-      // Add to batch tracking
-      acceptedBatch.push({ 
-        lat: newLat, 
+      acceptedBatch.push({
+        lat: newLat,
         lng: newLng,
-        node_id: item.node_id 
+        node_id: item.node_id,
       });
 
-      /* =========================
-         📝 PREPARE OPERATION
-      ========================= */
       operations.push({
         updateOne: {
           filter: { node_id: item.node_id },
           update: {
             $set: updateData,
-            $setOnInsert: {
-              createdAt: new Date(),
-            },
+            $setOnInsert: { createdAt: new Date() },
           },
           upsert: true,
         },
@@ -242,12 +207,12 @@ export async function POST(req: Request) {
     });
 
     /* =========================
-       🚀 EXECUTE BULK
+       🚀 BULK WRITE
     ========================= */
     if (operations.length > 0) {
       try {
-        const result = await Node.bulkWrite(operations as AnyBulkWriteOperation<any>[], { ordered: false });
-        
+        const result = await Node.bulkWrite(operations, { ordered: false });
+
         inserted = result.upsertedCount || 0;
         updated = result.modifiedCount || 0;
 
@@ -258,33 +223,29 @@ export async function POST(req: Request) {
         });
       } catch (bulkError: any) {
         console.error("Bulk write error:", bulkError);
-        
-        // Fallback to individual updates
+
         console.log("🔄 Falling back to individual updates...");
-        let successCount = 0;
 
         for (const op of operations) {
-          try {
-            const result = await Node.updateOne(
-              op.updateOne.filter,
-              op.updateOne.update,
-              { upsert: op.updateOne.upsert }
-            );
+          if ("updateOne" in op) {
+            try {
+              const result = await Node.updateOne(
+                op.updateOne.filter,
+                op.updateOne.update,
+                { upsert: op.updateOne.upsert },
+              );
 
-            if (result.upsertedId) {
-              inserted++;
-              successCount++;
-            } else if (result.modifiedCount && result.modifiedCount > 0) {
-              updated++;
-              successCount++;
+              if (result.upsertedId) inserted++;
+              else if (result.modifiedCount > 0) updated++;
+            } catch (err: any) {
+              console.error(
+                `❌ Failed: ${op.updateOne.filter.node_id}`,
+                err.message,
+              );
+              skipped++;
             }
-          } catch (individualError: any) {
-            console.error(`Failed to update ${op.updateOne.filter.node_id}:`, individualError.message);
-            skipped++;
           }
         }
-
-        console.log(`✅ Individual updates completed: ${successCount} successful`);
       }
     }
 
@@ -298,19 +259,21 @@ export async function POST(req: Request) {
       locationSkipped,
       totalProcessed: data.length,
       radiusApplied: RADIUS_APPLIED,
-      message: `${locationSkipped} node(s) had their location update blocked due to proximity restrictions (within ${RADIUS}m)`,
+      message: `${locationSkipped} node(s) skipped due to proximity (${RADIUS}m)`,
       skipped_nodes: skippedNodes,
     });
-
   } catch (err: any) {
     console.error("❌ BULK ERROR:", err);
 
     return Response.json(
       {
         error: err.message,
-        details: err.code === 16755 ? "Geo index error: Invalid location data" : err.message,
+        details:
+          err.code === 16755
+            ? "Geo index error: Invalid location data"
+            : err.message,
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
